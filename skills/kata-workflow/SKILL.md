@@ -1,165 +1,112 @@
 ---
 name: kata-workflow
-description: Manage Kata issues and coordinate durable project work using Blue decision and Red implementation workflows. Inspect, claim, prioritize, link, and close issues with explicit ownership, evidence, and verified completion.
+description: Manage Kata issues using Blue decision and Red implementation workflows. Record model contributions, scope, decisions, dependencies, and verified completion in the shared issue ledger.
 disable-model-invocation: true
 ---
 
 # Kata Workflow
 
-Use Kata as the shared issue ledger and durable memory for scope, decisions, evidence, and close-out.
+Use Kata as the durable record of work: what was attempted, which model contributed, what was decided, and how completion was verified.
 
-## Start And Scope
+## Start
 
-- Run `kata quickstart` in an unfamiliar workspace or after an upgrade. Treat it as normative for operating rules and `kata <command> --help` as normative for syntax.
-- Treat examples here as checked against Kata v0.16.0 (`kata_api_version: 1`, `agent_format: 1`). If the installed CLI drifts, follow its contract and report the mismatch before mutating.
-- Resolve project-scoped commands from the workspace, `--workspace`, or `--project`. Without a `.kata.toml` binding, use `--project <name>` or qualified refs; run `kata init` only when binding is intended.
-- Prefer `--agent` for reads and mutations. Use `--json` only for scripts that need the full structured shape.
-- Orient with `kata list --agent` (open issues), then inspect with `kata show <ref> --agent` and `kata search "<term>" --agent`. Add `--status all` when closed history matters; `list` returns at most 200 rows unless you pass `--limit`.
-- Use `list --all`, `ready --all`, or `next --all` only for intentional cross-project discovery. Keep mutations project-scoped and use qualified refs.
-- Resolve identity with `kata whoami --agent` when attribution matters. Give every mutating agent in a fan-out a distinct `--as` or `$KATA_AUTHOR`; claims and history are keyed by actor, so shared identities silently defeat claim conflicts and attribution.
-- Never run `delete` or `purge` unless the user explicitly requests that exact destructive action and ref.
+- Run `kata quickstart` in an unfamiliar workspace or after an upgrade. Use `kata <command> --help` for syntax instead of maintaining a CLI manual here. These examples were checked against v0.18.0.
+- Work in the bound project; use `--workspace` or `--project` when needed. Run `kata init` only when binding a workspace is intended. Use qualified refs such as `project#abc4` across projects.
+- Use `--agent` for normal reads and mutations; use `--json` for scripts. Inspect with `kata show <ref> --agent` and search before creating. Use `list --status all` for history; search includes open and closed issues by default.
+- Track real work in its correct project. Create practice or scratchpad issues only when requested.
+- Run `delete` or `purge` only when the user explicitly requests that action and ref. Transfer ownership with `--force` only on explicit user direction.
 
-For JSON shapes, low-frequency command behavior, optional interfaces, hooks, and daemon operations, read [references/cli-gotchas.md](references/cli-gotchas.md).
+## Identity And Attribution
 
-## Non-Negotiable Rules
+The author (`KATA_AUTHOR` / `--as`) is the accountable human managing the agents. Keep it stable; do not set a per-agent author. Ownership and close history belong to the author.
 
-- Never false-close. Closing asserts verified completion, and other agents and humans act on that claim without re-checking.
-- Leave incomplete work open. Add `needs-review` when useful and comment with what was attempted, evidence, and the next action.
-- Close verified Red work promptly so dependents become ready.
-- Close Blue work only after recording the mode-appropriate decision.
-- Use `blocks` / `blocked_by` for sequencing and `related` only for context. Only `blocks` links gate `ready` and `next`.
-- Rank ready work with priority, never as a substitute for dependencies: priority orders the ready queue but cannot hold an issue out of it. Priority `0` is highest.
-- Search before creating and always pass `--idempotency-key <slug>-<YYYY-MM-DD>` so a retried create returns the existing issue instead of a duplicate.
-- Treat a failed claim as a coordination signal: another actor owns the work. Never `--force` ownership transfer without explicit user direction.
-- Give every artifact-producing issue a `## Deliverables` block and review every listed path before close.
-- Write close messages as one substantive sentence naming what changed or was settled and how it was verified. Kata rejects short messages: at least 40 characters for `--done` and `--audit-no-change`, 60 for `--wontfix`. Put durable detail in reviewed artifacts, typed evidence, or a short issue comment.
+Identify each agent run with a teammate handle `<harness>_<model>_<run-id>`, using the identifiers supplied by the runtime (`unknown` when unavailable; never guess). Kata accepts only letters, digits, `.`, `_`, and `-`, up to 64 characters, so keep the run ID short. Set it in the run's own environment, or pass `--teammate` per command; on shared MCP connections pass `teammate` per call on `kata.comment` and `kata.create`.
 
-## Decision Modes
+```bash
+export KATA_TEAMMATE='codex_gpt-6.1-sol_s42'
+```
 
-Use exactly one mode for a goal or root issue:
+Comment when starting substantive work and record the outcome when finishing or handing off, including incomplete attempts. If the model changes mid-run, use the new identifier from then on.
 
-- **Human mode** is the default. State intent and decide nonconsequential choices within the authorized goal. For consequential choices not already settled by the user, present viable options, tradeoffs, and a recommendation, then pause once for the user.
-- **Agent mode** requires explicit user delegation for reversible, non-production work. The primary agent decides, records signoff, closes Blue issues, and reports decisions at the end without human checkpoints.
+## Classify And Decide
 
-Treat a decision as consequential when a wrong choice could cause material harm, establish a durable dependency or precedent, commit significant downstream work, or require more than a local correction to reverse. Uncertainty alone only increases the evidence required.
+Give every issue exactly one workflow label and start its title with a verb naming its completion claim. Use titles such as `Investigate callback duplication` or `Fix callback duplication`; omit `[Blue]` / `[Red]` prefixes.
 
-Honor existing authorization across the workflow. Authorization to execute a selected issue or work toward a goal permits choosing and claiming ready work within that scope without another checkpoint. It does not delegate unresolved consequential choices or expand action permissions.
-
-Record Agent mode and its authority source in the root issue or a reviewed policy; child issues inherit it. A Goal does not select Agent mode or expand permissions. For the full workflow and signoff format, read [references/agent-mode.md](references/agent-mode.md).
-
-## Blue And Red
-
-Give every issue exactly one canonical workflow label:
-
-| Type | Completion claim | Typical opening verbs |
+| Label | Completion claim | Read when doing this work |
 | --- | --- | --- |
-| Blue | Settled knowledge: decision, finding, or recommendation | `Decide`, `Investigate`, `Evaluate`, `Compare`, `Determine`, `Define`, `Audit` |
-| Red | Verified implementation at the requested delivery state | `Add`, `Fix`, `Implement`, `Migrate`, `Remove`, `Refactor`, `Optimize`, `Upgrade`, `Document`, `Configure` |
+| `blue` | Settled decision, finding, or recommendation | [references/blue.md](references/blue.md) |
+| `red` | Verified implementation at the requested delivery state | [references/red.md](references/red.md) |
 
-Start the title with a verb that names the completion claim, such as those above. Do not add `[Blue]` or `[Red]` prefixes. Classify by the completion claim and split mixed work only when decision and implementation outputs are independently durable. Keep ordinary local implementation judgment inside Red work.
+Split decision and implementation only when they have independently durable outputs. Keep ordinary local implementation choices inside Red work. Open or update Blue when uncertainty changes scope, acceptance, settled decisions, or reusable policy. Create retrospective Blue work only for reusable learning or a faulty assumption.
 
-- For Blue work, read [references/blue.md](references/blue.md).
-- For Red work, read [references/red.md](references/red.md).
+Use exactly one decision mode per goal or root issue.
 
-When Red work exposes uncertainty that would change scope, acceptance, settled decisions, or reusable policy, stop and open or update a Blue issue. Do not create retrospective Blue work unless execution produced reusable learning or exposed a faulty assumption.
+Use **Human mode** by default. State intent and decide nonconsequential choices within the authorized goal. For unresolved consequential choices, present viable options, tradeoffs, and a recommendation, then pause once for the user. A choice is consequential when a wrong decision could cause material harm, establish a durable dependency or precedent, commit significant downstream work, or require more than a local correction to reverse. Uncertainty calls for more evidence; it does not alone require a checkpoint.
 
-## Relationships
+Reuse the user's existing decisions and authorization. Authorization to execute permits selecting and claiming ready work within scope without another checkpoint.
 
-Frame relationship flags from the operating issue:
+Use **Agent mode** only after explicit delegation for reversible, non-production work. Record its authority in the root issue or reviewed policy; children inherit it. Follow [references/agent-mode.md](references/agent-mode.md) for signoff and reporting. An active Goal supplies persistence, not decision authority or additional action permissions.
 
-- `parent`: this issue is a subtask of the target.
-- `blocks`: this issue must finish before the target can proceed.
-- `blocked_by`: the target must finish before this issue can proceed.
-- `related`: useful context without ordering.
+## Select, Create, And Claim
 
-If Red work depends on a Blue decision, make the Red issue `--blocked-by` the Blue issue. Labels and titles do not affect readiness.
+Run `kata next --unowned --agent`; use `kata ready --unowned --agent` to compare candidates. Prefer upstream feeders when priority is close. Before starting, inspect the issue, parent, links, and previous comments, and check its assumptions against current code and docs; edit stale scope before implementing. Future schedules and `someday` parking can keep issues out of the ready queue.
 
-Use qualified refs for cross-project links. Federated projects synchronize them, so do not mirror dependency state with duplicate issues or comments.
-
-## Creation, Ownership, And Coordination
-
-Create with an idempotency key after searching:
+Search before creating, reuse suitable issues, and give every create an idempotency key:
 
 ```bash
 kata search "login race" --agent
-kata create "Fix login race" --body "Observed double-submit in Safari callback." \
-  --label red --idempotency-key "login-race-2026-05-02" --agent
+kata create "Fix login race" --body-file .kata/drafts/login-race.md \
+  --label red --idempotency-key login-race-2026-10-03 --agent
+kata claim abc4 --if-unowned --comment "Starting the agreed implementation." --agent
 ```
 
-Claim work before starting and release it when pausing:
+Always claim with `--if-unowned`. Concurrent runs share the author, so it is the only claim check that stops two runs taking the same issue; it fails whenever the issue has any owner. On failure, choose other ready work. An issue owned by the author may belong to another run: resume it only after the latest teammate-attributed comment shows it is this run's to continue or was handed off.
+
+Use relationships from the operating issue's perspective:
+
+- `--parent <ref>`: this issue is a subtask of the target.
+- `--blocks <ref>`: this issue must finish before the target.
+- `--blocked-by <ref>`: the target must finish before this issue.
+- `--related <ref>`: context without ordering.
+
+Block Red work on any required Blue decision. Use priority to rank ready work (`0` is highest), and dependency links to enforce sequencing. Parenting, labels, and titles do not establish blockers.
+
+For plan conversion, read [references/plan-to-issues.md](references/plan-to-issues.md).
+
+## Record Progress And Pause
+
+Keep scope, acceptance, and deliverables in the issue body. Put attempts, blockers, essential findings, decisions, rationale, and next actions in the shared issue body or comments. Add a `## Deliverables` block for artifact-producing work and review every listed path before close.
+
+Use `.kata/drafts/<slug>.md` with `--body-file` for multiline drafts. Keep scratch notes and logs under gitignored `.kata/`. Create tracked artifacts only when requested or required by a deliverable; use accessible shared or tracked artifacts when collaborators need detail beyond the issue record. Edit durable documents in place.
+
+Leave unfinished work open. Comment with evidence and the next action, and add `kata label add <ref> needs-review` when useful (`kata edit` has no `--label` flag, despite hints in `close` help and errors). Release ownership when giving work back:
 
 ```bash
-kata claim abc4 --comment "Starting the agreed implementation." --agent
 kata unassign abc4 --comment "Releasing; blocked on a missing fixture." --agent
 ```
 
-Use `work.attention` only as transient state owned by the working-agent side:
+## Verify And Close
 
-```bash
-kata meta set abc4 work.attention ok --agent
-kata meta set abc4 work.attention needs-human --agent
-kata meta set abc4 work.attention_msg "Blocked on a missing prod fixture." --agent
-```
+Closing asserts verified completion, and other agents and humans act on that claim without re-checking. Close each issue promptly after its completion claim is verified so dependents become ready; leave incomplete work open.
 
-The launcher owns `work.branch`. Coordinators may read `work.*` but must not overwrite the working agent's signal. For fan-out/fan-in, use `kata wait <refs...> --all --timeout <duration> --agent`; use `--any` or `--until attention` when appropriate, and always include duration units.
+Close with a substantive sentence naming the result and verification, and record the attributed outcome with `--comment`. Supply at least one genuine typed evidence item for `--done`, and review every deliverable:
 
-Before pausing or ending a session:
+- `--commit <sha>` for the commit containing the completed work; never cite HEAD merely because it is convenient.
+- `--pr <url>` for the relevant pull request.
+- Repeat `--evidence "test:<cmd>"` for each verification command that passed.
+- Repeat `--reviewed <path>` for every deliverable reviewed.
+- Use `--audit-no-change`, `--duplicate-of <ref>`, `--superseded-by <ref>`, or `--wontfix` for those dispositions.
 
-- Make ownership and attention truthful.
-- Comment incomplete work with evidence and the next action.
-- Close verified work with typed evidence.
-- Turn sequencing discovered during work into relationships.
-- Report relevant refs; leave no next step only in chat.
-
-## Choosing Next Work
-
-1. Run `kata next --unowned --agent`.
-2. If comparison is needed, run `kata ready --unowned --agent`; inspect unfamiliar hierarchy with `kata list --status all` and `kata show <root-ref> --agent`. Issues with a future `kata schedule` date or the `someday` marker are excluded from `ready` and `next`; check `show` or `list` before assuming an issue is missing.
-3. Prefer upstream feeders and work without a stakeholder loop when priority is otherwise close.
-4. If Red work still needs a Blue decision, add the missing dependency rather than relying on priority or type.
-5. If execution is already authorized, state the selected issue and claim it. In Human mode, recommend one issue and wait only when execution has not been authorized or the selection requires an unresolved consequential choice. In Agent mode, record the choice and tradeoff, then claim and start.
-
-## Closing Evidence
-
-Use typed evidence:
-
-- `--commit <sha>` for the commit containing the completed work.
-- `--pr <url>` for a pull request.
-- One repeatable `--evidence "test:<cmd>"` per verification command; use `--test "<cmd>"` only for one command.
-- One repeatable `--reviewed <path>` per deliverable.
-- `--audit-no-change`, `--duplicate-of <ref>`, or `--superseded-by <ref>` for their corresponding dispositions.
-
-Do not invent evidence prefixes. Record manual checks, skipped checks, benchmarks, residual risk, and rationale in a reviewed artifact or a short comment.
-
-Verify that commit evidence contains the completed work; never cite the current `HEAD` only because it is convenient. Preview complicated or high-impact closes with `--dry-run`.
+Record manual checks, benchmarks, skipped checks, residual risk, and rationale in the outcome comment or reviewed artifact. Use supported evidence types; do not invent prefixes or call ordinary research a test. Follow the Blue or Red reference for its specific completion requirements.
 
 ```bash
 kata close abc4 --done \
-  --message "Fixed Safari callback double-submit; callback tests pass." \
-  --commit <sha-containing-completed-work> \
-  --evidence "test:cargo test" \
-  --reviewed src/callback.rs \
+  --message "Fixed callback double-submit; callback tests pass." \
+  --evidence "test:cargo test callback" --reviewed src/callback.rs \
+  --comment "Deduplicated submit handler; changes remain uncommitted. Safari not tested manually." \
   --agent
 ```
 
-Parent close is refused while children remain open. Follow the Blue or Red reference for mode-specific close-out requirements.
+Preview complicated closes with `--dry-run`.
 
-## Records And Artifacts
-
-| Information | Location |
-| --- | --- |
-| Scope, acceptance, deliverables | Issue body |
-| Status, blockers, attempts | Issue comment |
-| Essential findings, decision, rationale, and evidence | Shared issue body or comment |
-| Detailed analysis beyond the issue record | Accessible shared or tracked artifact |
-| Mutation rationale | Mutation `--comment` |
-
-Write drafts, scratch notes, logs, and untracked evidence under the gitignored `.kata/` directory. Use `.kata/drafts/<slug>.md` with `--body-file` for multiline issue bodies or comments. Persist artifacts in tracked repo paths only when the user requests durable version-controlled output or a deliverable requires it.
-
-Keep enough of each decision in the shared issue for another agent or machine to act without local files. Use `.kata/` for supplementary local material; when the issue record is insufficient, put the required detail in a shared or tracked artifact accessible to collaborators and link it from the issue.
-
-Edit durable documents in place; do not create version-suffixed copies. Let Git history and Kata comments carry the change trail.
-
-## Plan Markdown To Issues
-
-When translating one or more plans into issues, read [references/plan-to-issues.md](references/plan-to-issues.md). Use its coordinator draft, pre-mortem and modularity review, unlinked creation, central linking, drift reconciliation, and fidelity review flow.
+Before ending, make ownership truthful, record remaining actions in Kata, reconcile discovered dependencies, and report the relevant refs and delivery state.

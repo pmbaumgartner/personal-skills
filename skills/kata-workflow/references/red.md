@@ -1,83 +1,30 @@
-# Red Kata Issues
+# Red Issues
 
-Red issues are implementation work. Their output is a verified change at the delivery state requested by the user or required by the repository workflow.
+Use Red for verified implementation at the delivery state requested by the user or repository. Apply the shared classification, attribution, evidence, and close rules in SKILL.md.
 
-## Issue Body
+## Define The Work
 
-Use label `red`. Start the title with a verb naming the implemented change, such as the Red verbs listed in SKILL.md; do not add a `[Red]` prefix.
+Include these issue fields:
 
-Examples: `Fix Safari callback duplication`, `Add ANN recall gates`, `Migrate legacy issue references`.
+- `## Objective`: the known goal.
+- `## Context`: relevant decisions and execution constraints.
+- `## Scope In` / `## Scope Out`: boundaries; omit for small work with unambiguous acceptance criteria.
+- `## Acceptance Criteria`: observable completion criteria.
+- `## Pause Triggers`: discoveries that would change scope, acceptance, a settled decision, or reusable policy.
+- `## Deliverables`: every path to review before close.
 
-Required fields:
+## Implement And Verify
 
-- `## Objective` - the known goal
-- `## Context` - selected context needed to execute
-- `## Scope In` / `## Scope Out` - boundaries for the work
-- `## Acceptance Criteria` - observable completion criteria
-- `## Pause Triggers` - conditions that should stop work and open Blue
-- `## Deliverables` - every path that must be reviewed before close
+1. Read the issue and linked decisions, then claim it.
+2. Implement the smallest change satisfying acceptance criteria. If a pause trigger changes scope, acceptance, a settled decision, or reusable policy, pause affected implementation and open or update Blue. Block affected Red work on that decision before continuing. Keep equivalent local implementation choices inside Red.
+3. Run focused checks and the required acceptance verification.
+4. Commit when requested or required by the repository. Otherwise, verified working-tree changes may satisfy delivery; explicitly record that they remain uncommitted.
+5. Record reusable learning or faulty assumptions in linked Blue work when warranted. Such follow-up blocks Red closure only if it invalidates acceptance or verification.
 
-Small Red issues may omit `Scope In/Out` only when acceptance criteria are
-unambiguous.
+For a performance claim, benchmark the starting behavior before editing and the changed behavior with the same harness. Record the starting commit and relevant working-tree changes, command, dataset/shape, seed, metric, and both results. Claim an improvement only when the comparison shows one. If results are slower or inconclusive, apply the decision mode and preserve existing user work; leave the issue open while its performance criteria remain unmet.
 
-Pause trigger examples: loss does not converge after repeated runs, data schema differs from Blue assumptions, or the implementation would require changing the settled product decision.
+## Close The Implementation
 
-Red work still permits local implementation judgment. Do not open Blue merely to choose among equivalent local techniques that leave scope, acceptance criteria, settled decisions, and reusable policy unchanged.
+Record what changed, checks performed, skipped checks, residual risk, and deferred work in the close's outcome comment or a reviewed artifact.
 
-## Workflow
-
-Claim the issue and set `work.attention=ok` before starting. If you pause with work unfinished, set `needs-human` or `stuck` with a `work.attention_msg` and leave a durable comment.
-
-1. Read the issue body and linked decision docs.
-2. Check `Pause Triggers` before broadening scope.
-3. Implement the smallest change that satisfies acceptance criteria.
-4. Run focused checks while developing.
-5. Run the issue's required verification before close.
-6. Commit when the user's request or repository workflow requires it. Otherwise, a verified working-tree change may satisfy the requested delivery state; record that it remains uncommitted.
-7. If uncertainty would change scope, acceptance criteria, a settled decision, or a reusable policy, stop and open or update a Blue issue.
-8. Before close, consider whether execution produced reusable learning, exposed a faulty assumption, or suggests changing future decisions or process. If so, record it in a linked Blue issue; otherwise close without retrospective ceremony.
-
-The learning review does not block Red closure unless it invalidates acceptance or verification. A follow-up Blue issue is sufficient when the Red change remains complete.
-
-## Performance Work
-
-For any Red issue that claims a performance improvement, optimization, fewer syncs, fewer allocations, faster runtime, lower memory, or benchmark evidence:
-
-- Run or create the baseline benchmark against the starting behavior before changing code; identify the commit and any relevant working-tree changes.
-- Record the baseline command, dataset or shape, seed, metric, and result.
-- After implementation, run the same benchmark against the changed code.
-- Do not call the change an improvement unless same-harness before/after results show it.
-- If the benchmark is slower or inconclusive, record the result and choose the smallest reversible outcome that serves the authorized goal. In Human mode, ask only when the choice is consequential and not already settled by the user. In Agent mode, record the choice and continue. Revert only your own changes while preserving existing user work. Keep the issue open if its performance acceptance criteria remain unmet.
-
-## Close-Out
-
-Red closure must include:
-
-- one-sentence `--message` naming what changed and how it was verified (at least 40 characters)
-- the delivery state requested by the user or required by the repository workflow
-- `--commit <sha>` when the completed work was committed; for uncommitted work, use verification and reviewed-path evidence and explicitly record the working-tree delivery state
-- one `--evidence "test:<cmd>"` per verification command that passed; use `--test "<cmd>"` only when there is exactly one
-- skipped or unavailable checks documented in reviewed docs/artifacts when they
-  affect future work
-- `--reviewed <path>` for every deliverable path
-- residual risk or deferred follow-up documented in reviewed docs/artifacts
-
-If the issue has no doc/artifact deliverable, record skipped checks, residual
-risk, or deferred follow-up in a short kata comment before closing.
-
-When a commit is required, supply the commit containing the completed work. A PR URL alone does not satisfy that requirement. Closing verified working-tree work asserts the requested implementation is complete; it does not assert that it was committed, merged, or deployed.
-
-Example:
-
-```bash
-kata close abc4 --done \
-  --message "Added ANN recall gates to the benchmark suite." \
-  --commit <sha> \
-  --evidence "test:cargo test" \
-  --evidence "test:uv run pytest" \
-  --reviewed tests/test_ann_recall.py \
-  --reviewed examples/ann_benchmark.rs \
-  --agent
-```
-
-Do not close if verification did not run and no accepted rationale is recorded.
+When a commit is required, cite the commit containing the completed work; a PR URL alone is insufficient. Closing working-tree work asserts the requested implementation is complete, not that it was committed, merged, or deployed. Leave the issue open when required verification is incomplete and no accepted rationale settles that gap.
