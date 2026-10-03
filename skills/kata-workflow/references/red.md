@@ -1,10 +1,10 @@
 # Red Kata Issues
 
-Red issues are implementation work. Their output is shipped, verified change.
+Red issues are implementation work. Their output is a verified change at the delivery state requested by the user or required by the repository workflow.
 
 ## Issue Body
 
-Use label `red`. Start the title with a verb naming the shipped change, such as the Red verbs listed in SKILL.md; do not add a `[Red]` prefix.
+Use label `red`. Start the title with a verb naming the implemented change, such as the Red verbs listed in SKILL.md; do not add a `[Red]` prefix.
 
 Examples: `Fix Safari callback duplication`, `Add ANN recall gates`, `Migrate legacy issue references`.
 
@@ -33,7 +33,7 @@ Claim the issue and set `work.attention=ok` before starting. If you pause with w
 3. Implement the smallest change that satisfies acceptance criteria.
 4. Run focused checks while developing.
 5. Run the issue's required verification before close.
-6. Commit the completed work before close, unless the user explicitly declares that no commit is required.
+6. Commit when the user's request or repository workflow requires it. Otherwise, a verified working-tree change may satisfy the requested delivery state; record that it remains uncommitted.
 7. If uncertainty would change scope, acceptance criteria, a settled decision, or a reusable policy, stop and open or update a Blue issue.
 8. Before close, consider whether execution produced reusable learning, exposed a faulty assumption, or suggests changing future decisions or process. If so, record it in a linked Blue issue; otherwise close without retrospective ceremony.
 
@@ -43,19 +43,19 @@ The learning review does not block Red closure unless it invalidates acceptance 
 
 For any Red issue that claims a performance improvement, optimization, fewer syncs, fewer allocations, faster runtime, lower memory, or benchmark evidence:
 
-- Run or create the baseline benchmark against current committed behavior before changing code.
+- Run or create the baseline benchmark against the starting behavior before changing code; identify the commit and any relevant working-tree changes.
 - Record the baseline command, dataset or shape, seed, metric, and result.
 - After implementation, run the same benchmark against the changed code.
 - Do not call the change an improvement unless same-harness before/after results show it.
-- If the benchmark is slower or inconclusive, record the result. In Human mode, ask the user whether to revert before closing or handing back. In Agent mode, choose the smallest reversible outcome that best serves the goal, record the choice, and continue without waiting.
+- If the benchmark is slower or inconclusive, record the result and choose the smallest reversible outcome that serves the authorized goal. In Human mode, ask only when the choice is consequential and not already settled by the user. In Agent mode, record the choice and continue. Revert only your own changes while preserving existing user work. Keep the issue open if its performance acceptance criteria remain unmet.
 
 ## Close-Out
 
 Red closure must include:
 
 - one-sentence `--message` naming what changed and how it was verified (at least 40 characters)
-- committed work, unless the user explicitly declared otherwise
-- `--commit <sha>` for the commit containing the completed work, unless the user explicitly declared otherwise
+- the delivery state requested by the user or required by the repository workflow
+- `--commit <sha>` when the completed work was committed; for uncommitted work, use verification and reviewed-path evidence and explicitly record the working-tree delivery state
 - one `--evidence "test:<cmd>"` per verification command that passed; use `--test "<cmd>"` only when there is exactly one
 - skipped or unavailable checks documented in reviewed docs/artifacts when they
   affect future work
@@ -65,9 +65,7 @@ Red closure must include:
 If the issue has no doc/artifact deliverable, record skipped checks, residual
 risk, or deferred follow-up in a short kata comment before closing.
 
-If the user declares that no commit is required, record that exception in a
-short kata comment or the close message. Do not treat a PR URL as a substitute
-for `--commit` unless the user explicitly accepts that exception.
+When a commit is required, supply the commit containing the completed work. A PR URL alone does not satisfy that requirement. Closing verified working-tree work asserts the requested implementation is complete; it does not assert that it was committed, merged, or deployed.
 
 Example:
 

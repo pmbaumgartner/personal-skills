@@ -38,10 +38,12 @@ For JSON shapes, low-frequency command behavior, optional interfaces, hooks, and
 
 Use exactly one mode for a goal or root issue:
 
-- **Human mode** is the default. State intent and decide nonconsequential choices within the authorized goal. For consequential choices, present viable options, tradeoffs, and a recommendation, then pause once for the user.
+- **Human mode** is the default. State intent and decide nonconsequential choices within the authorized goal. For consequential choices not already settled by the user, present viable options, tradeoffs, and a recommendation, then pause once for the user.
 - **Agent mode** requires explicit user delegation for reversible, non-production work. The primary agent decides, records signoff, closes Blue issues, and reports decisions at the end without human checkpoints.
 
 Treat a decision as consequential when a wrong choice could cause material harm, establish a durable dependency or precedent, commit significant downstream work, or require more than a local correction to reverse. Uncertainty alone only increases the evidence required.
+
+Honor existing authorization across the workflow. Authorization to execute a selected issue or work toward a goal permits choosing and claiming ready work within that scope without another checkpoint. It does not delegate unresolved consequential choices or expand action permissions.
 
 Record Agent mode and its authority source in the root issue or a reviewed policy; child issues inherit it. A Goal does not select Agent mode or expand permissions. For the full workflow and signoff format, read [references/agent-mode.md](references/agent-mode.md).
 
@@ -52,7 +54,7 @@ Give every issue exactly one canonical workflow label:
 | Type | Completion claim | Typical opening verbs |
 | --- | --- | --- |
 | Blue | Settled knowledge: decision, finding, or recommendation | `Decide`, `Investigate`, `Evaluate`, `Compare`, `Determine`, `Define`, `Audit` |
-| Red | Verified shipped change | `Add`, `Fix`, `Implement`, `Migrate`, `Remove`, `Refactor`, `Optimize`, `Upgrade`, `Document`, `Configure` |
+| Red | Verified implementation at the requested delivery state | `Add`, `Fix`, `Implement`, `Migrate`, `Remove`, `Refactor`, `Optimize`, `Upgrade`, `Document`, `Configure` |
 
 Start the title with a verb that names the completion claim, such as those above. Do not add `[Blue]` or `[Red]` prefixes. Classify by the completion claim and split mixed work only when decision and implementation outputs are independently durable. Keep ordinary local implementation judgment inside Red work.
 
@@ -115,7 +117,7 @@ Before pausing or ending a session:
 2. If comparison is needed, run `kata ready --unowned --agent`; inspect unfamiliar hierarchy with `kata list --status all` and `kata show <root-ref> --agent`. Issues with a future `kata schedule` date or the `someday` marker are excluded from `ready` and `next`; check `show` or `list` before assuming an issue is missing.
 3. Prefer upstream feeders and work without a stakeholder loop when priority is otherwise close.
 4. If Red work still needs a Blue decision, add the missing dependency rather than relying on priority or type.
-5. In Human mode, recommend one issue and wait before claiming. In Agent mode, record the choice and tradeoff, then claim and start.
+5. If execution is already authorized, state the selected issue and claim it. In Human mode, recommend one issue and wait only when execution has not been authorized or the selection requires an unresolved consequential choice. In Agent mode, record the choice and tradeoff, then claim and start.
 
 ## Closing Evidence
 
@@ -148,10 +150,13 @@ Parent close is refused while children remain open. Follow the Blue or Red refer
 | --- | --- |
 | Scope, acceptance, deliverables | Issue body |
 | Status, blockers, attempts | Issue comment |
-| Reusable findings and decision rationale | One repo document |
+| Essential findings, decision, rationale, and evidence | Shared issue body or comment |
+| Detailed analysis beyond the issue record | Accessible shared or tracked artifact |
 | Mutation rationale | Mutation `--comment` |
 
 Write drafts, scratch notes, logs, and untracked evidence under the gitignored `.kata/` directory. Use `.kata/drafts/<slug>.md` with `--body-file` for multiline issue bodies or comments. Persist artifacts in tracked repo paths only when the user requests durable version-controlled output or a deliverable requires it.
+
+Keep enough of each decision in the shared issue for another agent or machine to act without local files. Use `.kata/` for supplementary local material; when the issue record is insufficient, put the required detail in a shared or tracked artifact accessible to collaborators and link it from the issue.
 
 Edit durable documents in place; do not create version-suffixed copies. Let Git history and Kata comments carry the change trail.
 

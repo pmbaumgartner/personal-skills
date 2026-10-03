@@ -28,8 +28,8 @@ Required fields:
 
 Use one of two recording scales:
 
-- Inline Blue - for a small, reversible decision local to one issue. Record the frame, evidence, decision, and who decided in the issue body or a short comment. A separate artifact and `## Deliverables` block are not required.
-- Artifact Blue - for a decision that is expensive to reverse, affects multiple issues, establishes reusable policy, or needs durable evidence beyond the issue record. Add `## Decision Artifact` and `## Deliverables` fields and record the decision in a document. By default write it under the gitignored `.kata/` directory (see **Records And Artifacts** in SKILL.md). Write it to a tracked repo path only when the user requests durable, version-controlled persistence; prefer `docs/<slug>.md` unless the project has another convention.
+- Inline Blue - when the shared issue can hold the decision and its supporting evidence. Record the frame, finding, decision, rationale, evidence, and who decided in the issue body or a short comment. A separate artifact and `## Deliverables` block are needed only if closure requires a reviewed record as described below.
+- Artifact Blue - when the issue record is insufficient for the detailed analysis or evidence collaborators need. Add `## Decision Artifact` and `## Deliverables` fields and link an accessible shared or tracked document. Keep the essential finding, decision, rationale, evidence, and decision owner in the shared issue as well. Use `.kata/` for drafts and supplementary local material. For a required repo document, prefer `docs/<slug>.md` unless the project has another convention.
 
 In Human mode, the primary agent decides nonconsequential Blue work by intent; the decision owner named by the issue or project, defaulting to the current user, decides consequential Blue work. In Agent mode, the primary agent is the decision owner.
 
@@ -69,10 +69,10 @@ Do not rush to a final recommendation in the first draft.
 5. Identify the strongest credible alternative and what evidence would change the recommendation.
 6. Decide:
    - In Human mode, state intent and decide nonconsequential work without a checkpoint.
-   - In Human mode, present consequential work in the format below and pause once for the human decision owner.
+   - In Human mode, reuse an explicit user decision already recorded for this choice; otherwise present consequential work in the format below and pause once for the human decision owner.
    - In Agent mode, choose without a human checkpoint and use the signoff in agent-mode.md.
 7. Record the decision and who decided, then create necessary follow-up issues.
-8. Finalize the decision record. For Artifact Blue, mark the artifact as reviewed, then close.
+8. Finalize the shared issue record and any required artifact. Review every deliverable and supply typed evidence before closing.
 
 For a consequential Human-mode decision, present:
 
@@ -111,20 +111,24 @@ If a question needs new investigation, open a child Blue issue and mark the curr
 
 Blue closure must include:
 
-- brief `--message` naming the settled decision
-- mode-appropriate decision recorded in the issue, artifact, or a short kata comment: agent intent for nonconsequential Human-mode work, explicit human choice for consequential Human-mode work, or primary-agent signoff in Agent mode
-- `--reviewed <path>` for Artifact Blue; omit it for Inline Blue unless another deliverable exists
+- substantive `--message` naming the settled decision and verification (at least 40 characters)
+- mode-appropriate decision and owner recorded in the shared issue body or comment: agent intent for nonconsequential Human-mode work, explicit human choice for consequential Human-mode work, or primary-agent signoff in Agent mode
+- at least one valid typed evidence item for `--done`; use `--reviewed <path>` for every artifact deliverable
 - `--commit <sha>` when there is a relevant commit, but do not require one just to close Blue work
 - follow-up issues listed in the decision record, if opened
 - material rejected or deferred options recorded in the decision record
+
+For Inline Blue, use genuine existing evidence such as a relevant `--commit`, `--pr`, a verification command that actually passed via `--evidence "test:<cmd>"`, or a reviewed supporting path. A decision recorded in an issue or comment does not itself supply a supported typed evidence item. Do not invent an issue/comment prefix or describe ordinary research as a test.
+
+If no existing typed evidence fits, write a concise decision and review record to `.kata/blue/<ref>-review.md`, add that path to `## Deliverables`, inspect it, and close with `--reviewed <path>`. Include the finding, decision, owner, rationale, and checks performed. Copy the essential record into the shared issue before closing so the local file is supplementary. Use an accessible shared or tracked artifact instead if collaborators need detail beyond the issue record. A commit is not required solely for this fallback.
 
 Example:
 
 ```bash
 kata close abc4 --done \
-  --message "Decided to keep match-based ANN dispatch." \
+  --message "Kept match-based ANN dispatch after reviewing the decision record." \
   --reviewed docs/ann_abstraction_decision.md \
   --agent
 ```
 
-For consequential Human-mode work, agreement to investigate is not the final decision.
+For consequential Human-mode work, agreement to investigate is not the final decision; an explicit user choice already made for the same scope does not need reconfirmation.

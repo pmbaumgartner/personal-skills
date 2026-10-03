@@ -22,6 +22,8 @@ Use this workflow when translating a large markdown plan, or several smaller pla
    - Create issues in parallel only when independent agents are available, scopes do not overlap, and coordination overhead is justified. Otherwise, have the coordinator create them sequentially.
    - When using subagents, tell each one it is not alone in the kata ledger and must not create relationships yet.
    - Each creator handles only its assigned issue(s), using `--idempotency-key <plan-slug>-<issue-slug>-<YYYY-MM-DD>`.
+   - Hold every new issue outside `ready` and `next` until central linking and fidelity review finish. In Kata v0.16.0, `create --meta` stores strings, so `--meta someday=true` cannot set the required boolean. Create with `--meta scheduled_on=9999-12-31` as a temporary hold, then run `kata meta set <ref> someday true --json-value --agent`. Keep the temporary schedule until release; if setting `someday` fails, the schedule still holds the issue. Creators must not release either hold.
+   - Record which refs are new, which holds this conversion added, and each issue's intended schedule or intentional `someday` state. On an idempotent retry, inspect the returned issue before changing metadata; it may already have been released or claimed. For reused issues, inspect ownership and scheduling and coordinate with any owner before editing or parking them. Preserve existing holds and schedules.
    - Each issue body must preserve provenance with a short `## Source Plan` block naming the file(s) and section(s) covered.
    - Each artifact-producing issue still needs a `## Deliverables` block.
    - Creators may add necessary detail from repo/code context, but must report additions separately from source-plan content.
@@ -32,7 +34,7 @@ Use this workflow when translating a large markdown plan, or several smaller pla
    - Add all relationships centrally after creation. Do not link during parallel creation.
    - Use `blocks` / `blocked_by` only for true ordering constraints. Use `related` for shared context.
    - Add mutation comments that explain non-obvious sequencing decisions.
-   - If creation exposed an unresolved decision, create or update a Blue issue and block affected Red work on it.
+   - If creation exposed an unresolved decision, create or update a Blue issue and block affected Red work on it. Apply the same creation holds to new issues discovered during linking or review.
 
 5. Drift reconciliation:
    - Before starting or handing off an issue, compare its assumptions against current code, docs, tests, and existing kata comments.
@@ -51,4 +53,9 @@ Use this workflow when translating a large markdown plan, or several smaller pla
    - Review additions from issue creation. Keep useful repo-grounded additions. In Human mode, surface speculative additions or unresolved scope questions to the user; in Agent mode, decide or document an assumption.
    - If fidelity is incomplete, edit issues or create missing ones before reporting completion.
 
-Final response: list the created/reused refs, major links added, coverage/fidelity result, handled pre-mortem/drift findings, and additions. In Human mode, include user decisions still needed. In Agent mode, include decisions made, material assumptions, confidence, and reversal paths.
+7. Release reviewed work:
+   - Release only new issues or agreed holds introduced by this conversion after their links and fidelity checks pass. Verify the temporary holds are still yours before changing them; preserve scheduling or ownership changes made by others.
+   - While `someday=true` still holds a new issue, replace its temporary schedule with the intended source-plan schedule using `kata schedule <ref> <date> --agent`, or clear the temporary schedule with `kata schedule <ref> - --agent` if none is intended. Then run `kata meta unset <ref> someday --agent` unless the issue is intentionally parked. If a step fails or review is incomplete, leave the hold in place and record the remaining action.
+   - Check `kata show <ref> --agent` for final relationships and scheduling, and inspect `kata ready --unowned --agent` to confirm only actionable work is available. Open dependencies or intended parking may correctly keep reviewed issues out of the queue.
+
+Final response: list the created/reused refs, major links added, coverage/fidelity result, released or intentionally held issues, handled pre-mortem/drift findings, and additions. In Human mode, include user decisions still needed. In Agent mode, include decisions made, material assumptions, confidence, and reversal paths.
