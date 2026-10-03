@@ -1,0 +1,6 @@
+interface:
+  display_name: "Thermo-Nuclear Code Quality Review"
+  short_description: "Strict maintainability and structural quality review"
+  default_prompt: "Use $thermo-nuclear-code-quality-review to rigorously review this change for maintainability and ambitious behavior-preserving simplifications."
+policy:
+  allow_implicit_invocation: false

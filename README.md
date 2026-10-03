@@ -40,8 +40,17 @@ and foreign links are protected. Activation is machine-local, not tracked.
 Restart your agent session if its skill list does not refresh.
 
 All source skills have a normal `SKILL.md`, even when disabled.
-`disable-model-invocation: true` is a separate Claude Code setting: the skill is
-manual-only, not disabled.
+All managed skills are manual-only: `disable-model-invocation: true` in
+`SKILL.md` controls Claude Code and Pi; `policy.allow_implicit_invocation: false`
+in `agents/openai.yaml` controls Codex. These policies are separate from
+activation. Enabling a skill makes its explicit command available, not automatic
+selection.
+
+Invoke an enabled skill explicitly:
+
+- Claude Code: `/grug-consult`
+- Pi: `/skill:grug-consult`
+- Codex: `$grug-consult`
 
 ## Editing and updating
 

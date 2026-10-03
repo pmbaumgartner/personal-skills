@@ -1,6 +1,7 @@
 ---
 name: test-blind-code-review
 description: "Review code without seeing its tests. Use when asked for a test-blind, test-free, acceptance-independent, or independent code review: make a temporary copy, remove test files from it, assess the remaining code on its own merits, and report concrete defects and design problems."
+disable-model-invocation: true
 ---
 
 # Test-Blind Code Review

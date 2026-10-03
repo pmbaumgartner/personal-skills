@@ -2,3 +2,5 @@ interface:
   display_name: "Kata Workflow"
   short_description: "Coordinate and manage kata issue workflows."
   default_prompt: "Use $kata-workflow to inspect, claim, create, update, link, or close kata issues."
+policy:
+  allow_implicit_invocation: false

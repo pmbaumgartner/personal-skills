@@ -1,6 +1,7 @@
 ---
 name: evidence-based-diff-review
 description: Quickly assess a commit, pull request, branch, or pasted diff using SCC file deltas and maintenance history to rank changed code, then Codebase Memory structural evidence and focused source inspection to validate the leading concerns. Use for bounded evidence-based design or complexity reviews of changes. Do not use for repository-wide audits, SCC-only reviews, or broad defect and security hunts.
+disable-model-invocation: true
 ---
 
 # Evidence-Based Diff Review

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Context File Audit"
+  short_description: "Evidence-based audits of agent context files"
+  default_prompt: "Use $context-file-audit to assess and improve this agent context file, keeping only useful, evidence-backed guidance."
+policy:
+  allow_implicit_invocation: false

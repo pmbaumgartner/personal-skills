@@ -10,3 +10,5 @@ dependencies:
     - type: "mcp"
       value: "codebase-memory-mcp"
       description: "Changed-symbol context, callers, duplication, coverage, and blast-radius evidence"
+policy:
+  allow_implicit_invocation: false

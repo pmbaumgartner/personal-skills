@@ -1,6 +1,7 @@
 ---
 name: grug-consult
 description: Give concise, Grug-inspired engineering advice that identifies unnecessary complexity and recommends the simplest adequate solution. Use when asked to consult Grug, simplify code, a design, or a proposal, or assess overengineering.
+disable-model-invocation: true
 ---
 
 # Grug Consult

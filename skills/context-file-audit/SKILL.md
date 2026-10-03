@@ -1,6 +1,7 @@
 ---
 name: context-file-audit
-description: Audit and fix CLAUDE.md, AGENTS.md, or other agent context files using evidence from six empirical studies (Gloaguen et al. arXiv:2602.11988, Lulla et al. 2601.20404, McMillan 2605.10039 and 2602.05447, the Agent READMEs study 2511.12884, SWE-Skills-Bench 2603.15401). Use this skill whenever the user asks to review, audit, improve, trim, rewrite, restructure, split, or generate a CLAUDE.md / AGENTS.md / GEMINI.md / .cursorrules or similar agent context file, asks about context file length, format, instruction placement, or moving content into Skills, mentions that their coding agent is slow, expensive, over-exploring, or ignoring repo conventions, or asks whether a context file is worth having at all. Also trigger when asked to run /init-style context file generation, since the research shows naive generation reduces agent performance.
+description: Audit, trim, improve, or generate CLAUDE.md, AGENTS.md, GEMINI.md, and similar agent context files using empirical research. Assess instruction content, context cost, and what belongs in skills rather than always-loaded guidance.
+disable-model-invocation: true
 ---
 
 # Context File Audit (CLAUDE.md / AGENTS.md)

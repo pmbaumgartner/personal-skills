@@ -1,6 +1,7 @@
 ---
 name: kata-workflow
-description: Use when an agent needs to inspect, create, claim, assign, prioritize, coordinate, update, link, or close Kata issues; choose next work; translate plans into issue graphs; or run delegated reversible work. Enforce Blue decision and Red implementation workflows, durable evidence, ownership, and verified close-out across projects.
+description: Manage Kata issues and coordinate durable project work using Blue decision and Red implementation workflows. Inspect, claim, prioritize, link, and close issues with explicit ownership, evidence, and verified completion.
+disable-model-invocation: true
 ---
 
 # Kata Workflow

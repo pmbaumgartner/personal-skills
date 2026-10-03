@@ -1,6 +1,7 @@
 ---
 name: jblow-code-review
-description: Perform a code review of video game code in the style and philosophy of Jonathan Blow (creator of Braid, The Witness, and the Jai language). Use this skill whenever the user asks for a "Jonathan Blow review", a "Blow-style review", a "handmade-style review", a harsh/pragmatic indie game code review, or asks to evaluate game code for over-engineering, over-abstraction, unnecessary dependencies, iteration speed, data-oriented design, or "would Jon Blow approve of this?". Also use it when reviewing any game/engine codebase where the user wants brutal honesty about complexity, generality, and shipping velocity rather than conventional "clean code" feedback.
+description: Review game and engine code through a Jonathan Blow-inspired lens, focusing on overengineering, unnecessary abstraction, dependencies, data-oriented design, iteration speed, and shipping velocity rather than conventional clean-code rules.
+disable-model-invocation: true
 ---
 
 # Jonathan Blow Code Review

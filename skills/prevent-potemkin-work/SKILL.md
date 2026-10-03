@@ -1,6 +1,7 @@
 ---
 name: prevent-potemkin-work
-description: Audit whether completed or in-progress work is more convincing than verified. Use to assess an existing task ledger, issue history, test suite, benchmark, dataset, research record, agent handoff, project milestone, or release for unsupported or self-certified completion claims, silent omissions, mutable acceptance criteria, old-path bypasses, simulation laundering, hidden failures, or inflated reporting. Trigger for baseline audits, high-risk claims, changes to tests or metrics, suspiciously easy completion, repeated follow-up work, agent or harness changes, and pre-scale or pre-release review. It can also provide a minimal standalone discipline when no project workflow exists.
+description: Audit project completion claims against independent acceptance evidence. Assess task ledgers, tests, benchmarks, research records, handoffs, milestones, or releases for unsupported claims, omissions, weakened criteria, bypasses, and hidden failures.
+disable-model-invocation: true
 ---
 
 # Prevent Potemkin Work

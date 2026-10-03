@@ -1,6 +1,7 @@
 ---
 name: agentic-project-delivery
-description: Plan, assess, execute, audit, or release bounded software delivery performed substantially by AI agents when coordination, executable acceptance, integration, or release risk is itself material. Use for staged migrations, broad refactors, compatibility changes, or a complex feature that genuinely needs bounded packets, a representative pilot, and progressive delivery. For durable multi-session work, use Kata as the canonical work ledger. Do not use merely because agents are involved or the work is difficult; exclude ordinary bugs, routine reviews, isolated research experiments, and reversible changes that normal repository workflow can handle.
+description: Plan, coordinate, assess, or release staged agent-led software delivery when integration, acceptance, or release risk requires bounded work packets and progressive delivery. Not for ordinary bugs, routine reviews, or reversible changes handled by normal repository workflow.
+disable-model-invocation: true
 ---
 
 # Agentic Project Delivery

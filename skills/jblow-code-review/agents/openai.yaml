@@ -1,0 +1,6 @@
+interface:
+  display_name: "Jonathan Blow-Inspired Code Review"
+  short_description: "Pragmatic game code review focused on shipping"
+  default_prompt: "Use $jblow-code-review to review this game or engine code for unnecessary complexity, iteration friction, and shipping risk."
+policy:
+  allow_implicit_invocation: false
