@@ -1,0 +1,4 @@
+interface:
+  display_name: "Grug Consult"
+  short_description: "Concise advice, simpler code, less machinery"
+  default_prompt: "Use $grug-consult to recommend the simplest adequate option, explain the tradeoff briefly, and say what evidence would change your mind."

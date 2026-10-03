@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agentic Project Delivery"
+  short_description: "Bound staged agent delivery with minimal controls"
+  default_prompt: "Use $agentic-project-delivery to decide whether staged agent delivery is warranted, then apply one bounded workflow with only condition-triggered controls."

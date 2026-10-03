@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Manage local skill activation without copying or deleting skill sources."""
+
+import argparse
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+
+REPO = Path(__file__).resolve().parent.parent
+SOURCES = REPO / "skills"
+ACTIVE = Path.home() / ".agents" / "skills"
+
+
+def exists(path):
+    return os.path.lexists(path)
+
+
+def source(name):
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
+        raise ValueError(f"Invalid skill name: {name}")
+    path = SOURCES / name
+    if not (path / "SKILL.md").is_file():
+        raise ValueError(f"No skill source with SKILL.md: {name}")
+    return path
+
+
+def owned_link(path, target):
+    # Compare the actual link target, not just resolved content. A link owned
+    # by some other installer must not be removed even if content is shared.
+    if not path.is_symlink():
+        return False
+    return Path(os.path.abspath(path.parent / path.readlink())) == target
+
+
+def enable(name):
+    target = source(name)
+    path = ACTIVE / name
+    if exists(path):
+        if owned_link(path, target):
+            print(f"{name}: already enabled")
+            return
+        raise ValueError(f"Refusing to overwrite unmanaged path: {path}")
+    ACTIVE.mkdir(parents=True, exist_ok=True)
+    path.symlink_to(target, target_is_directory=True)
+    print(f"{name}: enabled")
+
+
+def disable(name):
+    target = source(name)
+    path = ACTIVE / name
+    if not exists(path):
+        print(f"{name}: already disabled")
+        return
+    if not owned_link(path, target):
+        raise ValueError(f"Refusing to remove unmanaged path: {path}")
+    path.unlink()
+    print(f"{name}: disabled")
+
+
+def list_skills():
+    for target in sorted(SOURCES.iterdir()):
+        if not target.is_dir() and not target.is_symlink():
+            continue
+        path = ACTIVE / target.name
+        if not (target / "SKILL.md").is_file():
+            state = "broken source"
+        elif owned_link(path, target):
+            state = "enabled"
+        elif exists(path):
+            state = "unmanaged conflict"
+        else:
+            state = "disabled"
+        print(f"{target.name:42} {state}")
+    if ACTIVE.is_dir():
+        for path in sorted(ACTIVE.iterdir()):
+            if path.is_symlink() and not path.exists():
+                print(f"{path.name:42} broken active link -> {path.readlink()}")
+
+
+def git(*args):
+    return subprocess.run(
+        ["git", "-C", str(REPO), *args],
+        check=True, text=True, capture_output=True,
+    ).stdout.strip()
+
+
+def update():
+    if git("status", "--porcelain", "--untracked-files=all"):
+        raise ValueError("Working tree is dirty; commit or stash changes before updating.")
+    if not git("remote"):
+        raise ValueError("No remote configured; add your personal-skills Git remote first.")
+    # With no explicit remote or branch, Git requires a configured upstream.
+    subprocess.run(["git", "-C", str(REPO), "pull", "--ff-only"], check=True)
+    external = [p.name for p in SOURCES.iterdir() if p.is_symlink()]
+    if external:
+        print("Independent sources not updated: " + ", ".join(sorted(external)))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    commands.add_parser("list", help="Show available skills and local activation")
+    for command in ("enable", "disable"):
+        commands.add_parser(command).add_argument("name")
+    commands.add_parser("update", help="Fast-forward the clean source checkout")
+    args = parser.parse_args()
+    try:
+        if args.command == "list":
+            list_skills()
+        elif args.command == "enable":
+            enable(args.name)
+        elif args.command == "disable":
+            disable(args.name)
+        else:
+            update()
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        print(f"skills: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

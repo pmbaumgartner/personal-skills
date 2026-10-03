@@ -1,0 +1,7 @@
+interface:
+  display_name: "Prevent Potemkin Work"
+  short_description: "Audit completion claims and acceptance evidence"
+  default_prompt: "Use $prevent-potemkin-work to audit this project for unsupported completion claims and weak acceptance evidence."
+
+policy:
+  allow_implicit_invocation: false

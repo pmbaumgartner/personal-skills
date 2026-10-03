@@ -1,0 +1,25 @@
+{
+  "should_trigger": [
+    "Assess whether AI agents can safely perform most of our C++ to Rust migration.",
+    "Initialize Kata and design an agent-heavy workflow for modernizing a large legacy monolith.",
+    "Turn our platform rewrite into bounded work packets, executable acceptance, and a measured representative pilot.",
+    "We have fifty coding agents producing changes but delivery is not faster. Audit the project system and ledger.",
+    "Plan progressive integration and canary release for a large agent-generated compatibility layer.",
+    "How should we structure human approvals, harnesses, and rollback for agents migrating our payment platform?",
+    "Create a bounded Kata workflow for a multi-quarter dependency modernization program.",
+    "Help us decide whether a generated rewrite or a strangler migration is appropriate.",
+    "I maintain this library alone; this complex parser feature may fit one PR, but plan its executable acceptance, representative pilot, prerelease, and stable release."
+  ],
+  "should_not_trigger": [
+    "Fix this one failing unit test.",
+    "Review the attached small pull request.",
+    "Explain Rust ownership to me.",
+    "Write a function that parses a date.",
+    "Add one GitHub Actions job to run linting.",
+    "Rename this class and update its references.",
+    "Generate documentation for this single API endpoint.",
+    "Why does this SQL query return duplicates?",
+    "Add one optional argument to an internal helper and update its unit test in one pull request.",
+    "Run one private reversible benchmark to compare two parser algorithms; no release or production decision follows."
+  ]
+}
