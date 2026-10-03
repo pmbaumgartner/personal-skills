@@ -10,7 +10,7 @@ Use Kata as the durable record of work: what was attempted, which model contribu
 
 ## Start
 
-- Run `kata quickstart` in an unfamiliar workspace or after an upgrade. Use `kata <command> --help` for syntax instead of maintaining a CLI manual here. These examples were checked against v0.18.0.
+- Run `kata quickstart` in an unfamiliar workspace or after an upgrade. Use `kata <command> --help` for syntax. Keep version-specific CLI quirks and input/output normalization in Kata's CLI help/docs, not this workflow skill. These examples were checked against v0.18.0.
 - Work in the bound project; use `--workspace` or `--project` when needed. Run `kata init` only when binding a workspace is intended. Use qualified refs such as `project#abc4` across projects.
 - Use `--agent` for normal reads and mutations; use `--json` for scripts. Inspect with `kata show <ref> --agent` and search before creating. Use `list --status all` for history; search includes open and closed issues by default.
 - Track real work in its correct project. Create practice or scratchpad issues only when requested.

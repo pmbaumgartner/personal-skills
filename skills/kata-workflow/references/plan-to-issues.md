@@ -1,6 +1,14 @@
 # Convert Plans To Issues
 
-Use this workflow for a large plan or several plan documents. Apply SKILL.md for attribution, Blue/Red classification, decisions, relationships, and close evidence.
+Use this workflow to convert a plan or several plan documents into Kata issues. Apply SKILL.md for attribution, Blue/Red classification, decisions, relationships, and close evidence.
+
+## Scale The Review
+
+Default to a lightweight conversion: keep the coverage map and review findings in the gate issue, and inspect issue bodies, relationships, and readiness directly with Kata. Separate draft files are useful for multiline bodies; additional manifests, snapshots, or audit scripts are optional.
+
+Use more structured reconciliation when overlapping plans, concurrent creators, ambiguous scope, or complex dependencies make direct review unreliable. Automate specific checks where automation adds confidence—not merely to produce closure evidence.
+
+Either path must preserve substantive source requirements, genuine dependencies, deliverables, acceptance criteria, and unresolved decisions. Before closing the gate, confirm that rejected or deferred choices cannot release unapproved implementation and that the resulting ready queue matches the intended next work.
 
 ## Draft And Review
 
