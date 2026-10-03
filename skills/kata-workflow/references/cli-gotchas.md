@@ -36,6 +36,11 @@ contract. Use `--json` and project with `jq`.
 
 ## Mutation Edge Cases
 
+- `create` may soft-block a title that looks like an existing issue. Re-run
+  the search and reuse or update the match; pass `--force-new` only when the
+  new issue is genuinely distinct. An idempotency-key match still wins.
+- Close validation rejects messages shorter than 40 characters for `done` and
+  `audit-no-change`, and 60 for `wontfix`. `done` also requires typed evidence.
 - `edit`, `close`, `reopen`, `claim`, `assign`, `unassign`, and
   `label add/rm` accept `--comment TEXT`.
 - The mutation lands before its follow-up comment. If the comment fails, retry
@@ -70,11 +75,18 @@ resume from the returned reset cursor. Stream with `kata events --tail --agent`;
 resume a stream with `--last-event-id <cursor>`. Use `kata digest --since 24h
 --agent` for a human-scale handoff summary.
 
+`kata schedule <ref> <date>` parks an issue out of `ready` and `next` until
+that date; `kata schedule <ref> -` clears it. `kata meta set <ref> someday true
+--json-value` parks it with no date; `kata meta unset <ref> someday` returns it.
+`kata deadline <ref> <date>` records a due date without parking.
+
 ```bash
 kata close abc4 --duplicate-of d4ex --message "Same Safari race condition." --agent
 kata close abc4 --superseded-by d4ex --message "Replaced by broader scope." --agent
-kata close abc4 --wontfix --message "Out of scope after contract review." --agent
-kata close abc4 --audit-no-change --message "Reviewed schema; no change needed." \
+kata close abc4 --wontfix \
+  --message "Out of scope: the contract review moved this behavior to the client." --agent
+kata close abc4 --audit-no-change \
+  --message "Reviewed schema and queries; no change needed." \
   --evidence "no-change-audit:schema unchanged after review" \
   --reviewed internal/db/schema.sql --agent
 ```

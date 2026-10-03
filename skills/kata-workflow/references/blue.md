@@ -13,7 +13,7 @@ act," not shipped code.
 
 ## Issue Body
 
-Use label `blue`. Start the title with one of the Blue verbs listed in SKILL.md; do not add a `[Blue]` prefix.
+Use label `blue`. Start the title with a verb naming the decision or finding, such as the Blue verbs listed in SKILL.md; do not add a `[Blue]` prefix.
 
 Examples: `Decide whether to retain ANN dispatch`, `Investigate Safari callback duplication`, `Compare vector-index options`.
 
@@ -29,10 +29,9 @@ Required fields:
 Use one of two recording scales:
 
 - Inline Blue - for a small, reversible decision local to one issue. Record the frame, evidence, decision, and who decided in the issue body or a short comment. A separate artifact and `## Deliverables` block are not required.
-- Artifact Blue - for a decision that is expensive to reverse, affects multiple issues, establishes reusable policy, or needs durable evidence beyond the issue record. Add `## Decision Artifact` and `## Deliverables` fields and record the decision in a document. By default write it under the gitignored `.kata/` directory (see **Artifacts** in SKILL.md); write it to a tracked repo path such as `docs/<slug>.md` only when the user requests durable, version-controlled persistence.
+- Artifact Blue - for a decision that is expensive to reverse, affects multiple issues, establishes reusable policy, or needs durable evidence beyond the issue record. Add `## Decision Artifact` and `## Deliverables` fields and record the decision in a document. By default write it under the gitignored `.kata/` directory (see **Records And Artifacts** in SKILL.md). Write it to a tracked repo path only when the user requests durable, version-controlled persistence; prefer `docs/<slug>.md` unless the project has another convention.
 
 In Human mode, the primary agent decides nonconsequential Blue work by intent; the decision owner named by the issue or project, defaulting to the current user, decides consequential Blue work. In Agent mode, the primary agent is the decision owner.
-When the user asks for a tracked artifact, prefer `docs/<slug>.md` unless the project has another convention.
 
 ## Decision Frame
 

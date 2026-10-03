@@ -14,25 +14,25 @@ Use Kata as the shared issue ledger and durable memory for scope, decisions, evi
 - Treat examples here as checked against Kata v0.16.0 (`kata_api_version: 1`, `agent_format: 1`). If the installed CLI drifts, follow its contract and report the mismatch before mutating.
 - Resolve project-scoped commands from the workspace, `--workspace`, or `--project`. Without a `.kata.toml` binding, use `--project <name>` or qualified refs; run `kata init` only when binding is intended.
 - Prefer `--agent` for reads and mutations. Use `--json` only for scripts that need the full structured shape.
-- Orient with `kata list --status all --agent`, then inspect with `kata show <ref> --agent` and `kata search "<term>" --agent`.
+- Orient with `kata list --agent` (open issues), then inspect with `kata show <ref> --agent` and `kata search "<term>" --agent`. Add `--status all` when closed history matters; `list` returns at most 200 rows unless you pass `--limit`.
 - Use `list --all`, `ready --all`, or `next --all` only for intentional cross-project discovery. Keep mutations project-scoped and use qualified refs.
-- Resolve identity with `kata whoami --agent` when attribution matters. Give every mutating agent in a fan-out a distinct `--as` or `$KATA_AUTHOR`.
+- Resolve identity with `kata whoami --agent` when attribution matters. Give every mutating agent in a fan-out a distinct `--as` or `$KATA_AUTHOR`; claims and history are keyed by actor, so shared identities silently defeat claim conflicts and attribution.
 - Never run `delete` or `purge` unless the user explicitly requests that exact destructive action and ref.
 
 For JSON shapes, low-frequency command behavior, optional interfaces, hooks, and daemon operations, read [references/cli-gotchas.md](references/cli-gotchas.md).
 
 ## Non-Negotiable Rules
 
-- Never false-close. Closing asserts verified completion.
+- Never false-close. Closing asserts verified completion, and other agents and humans act on that claim without re-checking.
 - Leave incomplete work open. Add `needs-review` when useful and comment with what was attempted, evidence, and the next action.
-- Close verified Red work promptly.
+- Close verified Red work promptly so dependents become ready.
 - Close Blue work only after recording the mode-appropriate decision.
-- Use `blocks` / `blocked_by` for sequencing and `related` only for context.
-- Rank ready work with priority, never as a substitute for dependencies. Priority `0` is highest.
-- Search before creating and always pass `--idempotency-key <slug>-<YYYY-MM-DD>`.
-- Treat a failed claim as a coordination signal. Never `--force` ownership transfer without explicit user direction.
+- Use `blocks` / `blocked_by` for sequencing and `related` only for context. Only `blocks` links gate `ready` and `next`.
+- Rank ready work with priority, never as a substitute for dependencies: priority orders the ready queue but cannot hold an issue out of it. Priority `0` is highest.
+- Search before creating and always pass `--idempotency-key <slug>-<YYYY-MM-DD>` so a retried create returns the existing issue instead of a duplicate.
+- Treat a failed claim as a coordination signal: another actor owns the work. Never `--force` ownership transfer without explicit user direction.
 - Give every artifact-producing issue a `## Deliverables` block and review every listed path before close.
-- Keep close messages brief but substantive. Put durable detail in reviewed artifacts, typed evidence, or a short issue comment.
+- Write close messages as one substantive sentence naming what changed or was settled and how it was verified. Kata rejects short messages: at least 40 characters for `--done` and `--audit-no-change`, 60 for `--wontfix`. Put durable detail in reviewed artifacts, typed evidence, or a short issue comment.
 
 ## Decision Modes
 
@@ -49,12 +49,12 @@ Record Agent mode and its authority source in the root issue or a reviewed polic
 
 Give every issue exactly one canonical workflow label:
 
-| Type | Completion claim | Opening verbs |
+| Type | Completion claim | Typical opening verbs |
 | --- | --- | --- |
 | Blue | Settled knowledge: decision, finding, or recommendation | `Decide`, `Investigate`, `Evaluate`, `Compare`, `Determine`, `Define`, `Audit` |
 | Red | Verified shipped change | `Add`, `Fix`, `Implement`, `Migrate`, `Remove`, `Refactor`, `Optimize`, `Upgrade`, `Document`, `Configure` |
 
-Do not add `[Blue]` or `[Red]` prefixes. Classify by the completion claim and split mixed work only when decision and implementation outputs are independently durable. Keep ordinary local implementation judgment inside Red work.
+Start the title with a verb that names the completion claim, such as those above. Do not add `[Blue]` or `[Red]` prefixes. Classify by the completion claim and split mixed work only when decision and implementation outputs are independently durable. Keep ordinary local implementation judgment inside Red work.
 
 - For Blue work, read [references/blue.md](references/blue.md).
 - For Red work, read [references/red.md](references/red.md).
@@ -112,7 +112,7 @@ Before pausing or ending a session:
 ## Choosing Next Work
 
 1. Run `kata next --unowned --agent`.
-2. If comparison is needed, run `kata ready --unowned --agent`; inspect unfamiliar hierarchy with `kata list --status all` and `kata show <root-ref> --agent`.
+2. If comparison is needed, run `kata ready --unowned --agent`; inspect unfamiliar hierarchy with `kata list --status all` and `kata show <root-ref> --agent`. Issues with a future `kata schedule` date or the `someday` marker are excluded from `ready` and `next`; check `show` or `list` before assuming an issue is missing.
 3. Prefer upstream feeders and work without a stakeholder loop when priority is otherwise close.
 4. If Red work still needs a Blue decision, add the missing dependency rather than relying on priority or type.
 5. In Human mode, recommend one issue and wait before claiming. In Agent mode, record the choice and tradeoff, then claim and start.
@@ -133,7 +133,7 @@ Verify that commit evidence contains the completed work; never cite the current 
 
 ```bash
 kata close abc4 --done \
-  --message "Fixed Safari callback double-submit." \
+  --message "Fixed Safari callback double-submit; callback tests pass." \
   --commit <sha-containing-completed-work> \
   --evidence "test:cargo test" \
   --reviewed src/callback.rs \

@@ -7,7 +7,7 @@ Use this workflow when translating a large markdown plan, or several smaller pla
 1. Coordinator draft:
    - Read every source plan first.
    - Identify outcomes, phases, dependencies, deliverables, unresolved decisions, acceptance evidence, and likely repo areas.
-   - Decide the provisional issue graph before creating anything. Classify each issue by its completion claim. Split thinking and doing only when they have distinct durable decision and implementation outputs; keep ordinary local implementation judgment inside Red work. Give each issue exactly one `blue` or `red` label and start its title with the corresponding verb family from SKILL.md.
+   - Decide the provisional issue graph before creating anything. Classify each issue by its completion claim. Split thinking and doing only when they have distinct durable decision and implementation outputs; keep ordinary local implementation judgment inside Red work. Give each issue exactly one `blue` or `red` label and start its title with a verb naming its completion claim.
    - Build a source coverage map from plan headings, bullets, checklist items, or requirement IDs to planned issue titles.
    - Search existing kata issues before creation and reuse/update obvious matches instead of duplicating them.
 
@@ -43,7 +43,7 @@ Use this workflow when translating a large markdown plan, or several smaller pla
 
 6. Fidelity review:
    - Reconcile the source coverage map against the final issue set and relationship graph.
-   - Verify every issue has exactly one `blue` or `red` label and a matching opening verb.
+   - Verify every issue has exactly one `blue` or `red` label and an opening verb matching its completion claim.
    - Verify every substantive source-plan requirement is represented by a kata issue, explicitly folded into another issue, or intentionally left out with a noted reason.
    - Verify source-plan dependencies became `blocks` / `blocked_by` links when they affect readiness.
    - Verify deliverables, acceptance checks, and evidence expectations were not lost.

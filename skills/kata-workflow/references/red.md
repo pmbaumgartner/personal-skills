@@ -4,7 +4,7 @@ Red issues are implementation work. Their output is shipped, verified change.
 
 ## Issue Body
 
-Use label `red`. Start the title with one of the Red verbs listed in SKILL.md; do not add a `[Red]` prefix.
+Use label `red`. Start the title with a verb naming the shipped change, such as the Red verbs listed in SKILL.md; do not add a `[Red]` prefix.
 
 Examples: `Fix Safari callback duplication`, `Add ANN recall gates`, `Migrate legacy issue references`.
 
@@ -53,7 +53,7 @@ For any Red issue that claims a performance improvement, optimization, fewer syn
 
 Red closure must include:
 
-- brief `--message` naming what changed
+- one-sentence `--message` naming what changed and how it was verified (at least 40 characters)
 - committed work, unless the user explicitly declared otherwise
 - `--commit <sha>` for the commit containing the completed work, unless the user explicitly declared otherwise
 - one `--evidence "test:<cmd>"` per verification command that passed; use `--test "<cmd>"` only when there is exactly one
@@ -73,7 +73,7 @@ Example:
 
 ```bash
 kata close abc4 --done \
-  --message "Added ANN recall gates." \
+  --message "Added ANN recall gates to the benchmark suite." \
   --commit <sha> \
   --evidence "test:cargo test" \
   --evidence "test:uv run pytest" \
