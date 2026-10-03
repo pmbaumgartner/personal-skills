@@ -17,7 +17,7 @@ skills enable grug-consult
 Run the setup commands from the repository root. Do not overwrite an existing
 `skills` command or skill directory: inspect and reconcile it first.
 The script finds its checkout through its own symlink, so the checkout need not
-live at any particular path. Python 3 and Git are required.
+live at any particular path. uv and Git are required; uv manages Python for the script.
 
 Claude Code shares the active collection through
 `~/.claude/skills -> ~/.agents/skills`. On a new machine, create that link only
@@ -83,5 +83,5 @@ updates are used.
 ## Verification
 
 ```sh
-python3 -m unittest discover -s tests -v
+uv run --python '>=3.9' -m unittest discover -s tests -v
 ```
