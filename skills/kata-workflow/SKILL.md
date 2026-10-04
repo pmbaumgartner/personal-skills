@@ -87,7 +87,9 @@ kata unassign abc4 --comment "Releasing; blocked on a missing fixture." --agent
 
 ## Verify And Close
 
-Closing asserts verified completion, and other agents and humans act on that claim without re-checking. Close each issue promptly after its completion claim is verified so dependents become ready; leave incomplete work open.
+Closing asserts verified completion, and other agents and humans act on that claim without re-checking. Close each issue promptly after its completion claim and delivery requirements are satisfied so dependents become ready; leave incomplete work open.
+
+For Red implementation issues, verified working-tree changes are not completion: review and verify the work, commit it, then close with `--commit <sha>` naming the commit containing the completed work. Tests, reviewed paths, or a PR URL supplement that commit evidence; they do not replace it. If committing is not authorized or possible, record the verified but uncommitted state and leave the issue open. Adding a commit in a later comment does not repair the original close evidence; reopen a prematurely closed issue and close it again with the correct commit evidence.
 
 Close with a substantive sentence naming the result and verification, and record the attributed outcome with `--comment`. Supply at least one genuine typed evidence item for `--done`, and review every deliverable:
 
@@ -101,12 +103,15 @@ Record manual checks, benchmarks, skipped checks, residual risk, and rationale i
 
 ```bash
 kata close abc4 --done \
-  --message "Fixed callback double-submit; callback tests pass." \
+  --message "Committed the callback double-submit fix; callback tests pass." \
+  --commit <verified-work-commit-sha> \
   --evidence "test:cargo test callback" --reviewed src/callback.rs \
-  --comment "Deduplicated submit handler; changes remain uncommitted. Safari not tested manually." \
+  --comment "Deduplicated submit handler and committed the verified changes. Safari not tested manually." \
   --agent
 ```
 
 Preview complicated closes with `--dry-run`.
 
 Before ending, make ownership truthful, record remaining actions in Kata, reconcile discovered dependencies, and report the relevant refs and delivery state.
+
+Whenever reporting on an issue or asking the user for input, explain its goal, relevant current state, why it matters, and what the proposed choice or next step would authorize; do not present only issue refs, options, or decisions without that context.
