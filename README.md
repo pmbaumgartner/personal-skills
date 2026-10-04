@@ -31,6 +31,8 @@ changed by this tool.
 skills list
 skills enable thermo-nuclear-code-quality-review
 skills disable thermo-nuclear-code-quality-review
+skills invocation thermo-nuclear-code-quality-review
+skills invocation thermo-nuclear-code-quality-review manual
 skills update
 ```
 
@@ -40,14 +42,15 @@ and foreign links are protected. Activation is machine-local, not tracked.
 Restart your agent session if its skill list does not refresh.
 
 All source skills have a normal `SKILL.md`, even when disabled.
-Each skill sets its own invocation policy, and its settings must agree across
-agents. A manual-only skill sets `disable-model-invocation: true` in `SKILL.md`
-for Claude Code and Pi, and `policy.allow_implicit_invocation: false` in
-`agents/openai.yaml` for Codex.
-These policies are separate from activation: enabling a manual-only skill makes
-its explicit command available, not automatic selection.
+Invocation is a separate, tracked setting of each skill: `auto` lets agents
+choose the skill on their own, while `manual` runs it only when explicitly
+invoked. Enabling a skill does not change its invocation setting.
+`skills invocation <name>` shows the setting and reports when agents disagree;
+`skills invocation <name> manual|auto` sets it for every agent at once, through
+`disable-model-invocation` in `SKILL.md` (Claude Code and Pi) and
+`policy.allow_implicit_invocation` in `agents/openai.yaml` (Codex).
 
-Invoke an enabled skill explicitly:
+Invoke an enabled skill explicitly, whatever its invocation setting:
 
 - Claude Code: `/grug-consult`
 - Pi: `/skill:grug-consult`

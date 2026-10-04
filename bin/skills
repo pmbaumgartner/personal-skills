@@ -3,7 +3,7 @@
 # requires-python = ">=3.9"
 # dependencies = []
 # ///
-"""Manage local skill activation without copying or deleting skill sources."""
+"""Manage local skill activation and invocation policy without copying or deleting skill sources."""
 
 import argparse
 import os
@@ -84,6 +84,70 @@ def list_skills():
                 print(f"{path.name:42} broken active link -> {path.readlink()}")
 
 
+CLAUDE_KEY = "disable-model-invocation"
+CODEX_KEY = "allow_implicit_invocation"
+
+
+def read_flag(lines, key):
+    for line in lines:
+        match = re.fullmatch(rf"\s*{key}:\s*(true|false)\s*", line)
+        if match:
+            return match.group(1) == "true"
+    return None
+
+
+def set_flag(lines, key, value, indent, insert_at):
+    """Replace key's line, or insert it at insert_at if absent."""
+    line = f"{indent}{key}: {'true' if value else 'false'}"
+    for i, existing in enumerate(lines):
+        if re.fullmatch(rf"\s*{key}:.*", existing):
+            lines[i] = line
+            return
+    lines.insert(insert_at, line)
+
+
+def newline(text):
+    return "\n" if text.endswith("\n") else ""
+
+
+def frontmatter_end(lines):
+    if not lines or lines[0] != "---" or "---" not in lines[1:]:
+        raise ValueError("SKILL.md has no frontmatter")
+    return lines.index("---", 1)
+
+
+def invocation(name, mode=None):
+    target = source(name)
+    skill = target / "SKILL.md"
+    codex = target / "agents" / "openai.yaml"
+    skill_text = skill.read_text()
+    skill_lines = skill_text.splitlines()
+    end = frontmatter_end(skill_lines)
+    codex_text = codex.read_text() if codex.is_file() else "\n"
+    codex_lines = codex_text.splitlines()
+    if mode:
+        manual = mode == "manual"
+        frontmatter = skill_lines[:end]
+        set_flag(frontmatter, CLAUDE_KEY, manual, "", end)
+        skill.write_text("\n".join(frontmatter + skill_lines[end:]) + newline(skill_text))
+        if "policy:" not in codex_lines:
+            codex_lines.append("policy:")
+        policy = codex_lines.index("policy:") + 1
+        set_flag(codex_lines, CODEX_KEY, not manual, "  ", policy)
+        codex.parent.mkdir(exist_ok=True)
+        codex.write_text("\n".join(codex_lines) + newline(codex_text))
+        print(f"{name}: {mode}")
+        return
+    # Both agents allow implicit invocation when their setting is absent.
+    claude = "manual" if read_flag(skill_lines[:end], CLAUDE_KEY) else "auto"
+    implicit = read_flag(codex_lines, CODEX_KEY)
+    codex_mode = "manual" if implicit is False else "auto"
+    if claude == codex_mode:
+        print(f"{name}: {claude}")
+    else:
+        print(f"{name}: mismatched (Claude Code/Pi {claude}, Codex {codex_mode})")
+
+
 def git(*args):
     return subprocess.run(
         ["git", "-C", str(REPO), *args],
@@ -109,6 +173,11 @@ def main():
     commands.add_parser("list", help="Show available skills and local activation")
     for command in ("enable", "disable"):
         commands.add_parser(command).add_argument("name")
+    policy = commands.add_parser(
+        "invocation", help="Show or set whether agents may invoke a skill automatically"
+    )
+    policy.add_argument("name")
+    policy.add_argument("mode", nargs="?", choices=("manual", "auto"))
     commands.add_parser("update", help="Fast-forward the clean source checkout")
     args = parser.parse_args()
     try:
@@ -118,6 +187,8 @@ def main():
             enable(args.name)
         elif args.command == "disable":
             disable(args.name)
+        elif args.command == "invocation":
+            invocation(args.name, args.mode)
         else:
             update()
     except (ValueError, OSError, subprocess.CalledProcessError) as error:

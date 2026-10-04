@@ -63,6 +63,32 @@ class ActivationTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     action(name)
 
+    def test_invocation_sets_both_agents_and_preserves_other_content(self):
+        skill = self.target / "SKILL.md"
+        skill.write_text(
+            "---\nname: example\ndisable-model-invocation: false\n---\n\n"
+            "disable-model-invocation: body text\n"
+        )
+        codex = self.target / "agents" / "openai.yaml"
+        codex.parent.mkdir()
+        codex.write_text('interface:\n  display_name: "Example"\n')
+
+        cli.invocation("example", "manual")
+        self.assertEqual(
+            skill.read_text(),
+            "---\nname: example\ndisable-model-invocation: true\n---\n\n"
+            "disable-model-invocation: body text\n",
+        )
+        self.assertEqual(
+            codex.read_text(),
+            'interface:\n  display_name: "Example"\n'
+            "policy:\n  allow_implicit_invocation: false\n",
+        )
+
+        cli.invocation("example", "auto")
+        self.assertIn("disable-model-invocation: false\n---", skill.read_text())
+        self.assertTrue(codex.read_text().endswith("  allow_implicit_invocation: true\n"))
+
     def test_update_does_not_pull_dirty_checkout(self):
         with patch.object(cli, "git", return_value=" M skills/example/SKILL.md"):
             with patch.object(cli.subprocess, "run") as run:
