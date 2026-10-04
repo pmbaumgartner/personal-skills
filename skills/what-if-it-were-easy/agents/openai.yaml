@@ -1,0 +1,8 @@
+interface:
+  display_name: "What if it were easy?"
+  short_description: "Four questions for the simplest sound solution"
+  default_prompt: "Use $what-if-it-were-easy to find the simplest sound next step for this developer problem."
+  icon_small: "./assets/icon.svg"
+  icon_large: "./assets/icon.svg"
+policy:
+  allow_implicit_invocation: false
