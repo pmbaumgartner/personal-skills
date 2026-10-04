@@ -7,11 +7,10 @@
 
 import argparse
 import os
-from pathlib import Path
 import re
 import subprocess
 import sys
-
+from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 SOURCES = REPO / "skills"
@@ -129,7 +128,9 @@ def invocation(name, mode=None):
         manual = mode == "manual"
         frontmatter = skill_lines[:end]
         set_flag(frontmatter, CLAUDE_KEY, manual, "", end)
-        skill.write_text("\n".join(frontmatter + skill_lines[end:]) + newline(skill_text))
+        skill.write_text(
+            "\n".join(frontmatter + skill_lines[end:]) + newline(skill_text)
+        )
         if "policy:" not in codex_lines:
             codex_lines.append("policy:")
         policy = codex_lines.index("policy:") + 1
@@ -151,15 +152,21 @@ def invocation(name, mode=None):
 def git(*args):
     return subprocess.run(
         ["git", "-C", str(REPO), *args],
-        check=True, text=True, capture_output=True,
+        check=True,
+        text=True,
+        capture_output=True,
     ).stdout.strip()
 
 
 def update():
     if git("status", "--porcelain", "--untracked-files=all"):
-        raise ValueError("Working tree is dirty; commit or stash changes before updating.")
+        raise ValueError(
+            "Working tree is dirty; commit or stash changes before updating."
+        )
     if not git("remote"):
-        raise ValueError("No remote configured; add your personal-skills Git remote first.")
+        raise ValueError(
+            "No remote configured; add your personal-skills Git remote first."
+        )
     # With no explicit remote or branch, Git requires a configured upstream.
     subprocess.run(["git", "-C", str(REPO), "pull", "--ff-only"], check=True)
 
