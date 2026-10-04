@@ -75,7 +75,7 @@ For plan conversion, read [references/plan-to-issues.md](references/plan-to-issu
 
 ## Record Progress And Pause
 
-Keep scope, acceptance, and deliverables in the issue body. Put attempts, blockers, essential findings, decisions, rationale, and next actions in the shared issue body or comments. Add a `## Deliverables` block for artifact-producing work and review every listed path before close.
+The issue body states current truth: what the next implementer or reader needs now, such as objective, constraints, scope, acceptance, deliverables, and for Blue the settled result. Comments hold the history: attempts, findings, blockers, decisions as they happened, and next actions. When scope or a decision changes, rewrite the affected body sections in place and explain the change in the edit's `--comment`. Do not add update sections, dated notes, or accounts of who changed what to the body. Add a `## Deliverables` block for artifact-producing work and review every listed path before close.
 
 Use `.kata/drafts/<slug>.md` with `--body-file` for multiline drafts. Keep scratch notes and logs under gitignored `.kata/`. Create tracked artifacts only when requested or required by a deliverable; use accessible shared or tracked artifacts when collaborators need detail beyond the issue record. Edit durable documents in place.
 

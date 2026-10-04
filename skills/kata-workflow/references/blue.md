@@ -13,7 +13,7 @@ Include these issue fields:
 - `## Exit Criteria`: what makes the finding or decision settled.
 - `## Decision Mode`: include Agent mode and its inherited authority when delegated; omission means Human mode.
 
-Keep the frame and result inline when the shared issue can hold the needed evidence. Add `## Decision Artifact` and `## Deliverables` only when a separate reviewed artifact is needed. Keep the essential result in the issue even when detailed analysis lives elsewhere. For a required repo document, use the project's convention or `docs/<slug>.md`.
+Keep the frame in the body while investigating. Once settled, rewrite the body around the result: question, decision and owner, rationale, rejected alternatives that affect later work, conditions to revisit, and follow-up links. Drop investigation-only sections such as Approach and Exit Criteria, and leave the evidence trail in comments. Add `## Decision Artifact` and `## Deliverables` only when a separate reviewed artifact is needed. Keep the essential result in the issue even when detailed analysis lives elsewhere. For a required repo document, use the project's convention or `docs/<slug>.md`.
 
 Draft the question, criteria, options, and evidence needed before settling a recommendation. Use this frame to check alignment with the higher-level goal; it is not a prewritten answer.
 
