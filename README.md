@@ -72,13 +72,7 @@ git push -u origin HEAD
 
 The old GitHub repository is not renamed or modified by this setup.
 
-## Independent and third-party skills
-
-`evidence-based-code-review` remains an independent checkout at
-`~/projects/evidence-based-code-review`, preserving its own history, remote,
-and local edits. Its source entry here is a relative symlink to that checkout.
-On a new machine, clone it beside this repository, or adjust that source link.
-Commit and pull its changes separately; `skills update` does not update it.
+## Third-party skills
 
 Third-party and externally synced skills remain outside this repository.
 The activation tool leaves them alone. No submodules or automatic external

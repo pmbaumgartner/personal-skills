@@ -66,7 +66,7 @@ def disable(name):
 
 def list_skills():
     for target in sorted(SOURCES.iterdir()):
-        if not target.is_dir() and not target.is_symlink():
+        if not target.is_dir():
             continue
         path = ACTIVE / target.name
         if not (target / "SKILL.md").is_file():
@@ -162,9 +162,6 @@ def update():
         raise ValueError("No remote configured; add your personal-skills Git remote first.")
     # With no explicit remote or branch, Git requires a configured upstream.
     subprocess.run(["git", "-C", str(REPO), "pull", "--ff-only"], check=True)
-    external = [p.name for p in SOURCES.iterdir() if p.is_symlink()]
-    if external:
-        print("Independent sources not updated: " + ", ".join(sorted(external)))
 
 
 def main():

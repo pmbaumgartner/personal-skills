@@ -1,0 +1,14 @@
+interface:
+  display_name: "Evidence-Based Code Review"
+  short_description: "Review design complexity with independent evidence"
+  default_prompt: "Use $evidence-based-code-review to identify evidence-backed design complexity and recommend the smallest structural changes that remove it using independent SCC and graph evidence validated in source."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "scc"
+      description: "File metrics, history hotspots, and change coupling"
+    - type: "mcp"
+      value: "codebase-memory-mcp"
+      description: "Structural graph, source, coverage, and blast-radius evidence"
+policy:
+  allow_implicit_invocation: false
