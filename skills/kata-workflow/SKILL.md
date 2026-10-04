@@ -35,7 +35,7 @@ Give every issue exactly one workflow label and start its title with a verb nami
 | Label | Completion claim | Read when doing this work |
 | --- | --- | --- |
 | `blue` | Settled decision, finding, or recommendation | [references/blue.md](references/blue.md) |
-| `red` | Verified implementation at the requested delivery state | [references/red.md](references/red.md) |
+| `red` | Verified, committed implementation, plus any additional requested delivery steps | [references/red.md](references/red.md) |
 
 Split decision and implementation only when they have independently durable outputs. Keep ordinary local implementation choices inside Red work. Open or update Blue when uncertainty changes scope, acceptance, settled decisions, or reusable policy. Create retrospective Blue work only for reusable learning or a faulty assumption.
 
@@ -89,7 +89,7 @@ kata unassign abc4 --comment "Releasing; blocked on a missing fixture." --agent
 
 Closing asserts verified completion, and other agents and humans act on that claim without re-checking. Close each issue promptly after its completion claim and delivery requirements are satisfied so dependents become ready; leave incomplete work open.
 
-For Red implementation issues, verified working-tree changes are not completion: review and verify the work, commit it, then close with `--commit <sha>` naming the commit containing the completed work. Tests, reviewed paths, or a PR URL supplement that commit evidence; they do not replace it. If committing is not authorized or possible, record the verified but uncommitted state and leave the issue open. Adding a commit in a later comment does not repair the original close evidence; reopen a prematurely closed issue and close it again with the correct commit evidence.
+Red issues should normally finish with a local commit, not implementation left only in the working tree. Review and verify the work, commit only the issue's changes, then close with `--commit <sha>` naming the commit containing the completed work. “Requested delivery state” adds requirements such as a PR, merge, publication, or deployment; it does not silently waive the commit requirement. A local commit does not authorize pushing or those additional actions. Tests, reviewed paths, or a PR URL supplement commit evidence; they do not replace it. If committing is not authorized or possible, record the verified but uncommitted state and leave the issue open. Adding a commit in a later comment does not repair the original close evidence; reopen a prematurely closed issue and close it again with the correct commit evidence.
 
 Close with a substantive sentence naming the result and verification, and record the attributed outcome with `--comment`. Supply at least one genuine typed evidence item for `--done`, and review every deliverable:
 
