@@ -1,0 +1,89 @@
+---
+name: test-rederivation
+description: "Re-derive what a codebase's tests should be from what the code observably does and what justifies it, without seeing the existing tests, then classify the existing tests against that spec. Use when asked to re-derive tests, run an independent test-suite audit or test-blind review, or check whether tests are being treated as ground truth."
+disable-model-invocation: true
+---
+
+# Test Re-derivation
+
+Agents tend to treat tests they wrote as ground truth, even when those tests encode a narrow or wrong implementation, duplicate other coverage, or have gone stale. Hide the tests and start from what the system actually does, not from the design its code or tests suggest: the purpose of a system is what it does. Keep the behavior that stated intent or real dependence justifies as the test spec, and only then compare that spec with the existing suite.
+
+## Deriving the spec
+
+**Behavior** is an effect observable from outside the unit: return values, errors, output, side effects, and persisted or exchanged data. Internal steps, call order, and intermediate state are not behavior.
+
+A behavior is **justified** when it is:
+
+- **stated:** in the user's requirements, documentation in scope (README, docs, doctests, runnable examples), or the interface's own declarations (names, types, docstrings, help text, schemas); or
+- **relied on:** production code in scope depends on it, or it is part of data already persisted or exchanged across the system boundary.
+
+The implementation alone never justifies a behavior. Issues, PR descriptions, and Git history are not blind-phase sources: they are outside the copy and often describe tests.
+
+Prefer observing to reading. Run a small probe when a behavior is uncertain or a defect depends on it, and record each behavior as observed or read.
+
+Reconcile what the system does with what is justified:
+
+| The system | Justified? | Result |
+| --- | --- | --- |
+| Does it | Yes | Spec item |
+| Doesn't do it | Yes | Defect, plus a spec item for its regression test |
+| Does it | No | Open question; harmful behavior such as data loss or security exposure is a defect instead |
+
+When stated intent and relied-on behavior disagree, record an open question rather than picking a side. Open questions produce neither tests nor defects until the user answers them.
+
+## Workflow
+
+1. **Scope and exposure.** Record the scope and the source checkout status. Note whether this session has already read, written, or run tests in scope.
+2. **Prepare the copy.** Create a temporary copy outside the source checkout, excluding `.git`, dependencies, and build output. Identify tests by path and file name only. Remove test files, test directories, fixtures, snapshots, and standalone test configuration without reading them. Keep doctests and examples. Remove separable inline tests; if that isn't safe, leave the file out and disclose the gap. Leave test settings embedded in production files (for example `[tool.pytest]` in `pyproject.toml` or Makefile test targets) in place, and disclose them in the removal summary. Record a production-file inventory and a short removal summary.
+3. **Blind phase.** Derive the spec, defects, and open questions.
+   - **Who runs it:** if step 1 found test exposure, a fresh-context subagent runs this phase. It gets only the scope, the path to the copy, and the user's stated requirements quoted verbatim, never paraphrased by an exposed agent. Without exposure, run it directly.
+   - **What it reads:** only the test-free copy. No original checkout, Git history, test output, coverage, or code indexes (the codebase-memory graph indexes test files).
+   - **Defects:** each has a severity, `path:line`, impact, and the smallest reasonable fix. Merge findings with the same root cause, and drop any claim that callers, guards, or dependency guarantees invalidate. A comprehensive code audit is outside this workflow's scope.
+   - **Test spec:** one entry per justified behavior worth testing, with:
+     - a short, stable ID;
+     - the behavior;
+     - its justification (stated or relied on) and exact reference;
+     - its status: met, or unmet with its defect; observed or read;
+     - the concrete bug the test would catch;
+     - a suggested test level (unit, integration, end-to-end).
+
+     Leave out a behavior if you can't name a plausible bug its test would catch.
+   - **Probes:** small, independently written programs run against production code in the temporary copy. Keep a probe that demonstrates a spec item as that item's draft test. Test infrastructure was removed from the copy, so draft tests may be self-contained sketches rather than suite-ready code. Never present an unexecuted probe as observed behavior.
+4. **Freeze.** Save the blind-phase output (spec, defects, and open questions) and any draft tests outside the disposable copy and source checkout before anyone opens the existing tests. Don't edit the frozen output afterward; anything learned during comparison, including supported corrections or additions to the spec, goes in the comparison report.
+5. **Compare.** Read the existing tests in the original checkout and give each test one label:
+
+   | Label | Meaning | Default action |
+   | --- | --- | --- |
+   | Keep | Its assertions would catch the concrete bug identified by a spec item | Retain; note any remaining coverage gap |
+   | Redundant | Identified retained coverage or a type-system guarantee catches the same failure | Delete, with a reference to that coverage or guarantee |
+   | Pins implementation | Asserts something that isn't behavior, such as internal calls, call order, or intermediate state | Rewrite against its spec item, or delete |
+   | Contradicts spec | Test and spec item disagree | User decides which side is wrong |
+   | Stale | Evidence establishes that the behavior is no longer intended | Delete |
+   | Needs investigation | Asserts behavior missing from the blind spec or recorded as an open question, or intent remains unclear | Preserve while investigating; record supported spec corrections in the comparison report |
+
+   Assess the setup and assertions, not just whether a test exercises the named behavior. Overlapping tests are not redundant when they catch different failures. Record partial coverage and weak assertions explicitly: matching a spec item does not by itself close its coverage gap. A test may map to multiple spec items. When a test mixes assertions that deserve different labels, label it "Pins implementation" if any assertion pins internals; its rewrite keeps the behavioral assertions.
+
+   Spec items with no effective coverage become **tests to add**, using any draft test from the blind phase. For partial coverage, propose a focused improvement to an existing test where practical.
+
+   For large scopes, split comparison by subsystem, the same way as the blind phase.
+6. **Report.** In order:
+   1. defects, open questions, and a link to the complete frozen output and any draft tests;
+   2. the comparison table (test, label, spec item IDs, reason), plus supported spec corrections and unresolved questions. List every test that isn't "Keep" individually; summarize "Keep" tests per file with their counts and spec item IDs;
+   3. tests to add or improve;
+   4. coverage: what was reviewed, left out, and executed, including any sampling.
+7. **Apply authorized changes.** The default output is the report. When the user authorizes selected deletes, rewrites, and additions, apply them; explicit authorization already given counts. Before deleting a test as redundant, inject its spec item's named bug into a scratch copy of the production code and confirm the retained coverage fails; if it doesn't, relabel instead of deleting. Adapt draft tests to the existing suite's conventions, fixtures, and layout rather than pasting them in. Run focused tests and appropriate checks after the edits.
+8. **Clean up.** Delete the temporary copy after any subagents finish. On failure or cancellation, stop subagents before deleting their workspace.
+
+## Isolation and delegation
+
+- If there was test exposure, the blind phase runs in a fresh subagent. Otherwise subagents are optional.
+- For large scopes, subagents own non-overlapping subsystems; they may read production callers across subsystem boundaries.
+- Point subagents and their tools explicitly at the temporary copy. Don't assume a copied repository changes their working directory.
+- Pass subagents only the task framing and production evidence: no test names, nothing derived from the tests, no search results from the original checkout.
+- Ask subagents for spec items, defects, open questions, reviewed files, and gaps, not exploration transcripts.
+
+## Rules
+
+- Don't run or inspect existing tests before the freeze.
+- Install dependencies or build only when a specific probe needs it, within the user's execution permissions.
+- Don't modify the source checkout before step 7.

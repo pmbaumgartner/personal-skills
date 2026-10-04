@@ -1,6 +1,0 @@
-interface:
-  display_name: "Test-Blind Code Review"
-  short_description: "Review code without seeing its tests"
-  default_prompt: "Use $test-blind-code-review to remove tests from a temporary copy and review the remaining code independently."
-policy:
-  allow_implicit_invocation: false

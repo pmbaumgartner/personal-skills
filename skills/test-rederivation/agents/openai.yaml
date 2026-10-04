@@ -1,0 +1,6 @@
+interface:
+  display_name: "Test Re-derivation"
+  short_description: "Re-derive tests from observed behavior, then audit the existing suite"
+  default_prompt: "Use $test-rederivation to hide the tests, derive what should be tested from what the code observably does and what justifies it, then classify the existing tests against that spec."
+policy:
+  allow_implicit_invocation: false
