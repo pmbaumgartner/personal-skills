@@ -1,7 +1,7 @@
 ---
 name: kata-workflow
 description: Manage Kata issues using Blue decision and Red implementation workflows. Record model contributions, scope, decisions, dependencies, and verified completion in the shared issue ledger.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Kata Workflow
