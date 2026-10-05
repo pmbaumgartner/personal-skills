@@ -31,10 +31,10 @@ Close after the mode-appropriate decision is recorded and any deliverables are r
 
 Resolve open questions that affect the exit criteria before closing. Close with deferred questions only when the explicit decision is to defer them and the record explains the resulting limits. Blue closure asserts settled knowledge or a recorded decision; it does not assert that follow-up implementation has shipped.
 
-Use genuine typed evidence: `--reviewed <path>` for each deliverable and for the code or docs the investigation actually examined, a relevant commit or PR, or a verification command that actually passed. The issue/comment containing the decision does not itself supply typed close evidence. Require a commit only when relevant to the requested delivery state. Do not create a file solely to satisfy close evidence.
+Use genuine typed evidence: `reviewed-paths` for each deliverable and for the code or docs the investigation actually examined, a relevant commit or PR, or a verification command that actually passed. The issue/comment containing the decision does not itself supply typed close evidence. Require a commit only when relevant to the requested delivery state. Do not create a file solely to satisfy close evidence.
 
-Match the close to the outcome when no typed evidence fits `--done`:
+Match the close to the outcome when no typed evidence fits `reason: "done"`:
 
-- Keep current behavior or no change needed: `--audit-no-change --evidence "no-change-audit:<what was reviewed>"`.
-- Decline the proposed work: `--wontfix` with the rationale.
-- A durable choice worth keeping in the repository: record it in a tracked decision document and cite it with `--reviewed`.
+- Keep current behavior or no change needed: `reason: "audit-no-change"` with `{"type": "no-change-audit", "rationale": "<what was reviewed>"}`.
+- Decline the proposed work: `reason: "wontfix"` with the rationale in `message`.
+- A durable choice worth keeping in the repository: record it in a tracked decision document and cite it with `reviewed-paths`.

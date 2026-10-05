@@ -27,6 +27,6 @@ For a performance claim, benchmark the starting behavior before editing and the 
 
 Record what changed, checks performed, skipped checks, residual risk, and deferred work in the close's outcome comment or a reviewed artifact.
 
-For a completed implementation, close with `--done --commit <sha>` citing the commit containing the reviewed and verified work. If completion spans several commits, include the relevant commit evidence. Tests, reviewed paths, and a PR URL are supplemental evidence, not substitutes for the commit. Never cite an unrelated HEAD or close first with a promise to commit later.
+For a completed implementation, close with `reason: "done"` and `commit` evidence citing the commit containing the reviewed and verified work. If completion spans several commits, include the relevant commit evidence. Tests, reviewed paths, and a PR URL are supplemental evidence, not substitutes for the commit. Never cite an unrelated HEAD or close first with a promise to commit later.
 
 Leave the issue open while its implementation is uncommitted, required verification is incomplete without an accepted rationale, or an additional requested delivery step remains unfinished. Do not create an empty commit for work that made no changes; use the appropriate no-change or other disposition from SKILL.md.

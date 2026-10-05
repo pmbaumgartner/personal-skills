@@ -18,7 +18,7 @@ Before creating, consider how the proposed set could fail: missing scope, oversi
 
 ## Create Behind A Review Gate
 
-First create a Blue gate issue, `Review conversion of <plan>`, whose exit criteria are the linking and fidelity checks below. Create every new issue with `--blocked-by <gate>` so it stays out of `ready` and `next` until review finishes. Apply the same blocker to new work discovered during linking or review.
+First create a Blue gate issue, `Review conversion of <plan>`, whose exit criteria are the linking and fidelity checks below. Create every new issue with `blocked_by: [<gate>]` so it stays out of `ready` and `next` until review finishes. Apply the same blocker to new work discovered during linking or review.
 
 Create sequentially unless authorized parallel work has independent scopes and justifies the coordination. When using multiple creators, assign nonoverlapping issues and have one coordinator add the remaining relationships after creation.
 
@@ -49,6 +49,6 @@ Repair gaps before releasing work. If review cannot finish, leave the gate open 
 
 ## Release And Report
 
-Close the gate with the coverage result to release the reviewed issues. Check `ready --unowned` for actionable work; remaining dependencies may correctly exclude some issues.
+Close the gate with the coverage result to release the reviewed issues. Check `kata.ready` with `unowned: true` for actionable work; remaining dependencies may correctly exclude some issues.
 
 Report created/reused refs, major dependencies, source coverage, additions, and the gate's state. Include unresolved user choices in Human mode, or decisions, material assumptions, confidence, and reversal paths in Agent mode.
