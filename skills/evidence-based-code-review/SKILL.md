@@ -48,10 +48,11 @@ Use file analysis, history hotspots, and change coupling to find:
 
 **Codebase-memory lane**
 
-Use architecture, symbol metrics, fan-in/out, cycles, similarity, and change traces to find:
+Use architecture layers, symbol metrics, interface size, fan-in/out, cycles, similarity, and change traces to find:
 
 - central interfaces and dependency concentration
 - complexity concentration in a small share of production functions
+- shallow modules whose exported surface rivals their hidden complexity
 - hidden call paths, boundary crossings, and blast radius
 - pass-through layers or adjacent layers with similar abstractions
 - duplicated policy, algorithmic risk, and structural unknown unknowns
@@ -76,7 +77,7 @@ Examples include distributed policy ownership, caller-managed state transitions,
 
 Inspect each concern's formal interface, informal contract, implementation, representative callers, relevant history, and comments or names that define the abstraction.
 
-For a leading graph hypothesis, establish its likely canonical owner, representative inbound and outbound paths, crossed boundaries, repeated caller knowledge, blast radius, useful existing seams, and coverage limits. Read [references/mcp-playbook.md](references/mcp-playbook.md) for the structural dossier.
+For a leading graph hypothesis, establish its likely canonical owner, representative inbound and outbound paths, crossed boundaries, repeated caller knowledge including the arguments callers pass, blast radius, useful existing seams, and coverage limits. Read [references/mcp-playbook.md](references/mcp-playbook.md) for the structural dossier.
 
 Ask five questions:
 
