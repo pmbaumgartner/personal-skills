@@ -54,6 +54,7 @@ Use architecture layers, symbol metrics, interface size, fan-in/out, cycles, sim
 - complexity concentration in a small share of production functions
 - shallow modules whose exported surface rivals their hidden complexity
 - hidden call paths, boundary crossings, and blast radius
+- state written from several modules, suggesting distributed state ownership
 - pass-through layers or adjacent layers with similar abstractions
 - duplicated policy, algorithmic risk, and structural unknown unknowns
 
@@ -69,6 +70,7 @@ After both lanes finish:
 - group evidence around design concerns or change paths, not files or metrics
 - use files and symbols as supporting evidence without forcing unlike signals into one score
 - treat overlap as corroboration and disagreement as a question to inspect
+- check leading SCC coupling pairs for a static graph dependency; repeated co-change with none is a hidden-coupling candidate
 - select up to 4–6 concerns from the union, proportional to scope, including material lane-unique concerns when they survive validation
 
 Examples include distributed policy ownership, caller-managed state transitions, boundary leakage, shallow layer chains, and duplicated coordination. Do not force equal finding counts or manufacture weak lane parity.

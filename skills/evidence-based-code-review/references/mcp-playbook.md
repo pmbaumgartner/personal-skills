@@ -14,10 +14,12 @@ Use this reference when executing an evidence-based review. Tool schemas can evo
   - [Complexity concentration](#complexity-concentration)
   - [Interface size](#interface-size)
 - [Fan-in and fan-out](#fan-in-and-fan-out)
+- [Shared-state writers](#shared-state-writers)
 - [Duplicate candidates](#duplicate-candidates)
 - [Tracing and source evidence](#tracing-and-source-evidence)
   - [Structural dossier](#structural-dossier)
 - [Dead-code candidates](#dead-code-candidates)
+- [Hidden change coupling](#hidden-change-coupling)
 - [Design-concern evidence matrix](#design-concern-evidence-matrix)
 
 ## Independent lane discipline
@@ -33,6 +35,8 @@ Treat SCC and codebase-memory as complementary discovery lanes, not a serial fil
 Run the lanes concurrently when practical. If calls must be serial, do not use early results from one lane to narrow, suppress, or rerank the other. Do not combine unlike metrics into a pseudo-precise score.
 
 Use SCC primarily to establish maintenance pressure and exposure. Use graph evidence to establish structural shape, ownership, dependency direction, caller coordination, and blast radius. Neither role vetoes a lane-unique signal.
+
+Use SCC for history evidence: frequency, churn, and co-change. The graph's `FILE_CHANGES_WITH` edges and `File.change_count` come from the same git log, filtered and without rename tracking, so they neither corroborate SCC nor rank candidates. Use the graph to explain history instead: map a diff to symbols with `detect_changes`, and test whether SCC's co-change pairs and hotspots have structural dependencies.
 
 ## Runtime tool syntax
 
@@ -141,8 +145,9 @@ get_architecture({
 detect_changes({
   project: "stable-project-name",
   scope: "impact",
-  direction: "both",
+  direction: "inbound",
   depth: 3,
+  edge_types: ["CALLS", "USAGE", "CALL_REFERENCE", "INHERITS", "IMPLEMENTS", "OVERRIDE"],
   seeds: "list",
   seed_filter: "product",
   via: true,
@@ -151,6 +156,8 @@ detect_changes({
 ```
 
 `detect_changes` defaults to the repository's default branch; pass `since` when the user gives an exact revision or `base_branch` for another base. Record merge base, changed files, changed product symbols, impacted total, truncation, and direction/depth. `via_qn` and `via_edge` show how each impacted symbol is reached; use them to describe blast radius rather than citing only the total.
+
+The walk follows only `CALLS` unless `edge_types` is given, which misses change that spreads through type usage, references, and inheritance. `edge_types`, `via`, and `fixpoint` require `direction: "inbound"`, and the call rejects edge types the index lacks, so pass only types listed by `get_graph_schema`.
 
 Architecture hotspots rank by fan-in and can include builtins and test utilities. Scope architecture calls to production roots, reconcile returned paths with `index_status`, and filter to owned production symbols before prioritizing. `layers` classifies modules as entry, core, internal, or leaf from fan-in/out; an internal layer whose callers and callees offer the same abstraction is a pass-through candidate. Clusters reveal de-facto seams, not necessarily desired architecture.
 
@@ -265,6 +272,22 @@ LIMIT 50
 
 These count resolved graph edges, not all runtime calls. Builtins, dynamic dispatch, callbacks, macros, reflection, and FFI can distort the result.
 
+## Shared-state writers
+
+Find fields and variables written from several files:
+
+```cypher
+MATCH (w:Function|Method)-[:WRITES]->(v)
+WHERE w.file_path STARTS WITH 'src/' AND w.is_test = false
+RETURN v.qualified_name AS state, v.file_path AS file,
+       count(DISTINCT w) AS writers,
+       count(DISTINCT w.file_path) AS writer_files
+ORDER BY writer_files DESC, writers DESC, state ASC
+LIMIT 20
+```
+
+State mutated from several files suggests distributed state ownership or caller-managed transitions. Inspect the writers: constructors, builders, and a single owning type writing its own fields are expected; scattered writers that must preserve one invariant are the finding.
+
 ## Duplicate candidates
 
 Query graph-generated token-similarity edges:
@@ -337,6 +360,8 @@ trace_path({
 
 Each caller row carries the argument expressions passed at the call site. Repeated flags, mode values, setup objects, or derived state across callers is evidence of complexity pushed onto callers.
 
+For blast radius, trace `direction: "inbound"` with the same `edge_types` as `detect_changes`; the default follows calls only.
+
 Follow `has_more` and `next` cursors. Use `get_code_snippet` for exact symbols, then direct file reads when more context is needed or coverage is partial. Treat trace `risk_labels` only as prioritization hints: they are not finding severity, and transitive risk propagation can label harmless accessors, builtins, or wrappers as `CRITICAL` or recursive.
 
 ### Structural dossier
@@ -366,6 +391,21 @@ search_graph({
 ```
 
 Paginate. Never report dead code from graph isolation alone. Verify exports, framework registration, reflection, plugin hooks, callbacks, FFI, macros, scripts, and direct textual references.
+
+## Hidden change coupling
+
+After both lanes complete, check each leading SCC coupling pair for a static dependency in either direction:
+
+```cypher
+MATCH (a)-[r]-(b)
+WHERE a.file_path = 'src/a.py' AND b.file_path = 'src/b.py'
+RETURN type(r) AS edge, count(r) AS n
+ORDER BY n DESC, edge ASC
+```
+
+`type()` is not allowed in `WHERE`, so filter client-side: count dependency edges such as `CALLS`, `USAGE`, `IMPORTS`, `WRITES`, `CALL_REFERENCE`, `INHERITS`, `IMPLEMENTS`, and `OVERRIDE`; ignore containment (`DEFINES*`, `CONTAINS_*`), similarity, and `FILE_CHANGES_WITH`. Confirm both paths with `check_index_coverage` first.
+
+Repeated co-change with no dependency edge is a hidden-coupling candidate: shared knowledge such as a format, protocol, or invariant that neither file states. Inspect a few co-change commits to name it. A link through a third module, dynamic dispatch, configuration, or a coverage gap explains the pair rather than proving the coupling hidden.
 
 ## Design-concern evidence matrix
 
