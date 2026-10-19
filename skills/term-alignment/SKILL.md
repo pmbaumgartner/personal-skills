@@ -10,7 +10,7 @@ Make the project's vocabulary legible: define jargon, consolidate competing name
 
 ## Scope
 
-Review only git-tracked files (list them with `git ls-files`); ignored or untracked files, such as old plans and notes, are out of scope. Within those, review the code and documentation the user names, or all of them if they name nothing. Skip standard terminology unless its local meaning is surprising or overloaded.
+In a git repository, review the git-tracked files (`git ls-files`), narrowed to any paths the user names; ignored and untracked files, such as old plans and notes, are out of scope. Outside a repository, or when the user explicitly asks for untracked or ignored files, review the files and folders the user points to. Skip standard terminology unless its local meaning is surprising or overloaded.
 
 ## Workflow
 
