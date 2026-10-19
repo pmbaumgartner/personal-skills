@@ -1,0 +1,6 @@
+interface:
+  display_name: "Term Alignment"
+  short_description: "Define jargon and choose clear, consistent names for project concepts"
+  default_prompt: "Use $term-alignment to review unclear jargon, competing names for the same concept, and names for related concepts in this repository's code and docs. Create a worksheet so I can choose names and definitions before changes are applied."
+policy:
+  allow_implicit_invocation: false
