@@ -9,7 +9,7 @@ Include these issue fields:
 - `## Objective`: the known goal.
 - `## Context`: relevant decisions and execution constraints.
 - `## Scope In` / `## Scope Out`: boundaries; omit for small work with unambiguous acceptance criteria.
-- `## Acceptance Criteria`: observable completion criteria.
+- `## Acceptance Criteria`: observable completion criteria, stated as outcomes. Name specific tests only for reproduced bugs or safety invariants; leave other test selection to the implementer under the repository's testing guidance.
 - `## Pause Triggers`: discoveries that would change scope, acceptance, a settled decision, or reusable policy.
 - `## Deliverables`: every path to review before close.
 

@@ -1,6 +1,6 @@
 ---
 name: kata-workflow
-description: Manage Kata issues using Blue decision and Red implementation workflows. Record model contributions, scope, decisions, dependencies, and verified completion in the shared issue ledger.
+description: Use whenever Kata is used for issue management, through the MCP tools or the CLI, including turning plans or review findings into issues. Applies Blue decision and Red implementation workflows, attribution, and verified close-out in the shared issue ledger.
 disable-model-invocation: false
 ---
 
@@ -10,15 +10,15 @@ Use Kata as the durable record of work: what was attempted, which model contribu
 
 ## Start
 
-- Use the Kata MCP tools (`kata.*`), not the `kata` CLI. Tools are grouped into sections that must be loaded before use: call `kata_load_issue_discovery`, `kata_load_issue_mutation`, and `kata_load_issue_lifecycle` at the start of the session, then load the listed tools' schemas if the harness defers them. Load other sections (projects, activity, recurrence) only when needed. Take parameter names and constraints from the tool schemas, not this skill.
-- The server is fixed to its startup project scope and actor. Pass `project` when the scope covers several projects, and use qualified refs such as `project#abc4` across projects.
-- Inspect with `kata.show` and search with `kata.search` before creating. Search and list cover open and closed issues when `status` is omitted. Link issues with the returned `web_url` values.
+- Use whichever Kata interface the session has: the MCP tools (`kata.*`) or the `kata` CLI. This skill names operations by verb (search, show, create, claim, comment, edit, label, close, next, ready); see [Interfaces](#interfaces) for how each interface spells them. Take parameter and flag names from the interface's own schemas or `--help`, not this skill.
+- Pass the project when the scope covers several projects, and use qualified refs such as `project#abc4` across projects.
+- Show and search before creating. Search and list cover open and closed issues unless a status is given. Link issues with the web URLs the interface returns.
 - Track real work in its correct project. Create practice or scratchpad issues only when requested.
-- Call `kata.delete` or `kata.purge` only when the user explicitly requests that action and ref. Claim with `force` only on explicit user direction.
+- Delete or purge only when the user explicitly requests that action and ref. Force a claim only on explicit user direction.
 
 ## Identity And Attribution
 
-The author is the MCP server's startup actor: the accountable human managing the agents. Ownership and close history belong to the author; do not try to act as a per-agent author.
+The author is the interface's actor (see [Interfaces](#interfaces)): the accountable human managing the agents. Ownership and close history belong to the author; do not try to act as a per-agent author.
 
 Identify each agent session (one harness conversation, start to finish) with a teammate handle `<harness>_<model>_<session-id>`, using the identifiers supplied by the runtime (`unknown` when unavailable; never guess). For `<session-id>`, use the last 8 characters of the session UUID, lowercased (`5ba8fe8e` for `…-ba6d-481c-8ee2-69d15ba8fe8e`); the leading characters of time-ordered UUIDs repeat across sessions. Read the UUID from the harness's environment:
 
@@ -28,7 +28,7 @@ Identify each agent session (one harness conversation, start to finish) with a t
 | Codex | `codex` | `$CODEX_THREAD_ID` |
 | Pi | `pi` | `$PI_SESSION_ID` |
 
-Kata accepts only letters, digits, `.`, `_`, and `-`, up to 64 characters. Pass the handle as `teammate` on every `kata.comment` and `kata.create` call, such as `"teammate": "claude-code_opus-5.5_5ba8fe8e"`; the MCP connection may be shared, so do not rely on its startup default.
+Kata accepts only letters, digits, `.`, `_`, and `-`, up to 64 characters. Pass the handle explicitly on every create, claim, comment, and close, such as `claude-code_opus-5.5_5ba8fe8e`; the MCP connection or the shell's `$KATA_TEAMMATE` may be shared with another session, so do not rely on a default.
 
 Each session's attributed claim comment and its close or release comment are its minimum record, including for incomplete attempts. If the model changes mid-session, use the new identifier from then on.
 
@@ -53,22 +53,13 @@ Use **Agent mode** only after explicit delegation for reversible, non-production
 
 ## Select, Create, And Claim
 
-Call `kata.next` with `unowned: true`; use `kata.ready` with `unowned: true` to compare candidates. Prefer upstream feeders when priority is close. Before starting, inspect the issue, parent, links, and previous comments, and check its assumptions against current code and docs; edit stale scope before implementing. Future schedules and `someday` parking can keep issues out of the ready queue.
+Take the next unowned ready issue; list unowned ready issues to compare candidates. Prefer upstream feeders when priority is close. Before starting, inspect the issue, parent, links, and previous comments, and check its assumptions against current code and docs; edit stale scope before implementing. Future schedules and `someday` parking can keep issues out of the ready queue.
 
-Search before creating, reuse suitable issues, and give every create and comment a stable idempotency key:
-
-```text
-kata.search  {"query": "login race"}
-kata.create  {"title": "Fix login race", "body": "<markdown>", "labels": ["red"],
-              "idempotency_key": "login-race-2026-10-03", "teammate": "<handle>"}
-kata.claim   {"ref": "abc4"}
-kata.comment {"ref": "abc4", "body": "Claimed.", "idempotency_key": "abc4-claim-<handle>",
-              "teammate": "<handle>"}
-```
+Search before creating, reuse suitable issues, and give every create a stable idempotency key such as `login-race-2026-10-03`. Give comments one too where the interface supports it (MCP); the CLI's `comment` has no key, so check before retrying a failed comment.
 
 An issue owned by the author may belong to another session: resume it only after the latest teammate-attributed comment shows it is this session's to continue or was handed off.
 
-Use relationships from the operating issue's perspective, on `kata.create` or as `add_*` / `remove_*` deltas on `kata.edit`:
+Use relationships from the operating issue's perspective, when creating or as add/remove deltas when editing:
 
 - `parent`: this issue is a subtask of the target.
 - `blocks`: this issue must finish before the target.
@@ -85,17 +76,11 @@ The issue body states current truth: what the next implementer or reader needs n
 
 Comment when one of those happens, not to report progress. Do not post status updates, step-by-step logs, plans you are about to execute, restatements of the body or diff, or summaries the close will repeat. Combine related findings into one comment. If nothing notable happens between claim and close, those two comments are the whole record.
 
-When scope or a decision changes, rewrite the affected body sections in place and explain the change in a `kata.comment` right after the `kata.edit` (edits carry no comment of their own). Do not add update sections, dated notes, or accounts of who changed what to the body. Add a `## Deliverables` block for artifact-producing work and review every listed path before close.
+When scope or a decision changes, rewrite the affected body sections in place and explain the change in a comment right after the edit (attach it to the edit where the interface allows). Do not add update sections, dated notes, or accounts of who changed what to the body. Add a `## Deliverables` block for artifact-producing work and review every listed path before close.
 
 Pass bodies inline as markdown; draft long ones in `.kata/drafts/<slug>.md` first when review helps. Keep scratch notes and logs under gitignored `.kata/`. Create tracked artifacts only when requested or required by a deliverable; use accessible shared or tracked artifacts when collaborators need detail beyond the issue record. Edit durable documents in place.
 
-Leave unfinished work open. Comment with evidence and the next action, and add the `needs-review` label with `kata.set_label` (`present: true`) when useful. Release ownership when giving work back:
-
-```text
-kata.edit    {"ref": "abc4", "clear_owner": true}
-kata.comment {"ref": "abc4", "body": "Releasing; blocked on a missing fixture.",
-              "idempotency_key": "abc4-release-<handle>", "teammate": "<handle>"}
-```
+Leave unfinished work open. Comment with evidence and the next action, and add the `needs-review` label when useful. When giving work back, clear the owner and comment with the reason, such as "Releasing; blocked on a missing fixture."
 
 ## Verify And Close
 
@@ -103,17 +88,27 @@ Closing asserts verified completion, and other agents and humans act on that cla
 
 Red issues should normally finish with a local commit, not implementation left only in the working tree. Review and verify the work, commit only the issue's changes, then close with `commit` evidence naming the commit containing the completed work. “Requested delivery state” adds requirements such as a PR, merge, publication, or deployment; it does not silently waive the commit requirement. A local commit does not authorize pushing or those additional actions. Tests, reviewed paths, or a PR URL supplement commit evidence; they do not replace it. If committing is not authorized or possible, record the verified but uncommitted state and leave the issue open. Adding a commit in a later comment does not repair the original close evidence; reopen a prematurely closed issue and close it again with the correct commit evidence.
 
-Close with `kata.close` and a substantive `message` naming the result and verification. Record the attributed outcome in a `kata.comment` posted just before the close, limited to what the message and evidence do not already say; `kata.close` takes no teammate or comment. Supply at least one genuine typed evidence item for `reason: "done"`, and review every deliverable:
+Close with a substantive message naming the result and verification, and an attributed outcome comment limited to what the message and evidence do not already say. Supply at least one genuine typed evidence item for reason `done`, and review every deliverable:
 
-- `{"type": "commit", "sha": ...}` for the commit containing the completed work; never cite HEAD merely because it is convenient.
-- `{"type": "pr", "url": ...}` for the relevant pull request.
-- One `{"type": "test", "command": ...}` for each verification command that passed.
-- `{"type": "reviewed-paths", "paths": [...]}` for every deliverable reviewed.
-- Use `reason` `audit-no-change` (with `no-change-audit` evidence), `duplicate` (`duplicate-of`), `superseded` (`superseded-by`), or `wontfix` (no evidence) for those dispositions.
+- `commit`: the commit containing the completed work; never cite HEAD merely because it is convenient.
+- `pr`: the relevant pull request.
+- `test`: one per verification command that passed.
+- `reviewed-paths`: every deliverable reviewed.
+- Use reason `audit-no-change` (with `no-change-audit` evidence), `duplicate` (`duplicate-of`), `superseded` (`superseded-by`), or `wontfix` (no evidence) for those dispositions.
 
 Record manual checks, benchmarks, skipped checks, residual risk, and rationale in the outcome comment or reviewed artifact. Use supported evidence types; do not invent prefixes or call ordinary research a test. Follow the Blue or Red reference for its specific completion requirements.
 
+Preview complicated closes with a dry run.
+
+Before ending, make ownership truthful, record remaining actions in Kata, reconcile discovered dependencies, and report the relevant refs and delivery state.
+
+## Interfaces
+
+**MCP.** Tools are grouped into sections that must be loaded first: call `kata_load_issue_discovery`, `kata_load_issue_mutation`, and `kata_load_issue_lifecycle` at the start of the session, then load the listed tools' schemas if the harness defers them. Load other sections (projects, activity, recurrence) only when needed. The server is fixed to its startup project scope and actor. Pass `teammate` and `idempotency_key` as arguments. `kata.close` takes no comment or teammate, so post the outcome comment just before closing.
+
 ```text
+kata.create  {"title": "Fix login race", "body": "<markdown>", "labels": ["red"],
+              "idempotency_key": "login-race-2026-10-03", "teammate": "<handle>"}
 kata.comment {"ref": "abc4", "body": "Safari not tested manually.",
               "idempotency_key": "abc4-close-<handle>", "teammate": "<handle>"}
 kata.close   {"ref": "abc4", "reason": "done",
@@ -123,8 +118,15 @@ kata.close   {"ref": "abc4", "reason": "done",
                            {"type": "reviewed-paths", "paths": ["src/callback.rs"]}]}
 ```
 
-Preview complicated closes with `dry_run: true`.
+**CLI.** Run `kata quickstart` once and `kata <verb> --help` for flags. The project comes from the workspace (`--project` overrides). The actor is `$KATA_AUTHOR`, then `$USER`, then the git user; do not override it with `--as`. Pass `--teammate <handle>` on every mutation and `--agent` for readable output. `close`, `claim`, and `edit` accept `--comment`, which posts the claim, change, or outcome comment with the mutation.
 
-Before ending, make ownership truthful, record remaining actions in Kata, reconcile discovered dependencies, and report the relevant refs and delivery state.
+```text
+kata create "Fix login race" --body-file .kata/drafts/login-race.md --label red \
+  --idempotency-key login-race-2026-10-03 --teammate <handle> --agent
+kata close abc4 --done --teammate <handle> \
+  --message "Committed the callback double-submit fix; callback tests pass." \
+  --comment "Safari not tested manually." \
+  --commit <verified-work-commit-sha> --test "cargo test callback" --reviewed src/callback.rs
+```
 
 Whenever reporting on an issue or asking the user for input, explain its goal, relevant current state, why it matters, and what the proposed choice or next step would authorize; do not present only issue refs, options, or decisions without that context.

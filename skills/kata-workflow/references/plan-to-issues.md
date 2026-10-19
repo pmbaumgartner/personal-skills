@@ -14,7 +14,7 @@ Either path must preserve substantive source requirements, genuine dependencies,
 
 Read every source plan. Map its substantive requirements to proposed issues, including outcomes, dependencies, deliverables, acceptance evidence, and unresolved decisions. Search existing issues and reuse suitable work.
 
-Before creating, consider how the proposed set could fail: missing scope, oversized tasks, hidden dependencies, weak acceptance evidence, or stale code assumptions. Resolve material risks through issue edits, splits, dependencies, or Blue decisions. Prefer small vertical increments that can be independently verified. Keep source-plan requirements distinguishable from useful additions grounded in the repository.
+Before creating, consider how the proposed set could fail: missing scope, oversized tasks, hidden dependencies, weak acceptance evidence, over-specified acceptance (test matrices or implementation details), or stale code assumptions. Resolve material risks through issue edits, splits, dependencies, or Blue decisions. Prefer small vertical increments that can be independently verified. Keep source-plan requirements distinguishable from useful additions grounded in the repository.
 
 ## Create Behind A Review Gate
 
@@ -49,6 +49,6 @@ Repair gaps before releasing work. If review cannot finish, leave the gate open 
 
 ## Release And Report
 
-Close the gate with the coverage result to release the reviewed issues. Check `kata.ready` with `unowned: true` for actionable work; remaining dependencies may correctly exclude some issues.
+Close the gate with the coverage result to release the reviewed issues. List unowned ready issues for actionable work; remaining dependencies may correctly exclude some issues.
 
 Report created/reused refs, major dependencies, source coverage, additions, and the gate's state. Include unresolved user choices in Human mode, or decisions, material assumptions, confidence, and reversal paths in Agent mode.
