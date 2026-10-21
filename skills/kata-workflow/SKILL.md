@@ -1,6 +1,6 @@
 ---
 name: kata-workflow
-description: Use whenever Kata is used for issue management, through the MCP tools or the CLI, including turning plans or review findings into issues. Applies Blue decision and Red implementation workflows, attribution, and verified close-out in the shared issue ledger.
+description: Use whenever Kata is used for issue management, through the MCP tools or the CLI, including turning plans or review findings into issues. Organizes work as epics of Red agent work between Blue user decision and review gates, with attribution and verified close-out in the shared issue ledger.
 disable-model-invocation: false
 ---
 
@@ -32,28 +32,37 @@ Kata accepts only letters, digits, `.`, `_`, and `-`, up to 64 characters. Pass 
 
 Each session's attributed claim comment and its close or release comment are its minimum record, including for incomplete attempts. If the model changes mid-session, use the new identifier from then on.
 
-## Classify And Decide
+## Classify Work
 
-Give every issue exactly one workflow label and start its title with a verb naming its completion claim. Use titles such as `Investigate callback duplication` or `Fix callback duplication`; omit `[Blue]` / `[Red]` prefixes.
+Give every issue exactly one workflow label naming who acts, and start its title with a verb naming its completion claim, such as `Decide session storage`, `Spike token refresh`, or `Fix callback duplication`; omit `[Blue]` / `[Red]` prefixes.
 
-| Label | Completion claim | Read when doing this work |
-| --- | --- | --- |
-| `blue` | Settled decision, finding, or recommendation | [references/blue.md](references/blue.md) |
-| `red` | Verified, committed implementation, plus any additional requested delivery steps | [references/red.md](references/red.md) |
+| Label | Who acts | Completion claim | Read when doing this work |
+| --- | --- | --- | --- |
+| `blue` | The user | Decisions settled or epic accepted by the user | [references/blue.md](references/blue.md) |
+| `red` | An agent | Verified, committed implementation, or recorded spike findings | [references/red.md](references/red.md) |
 
-Split decision and implementation only when they have independently durable outputs. Keep ordinary local implementation choices inside Red work. Open or update Blue when uncertainty changes scope, acceptance, settled decisions, or reusable policy. Create retrospective Blue work only for reusable learning or a faulty assumption.
+Agents prepare Blue issues; the user decides or accepts them. Keep investigation an agent can settle itself in Red, and make ordinary implementation choices inside Red work.
 
-Use exactly one decision mode per goal or root issue.
+## Organize Work As Epics
 
-Use **Human mode** by default. State intent and decide nonconsequential choices within the authorized goal. For unresolved consequential choices, present viable options, tradeoffs, and a recommendation, then pause once for the user. A choice is consequential when a wrong decision could cause material harm, establish a durable dependency or precedent, commit significant downstream work, or require more than a local correction to reverse. Uncertainty calls for more evidence; it does not alone require a checkpoint.
+Batch the user's attention at the start and end of multi-issue work by structuring it as an epic:
 
-Reuse the user's existing decisions and authorization. Authorization to execute permits selecting and claiming ready work within scope without another checkpoint.
+1. **Decision gate** (Blue, optional): `Decide <epic>` collects every consequential choice into one question set for the user. Red spikes that gather its evidence block it. A choice is consequential when a wrong decision could cause material harm, establish a durable dependency or precedent, commit significant downstream work, or require more than a local correction to reverse. Uncertainty calls for more evidence; it does not alone require a decision.
+2. **Implementation chain** (Red): issues blocked by the decision gate and by each other in execution order. Run independent issues in parallel only when authorized and their scopes do not overlap.
+3. **Review gate** (Blue): `Review <epic>` is the epic's root. Every other epic issue is its child, and the chain's final issues block it. Its body holds the goal, scope, authority, and acceptance.
 
-Use **Agent mode** only after explicit delegation for reversible, non-production work. Record its authority in the root issue or reviewed policy; children inherit it. Follow [references/agent-mode.md](references/agent-mode.md) for signoff and reporting. An active Goal supplies persistence, not decision authority or additional action permissions.
+Work that fits one Red issue needs no epic. Size an epic for one review sitting; split larger work into sequential epics, each with its own gates.
+
+The user's approval of the decision gate, or their request when no gate is needed, authorizes the agent to claim and complete the chain and to decide choices within its scope. It does not authorize pushing, pull requests, merges, deployment, destructive operations, external communication, spending, or scope expansion unless the user grants them; record granted delivery steps in the review gate's authority. Reuse the user's existing decisions and authorization. An active Goal supplies persistence, not additional authority.
+
+Handle discoveries during the chain by their effect:
+
+- **Within scope and reversible:** decide, choosing the smallest, simplest, easiest-to-reverse option when evidence is close. Comment on the Red issue with the decision, rationale, confidence, and how to reverse it, then continue. The review summary carries it to the user.
+- **Contradicts a settled decision, changes scope or acceptance, or crosses a limit of the authority:** stop the affected work. Reopen the decision gate, or create one if the epic has none, add the question with options and a recommendation, block the affected Red issues on it, and ask the user. Continue unaffected issues.
 
 ## Select, Create, And Claim
 
-Take the next unowned ready issue; list unowned ready issues to compare candidates. Prefer upstream feeders when priority is close. Before starting, inspect the issue, parent, links, and previous comments, and check its assumptions against current code and docs; edit stale scope before implementing. Future schedules and `someday` parking can keep issues out of the ready queue.
+Take the next unowned ready Red issue; list unowned ready issues to compare candidates. Prefer upstream feeders when priority is close. Within an authorized chain, keep selecting, completing, and closing ready Red work until the chain is done or a genuine blocker stops it. A ready Blue issue is waiting for the user: prepare it as [references/blue.md](references/blue.md) describes and ask them; do not decide or accept it yourself. Before starting, inspect the issue, parent, links, and previous comments, and check its assumptions against current code and docs; edit stale scope before implementing. Future schedules and `someday` parking can keep issues out of the ready queue.
 
 Search before creating, reuse suitable issues, and give every create a stable idempotency key such as `login-race-2026-10-03`. Give comments one too where the interface supports it (MCP); the CLI's `comment` has no key, so check before retrying a failed comment.
 

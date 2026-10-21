@@ -1,40 +1,50 @@
 # Blue Issues
 
-Use Blue for a settled decision, finding, or recommendation. Apply the shared classification, attribution, evidence, and close rules in SKILL.md.
+Blue issues are the user's gates in an epic: an optional decision gate before implementation and a review gate after it. Agents prepare them; the user decides or accepts. A standalone question for the user with no planned implementation is a decision gate without a chain. Apply the shared epic, attribution, evidence, and close rules in SKILL.md.
 
-## Frame The Question
+## Decision Gate
 
-Include these issue fields:
+Collect every consequential choice the epic needs into one gate so the user decides in a single pass. Before asking, settle what evidence can settle; run experiments as Red spikes that block the gate. Reuse choices the user has already made for this scope.
 
-- `## Question`: what must be resolved.
-- `## Context`: the higher-level goal and relevant constraints.
-- `## Decision Stakes`: for consequential decisions, `Consequential: Yes` with a brief reason; omission means nonconsequential.
-- `## Approach`: options, evaluation criteria, and evidence to gather.
-- `## Exit Criteria`: what makes the finding or decision settled.
-- `## Decision Mode`: include Agent mode and its inherited authority when delegated; omission means Human mode.
+While the gate is open, its body holds:
 
-Keep the frame in the body while investigating. Once settled, rewrite the body around the result: question, decision and owner, rationale, rejected alternatives that affect later work, conditions to revisit, and follow-up links. Drop investigation-only sections such as Approach and Exit Criteria, and leave the evidence trail in comments. Add `## Decision Artifact` and `## Deliverables` only when a separate reviewed artifact is needed. Keep the essential result in the issue even when detailed analysis lives elsewhere. For a required repo document, use the project's convention or `docs/<slug>.md`.
+- `## Context`: the epic goal and relevant constraints.
+- `## Questions`: each open choice with viable options, tradeoffs, a recommendation, and what would change it.
+- `## Findings`: spike results and other evidence bearing on the questions.
 
-Draft the question, criteria, options, and evidence needed before settling a recommendation. Use this frame to check alignment with the higher-level goal; it is not a prewritten answer.
+Present all questions to the user together and pause once. When the user answers, rewrite the body around the result: each decision with its rationale, rejected alternatives that affect later work, conditions to revisit, and links to the chain. Leave the evidence trail in comments. Add `## Decision Artifact` and `## Deliverables` only when a separate reviewed artifact is needed; for a required repo document, use the project's convention or `docs/<slug>.md`. Keep the essential result in the issue even when detailed analysis lives elsewhere.
 
-## Investigate And Decide
+When a mid-chain discovery escalates, reopen the gate, add the new question to `## Questions`, ask the user, then fold the answer into the decisions and close it again.
 
-1. Read the issue, parent, links, and previous findings. Check that the question serves the authorized goal.
-2. Gather evidence proportionate to the stakes. Compare plausible options, the strongest credible alternative, and what would change the recommendation.
-3. Apply the decision mode from SKILL.md. For consequential Human-mode work, reuse an explicit user choice already made for this scope; otherwise present viable options, tradeoffs, a recommendation, and what would change it, then pause once for the decision owner named by the issue or project (default: the user).
-4. Record the finding, decision, who decided, rationale, confidence, and evidence. Include material assumptions, rejected alternatives, or dead ends when they would affect later work. In Agent mode, add the signoff from [agent-mode.md](agent-mode.md).
-5. Link necessary follow-up work. If further investigation is required to settle this issue, open a child Blue issue and block this issue on it. Record intentionally deferred questions as part of the decision.
+## Review Gate
 
-## Close The Decision
+Create the review gate with the epic. While the chain runs, its body holds:
 
-Close after the mode-appropriate decision is recorded and any deliverables are reviewed. Agreement to investigate does not settle a consequential Human-mode choice.
+- `## Goal`: what the epic delivers.
+- `## Scope`: what is in and out.
+- `## Authority`: what the user authorized, including granted delivery steps and hard limits.
+- `## Acceptance`: observable outcomes for the whole epic.
 
-Resolve open questions that affect the exit criteria before closing. Close with deferred questions only when the explicit decision is to defer them and the record explains the resulting limits. Blue closure asserts settled knowledge or a recorded decision; it does not assert that follow-up implementation has shipped.
+When the last blocking Red issue closes, claim the gate and add the review summary so the user can review the epic in one sitting:
 
-Use genuine typed evidence: `reviewed-paths` for each deliverable and for the code or docs the investigation actually examined, a relevant commit or PR, or a verification command that actually passed. The issue/comment containing the decision does not itself supply typed close evidence. Require a commit only when relevant to the requested delivery state. Do not create a file solely to satisfy close evidence.
+- `## Summary`: what changed and how it meets acceptance, with commits and any branch or pull request.
+- `## Agent Decisions`: choices made during the chain, each with its Red ref, rationale, confidence, and reversal; material assumptions accepted without resolution.
+- `## Deviations`: departures from the plan or the decision gate, or none.
+- `## Verification`: checks run, checks skipped, and residual risk.
+- `## Deferred`: follow-up work with refs, or none.
+
+Link detailed records rather than repeating them. Add the `needs-review` label, release the gate with a comment, and ask the user to review.
+
+When the user requests changes, create Red issues for them as one batch, each blocking the gate, and remove `needs-review`. Complete them, update the summary, and request review again on the same gate. When the user accepts, record the acceptance in a comment, perform any granted delivery steps, and close.
+
+## Close The Gate
+
+Close only after the user's decision or acceptance is recorded on the issue, and any deliverables are reviewed. Agreement to investigate does not settle a choice. Close a decision gate with deferred questions only when the user decided to defer them and the record explains the resulting limits. Decision gate closure asserts settled decisions, not shipped implementation.
+
+Use genuine typed evidence. For a decision gate: `reviewed-paths` for each deliverable and for the code or docs the investigation examined, or a relevant commit, pull request, or passing verification command. For a review gate: `commit` evidence for the epic's commits, plus `pr` and `reviewed-paths` where relevant. The issue or comment containing the decision does not itself supply typed close evidence. Do not create a file solely to satisfy close evidence.
 
 Match the close to the outcome when no typed evidence fits `reason: "done"`:
 
 - Keep current behavior or no change needed: `reason: "audit-no-change"` with `{"type": "no-change-audit", "rationale": "<what was reviewed>"}`.
-- Decline the proposed work: `reason: "wontfix"` with the rationale in `message`.
+- The user declines the proposed work: `reason: "wontfix"` with the rationale in `message`.
 - A durable choice worth keeping in the repository: record it in a tracked decision document and cite it with `reviewed-paths`.
