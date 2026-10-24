@@ -1,0 +1,6 @@
+interface:
+  display_name: "Test Audit Lite"
+  short_description: "Quick audit for low-value, brittle, and legacy tests"
+  default_prompt: "Use $test-audit-lite to find tests that pin implementation details, are overly precise, keep legacy behavior alive, or guard removed code, and recommend rewrites or deletions."
+policy:
+  allow_implicit_invocation: false
