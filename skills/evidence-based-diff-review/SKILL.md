@@ -137,8 +137,9 @@ leading files and disclose reduced sensitivity.
 Call `list_projects` as the first graph operation, then ensure one moderate
 Codebase Memory index rooted at the pinned head worktree.
 
-1. Run `detect_changes` inbound at depth 2. Verify `base` and `merge_base`.
-2. Call `get_graph_schema` with the pinned project name.
+1. Call `get_graph_schema` with the pinned project name.
+2. Run `detect_changes` inbound at depth 2 over the dependency edge types the
+   schema lists, paging all changed files. Verify `base` and `merge_base`.
 3. In no more than the five leading SCC files, query `Function`, `Method`,
    `Class`, and `Variable` nodes whose spans intersect new hunk ranges or
    confirmed deletion anchors. Use the labels present in the graph schema.
@@ -157,8 +158,8 @@ an import, an identifier/literal substitution, or comment-only. Prefer
 structural hunks. A complex symbol intersected only by a lexical or comment
 change is context, not a design concern.
 
-Run `SIMILAR_TO` only when SCC, the patch, or source suggests duplicated policy.
-Inspect no more than three pairs. Shared scaffolding and parallel boundary
+Run the `SIMILAR_TO` and `SEMANTICALLY_RELATED` queries only when SCC, the
+patch, or source suggests duplicated policy. Inspect no more than three pairs. Shared scaffolding and parallel boundary
 adapters are not findings.
 
 ### 4. Validate the leading candidates

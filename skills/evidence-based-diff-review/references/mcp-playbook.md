@@ -241,6 +241,9 @@ Reuse only an index rooted at this pinned head worktree whose
 `index_status({verbose:true})` reports the exact `head_sha`, `status:"ready"`,
 and a complete generation.
 
+Call `get_graph_schema({project:"<repo>-diff-head-<sha7>"})` before relying on
+labels, metrics, or edge types.
+
 Run change impact:
 
 ```text
@@ -250,14 +253,23 @@ detect_changes({
   direction: "inbound",
   depth: 2,
   since: "<full-base-sha>",
+  edge_types: ["CALLS", "USAGE", "CALL_REFERENCE", "READS", "WRITES", "INHERITS", "IMPLEMENTS", "OVERRIDE"],
+  via: true,
   limit: 200,
   format: "json"
 })
 ```
 
+Without `edge_types` the walk follows only `CALLS` and misses impact through
+type usage, references, shared state, and inheritance. The call rejects edge
+types the index lacks, so pass only those `get_graph_schema` lists.
+
 Verify `base` and `merge_base` equal the requested base. Record changed files,
 seed symbols, impacted total/modules, and truncation. A mismatch invalidates
-the review scope.
+the review scope. `changed_files` is paged separately (20 by default): while
+`changed_has_more` is true, repeat the call with `changed_cursor` set to
+`changed_next_cursor` and otherwise identical arguments. `via_qn` and `via_edge`
+show how each impacted symbol is reached; use them to describe blast radius.
 
 The raw seed count includes deleted and relocated symbols. If it exceeds 300,
 do not split automatically. Count surviving hunk-intersecting `Function` and
@@ -277,9 +289,6 @@ RETURN count(f) AS hunk_functions
 
 Repeat for `Method`. This all-production count is only a scope decision; the
 detailed metric query below remains limited to the five leading files.
-
-Call `get_graph_schema({project:"<repo>-diff-head-<sha7>"})` before relying on
-labels, metrics, or edge types.
 
 ## Hunk-scoped symbols
 
@@ -415,7 +424,9 @@ RETURN f.qualified_name AS symbol, count(DISTINCT callee) AS fan_out
 ```
 
 Run these as separate calls; do not combine them with `UNION`. Repeat for
-methods as needed. These counts include resolved static edges only.
+methods as needed. These counts include resolved static edges only. Program
+launches are `SPAWNS` edges to `Process` nodes, not `CALLS`, so fan-out omits
+them; count them separately when a changed symbol launches external programs.
 Use `trace_path` at depth 2 for representative callers after a concern survives
 source inspection. Keep `risk_labels:false` by default; reachability labels are
 not defect severity.
@@ -439,6 +450,32 @@ RETURN a.qualified_name AS symbol_a,
 ORDER BY jaccard DESC
 LIMIT 20
 ```
+
+`SIMILAR_TO` compares tokens, so it misses the same policy written with
+different code. For the same hypothesis, also query vocabulary-based
+`SEMANTICALLY_RELATED` edges:
+
+```cypher
+MATCH (a:Function|Method)-[r:SEMANTICALLY_RELATED]->(b:Function|Method)
+WHERE (a.file_path IN ['src/a.py'] OR b.file_path IN ['src/a.py'])
+  AND (a.is_test = false OR a.is_test IS NULL)
+  AND (b.is_test = false OR b.is_test IS NULL)
+RETURN a.qualified_name AS symbol_a,
+       a.file_path AS file_a,
+       a.start_line AS line_a,
+       a.end_line AS end_line_a,
+       b.qualified_name AS symbol_b,
+       b.file_path AS file_b,
+       b.start_line AS line_b,
+       b.end_line AS end_line_b,
+       r.p AS p,
+       r.same_file AS same_file
+ORDER BY p DESC
+LIMIT 20
+```
+
+`p` is the calibrated probability that a reader would judge the pair related,
+not that they duplicate behavior. A pair with both edges is corroborated.
 
 Post-filter so a hunk intersects at least one endpoint. Inspect both endpoints.
 Report only shared behavior or policy with credible divergence cost. No rows

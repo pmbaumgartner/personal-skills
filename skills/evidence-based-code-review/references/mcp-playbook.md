@@ -116,7 +116,7 @@ index_status({project: "stable-project-name", diagnostics: "summary"})
 get_graph_schema({project: "stable-project-name", diagnostics: "full"})
 ```
 
-`project` accepts the stable name or an absolute directory, which resolves to its owning project. Reuse an index only when its root matches the repository. Use `index_repository` when absent or after a material external update; for a large repository, pass `async: true` and poll with `status: true`. Before citing files:
+`project` accepts the stable name or an absolute directory, which resolves to its owning project. Reuse an index only when its root matches the repository. `index_status.watch` reports whether the index auto-refreshes; only the project an MCP session is rooted in is watched, so an unwatched index is a snapshot as of `indexed_at`. Use `index_repository` when absent, or when the index is unwatched and the repository changed materially since `indexed_at`; for a large repository, pass `async: true` and poll with `status: true`. Before citing files:
 
 ```text
 check_index_coverage({
@@ -129,6 +129,17 @@ Before saying a bounded area has no cycles, duplicates, callers, dead code, or o
 
 ```text
 check_index_coverage({project: "stable-project-name", scopes: ["src/domain/"]})
+```
+
+To list every flagged gap file under a scope at once, query the coverage-gap graph, which holds only `Project`, `Folder`, and `File` nodes:
+
+```text
+query_graph({
+  project: "stable-project-name",
+  graph: "missed",
+  format: "json",
+  query: "MATCH (f:File) WHERE f.file_path STARTS WITH 'src/' RETURN f.file_path AS file ORDER BY file ASC"
+})
 ```
 
 Inspect skipped and parse-partial paths directly. `indexed_no_recorded_gap` is still not proof of completeness.
@@ -147,7 +158,7 @@ detect_changes({
   scope: "impact",
   direction: "inbound",
   depth: 3,
-  edge_types: ["CALLS", "USAGE", "CALL_REFERENCE", "INHERITS", "IMPLEMENTS", "OVERRIDE"],
+  edge_types: ["CALLS", "USAGE", "CALL_REFERENCE", "READS", "WRITES", "INHERITS", "IMPLEMENTS", "OVERRIDE"],
   seeds: "list",
   seed_filter: "product",
   via: true,
@@ -155,9 +166,9 @@ detect_changes({
 })
 ```
 
-`detect_changes` defaults to the repository's default branch; pass `since` when the user gives an exact revision or `base_branch` for another base. Record merge base, changed files, changed product symbols, impacted total, truncation, and direction/depth. `via_qn` and `via_edge` show how each impacted symbol is reached; use them to describe blast radius rather than citing only the total.
+`detect_changes` defaults to the repository's default branch; pass `since` when the user gives an exact revision or `base_branch` for another base. Record merge base, changed files, changed product symbols, impacted total, truncation, and direction/depth. `changed_files` is paged separately (20 by default); follow `changed_next_cursor` with `changed_cursor` while `changed_has_more` is true. `via_qn` and `via_edge` show how each impacted symbol is reached; use them to describe blast radius rather than citing only the total.
 
-The walk follows only `CALLS` unless `edge_types` is given, which misses change that spreads through type usage, references, and inheritance. `edge_types`, `via`, and `fixpoint` require `direction: "inbound"`, and the call rejects edge types the index lacks, so pass only types listed by `get_graph_schema`.
+The walk follows only `CALLS` unless `edge_types` is given, which misses change that spreads through type usage, references, shared state, and inheritance. `edge_types`, `via`, and `fixpoint` require `direction: "inbound"`, and the call rejects edge types the index lacks, so pass only types listed by `get_graph_schema`.
 
 Architecture hotspots rank by fan-in and can include builtins and test utilities. Scope architecture calls to production roots, reconcile returned paths with `index_status`, and filter to owned production symbols before prioritizing. `layers` classifies modules as entry, core, internal, or leaf from fan-in/out; an internal layer whose callers and callees offer the same abstraction is a pass-through candidate. Clusters reveal de-facto seams, not necessarily desired architecture.
 
@@ -245,7 +256,7 @@ ORDER BY exported DESC, file ASC
 LIMIT 50
 ```
 
-Many exported symbols over little complexity suggests a shallow module; few exports over substantial complexity suggests a deep one. `is_exported` follows each language's convention and can mark every top-level function of a plain script, so confirm the real interface in source.
+Many exported symbols over little complexity suggests a shallow module; few exports over substantial complexity suggests a deep one. `is_exported` follows each language's convention and can mark every top-level function of a plain script, so confirm the real interface in source. For a leading candidate, `get_file_outline({project: "stable-project-name", file_path: "src/a.py"})` lists every declaration, including variables and classes, in source order with exact paging; page while `has_more` is true.
 
 ## Fan-in and fan-out
 
@@ -270,7 +281,9 @@ ORDER BY fan_out DESC, symbol ASC
 LIMIT 50
 ```
 
-These count resolved graph edges, not all runtime calls. Builtins, dynamic dispatch, callbacks, macros, reflection, and FFI can distort the result.
+These count resolved graph edges, not all runtime calls. Builtins, dynamic dispatch, callbacks, macros, reflection, and FFI can distort the result. Program launches are `SPAWNS` edges to `Process` nodes, not `CALLS`, so fan-out omits them; count them separately when external programs are a boundary crossing.
+
+`Function`, `Method`, and `Class` nodes also carry `importance`, an index-time weighted degree. Use `ORDER BY f.importance DESC` as a quick cross-check of the fan-in ranking. It is precomputed over the whole graph and cannot be scoped to production callers or chosen edge types, so rank from the explicit queries.
 
 ## Shared-state writers
 
@@ -305,7 +318,24 @@ ORDER BY jaccard DESC
 LIMIT 100
 ```
 
-No rows means no indexed `SIMILAR_TO` edges, not no duplication. Inspect both snippets. Strong evidence of harmful duplication requires shared behavior or policy plus a plausible divergence cost; similar tests or boundary adapters often should remain explicit.
+`SIMILAR_TO` compares tokens, so it misses the same policy written with different code. Query vocabulary-based `SEMANTICALLY_RELATED` edges as a complementary lane:
+
+```cypher
+MATCH (a:Function|Method)-[r:SEMANTICALLY_RELATED]->(b:Function|Method)
+WHERE a.file_path STARTS WITH 'src/'
+  AND b.file_path STARTS WITH 'src/'
+  AND a.is_test = false AND b.is_test = false
+RETURN a.qualified_name AS symbol_a, a.file_path AS file_a,
+       a.start_line AS line_a, b.qualified_name AS symbol_b,
+       b.file_path AS file_b, b.start_line AS line_b,
+       r.p AS p, r.score AS score, r.same_file AS same_file
+ORDER BY p DESC, score DESC, symbol_a ASC
+LIMIT 100
+```
+
+`p` is the calibrated probability that a reader would judge the pair related, not that they duplicate behavior. Prefer cross-file pairs, and treat a pair that also has a `SIMILAR_TO` edge as corroborated.
+
+No rows means no indexed similarity edges, not no duplication. Inspect both snippets. Strong evidence of harmful duplication requires shared behavior or policy plus a plausible divergence cost; similar tests or boundary adapters often should remain explicit.
 
 Repeated symbol names can identify parallel implementations worth comparison, but are weaker evidence than `SIMILAR_TO`:
 
@@ -390,7 +420,7 @@ search_graph({
 })
 ```
 
-Paginate. Never report dead code from graph isolation alone. Verify exports, framework registration, reflection, plugin hooks, callbacks, FFI, macros, scripts, and direct textual references.
+Paginate. Never report dead code from graph isolation alone. Verify exports, framework registration, reflection, plugin hooks, callbacks, FFI, macros, scripts, and direct textual references. `search_code({project: "stable-project-name", pattern: "candidate_name", mode: "files"})` finds textual references in indexed files only; grep the excluded and unindexed paths reported by `index_status` before calling a symbol unreferenced.
 
 ## Hidden change coupling
 
@@ -403,7 +433,18 @@ RETURN type(r) AS edge, count(r) AS n
 ORDER BY n DESC, edge ASC
 ```
 
-`type()` is not allowed in `WHERE`, so filter client-side: count dependency edges such as `CALLS`, `USAGE`, `IMPORTS`, `WRITES`, `CALL_REFERENCE`, `INHERITS`, `IMPLEMENTS`, and `OVERRIDE`; ignore containment (`DEFINES*`, `CONTAINS_*`), similarity, and `FILE_CHANGES_WITH`. Confirm both paths with `check_index_coverage` first.
+`type()` is not allowed in `WHERE`, so filter client-side: count dependency edges such as `CALLS`, `USAGE`, `IMPORTS`, `READS`, `WRITES`, `CALL_REFERENCE`, `INHERITS`, `IMPLEMENTS`, and `OVERRIDE`; ignore containment (`DEFINES*`, `CONTAINS_*`), similarity, documentation links (`MENTIONS`, `REFERENCES_FILE`), and `FILE_CHANGES_WITH`. Confirm both paths with `check_index_coverage` first.
+
+Environment variables, launched programs, and HTTP routes are shared nodes rather than edges between the two files, so check them separately:
+
+```cypher
+MATCH (a)-[:CONFIGURES|SPAWNS|HTTP_CALLS]->(x)<-[:CONFIGURES|SPAWNS|HTTP_CALLS]-(b)
+WHERE a.file_path = 'src/a.py' AND b.file_path = 'src/b.py'
+RETURN labels(x) AS shared_label, x.name AS shared, count(*) AS n
+ORDER BY n DESC, shared ASC
+```
+
+A shared environment variable or route names the coupling; a shared common program such as `git`, or a `<dynamic>` process, does not.
 
 Repeated co-change with no dependency edge is a hidden-coupling candidate: shared knowledge such as a format, protocol, or invariant that neither file states. Inspect a few co-change commits to name it. A link through a third module, dynamic dispatch, configuration, or a coverage gap explains the pair rather than proving the coupling hidden.
 
