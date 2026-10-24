@@ -12,10 +12,9 @@ Agents tend to treat tests they wrote as ground truth, even when those tests enc
 
 **Behavior** is an effect observable from outside the unit: return values, errors, output, side effects, and persisted or exchanged data. Internal steps, call order, and intermediate state are not behavior.
 
-A behavior is **justified** when it is:
+A behavior is **justified** when it is stated in the user's requirements, documentation in scope (README, docs, doctests, runnable examples), or the interface's own declarations (names, types, docstrings, help text, schemas).
 
-- **stated:** in the user's requirements, documentation in scope (README, docs, doctests, runnable examples), or the interface's own declarations (names, types, docstrings, help text, schemas); or
-- **relied on:** production code in scope depends on it, or it is part of data already persisted or exchanged across the system boundary.
+Production callers and data already persisted or exchanged across the system boundary are evidence of **change impact**, not necessarily correctness. Record those dependencies. When a depended-on behavior lacks clear intent, make it an open question: show what depends on it and ask whether to preserve it. A caller and callee can share the same mistake; existing data does not by itself establish a supported contract.
 
 The implementation alone never justifies a behavior. Issues, PR descriptions, and Git history are not blind-phase sources: they are outside the copy and often describe tests.
 
@@ -29,7 +28,7 @@ Reconcile what the system does with what is justified:
 | Doesn't do it | Yes | Defect, plus a spec item for its regression test |
 | Does it | No | Open question; harmful behavior such as data loss or security exposure is a defect instead |
 
-When stated intent and relied-on behavior disagree, record an open question rather than picking a side. Open questions produce neither tests nor defects until the user answers them.
+When stated intent and production dependence disagree, record an open question rather than picking a side. Open questions produce neither tests nor defects until the user answers them.
 
 ## Workflow
 
@@ -42,7 +41,7 @@ When stated intent and relied-on behavior disagree, record an open question rath
    - **Test spec:** one entry per justified behavior worth testing, with:
      - a short, stable ID;
      - the behavior;
-     - its justification (stated or relied on) and exact reference;
+     - its stated justification and exact reference, plus any production dependence relevant to changing it;
      - its status: met, or unmet with its defect; observed or read;
      - the concrete bug the test would catch;
      - a suggested test level (unit, integration, end-to-end).
@@ -50,7 +49,7 @@ When stated intent and relied-on behavior disagree, record an open question rath
      Leave out a behavior if you can't name a plausible bug its test would catch.
    - **Probes:** small, independently written programs run against production code in the temporary copy. Keep a probe that demonstrates a spec item as that item's draft test. Test infrastructure was removed from the copy, so draft tests may be self-contained sketches rather than suite-ready code. Never present an unexecuted probe as observed behavior.
 4. **Freeze.** Save the blind-phase output (spec, defects, and open questions) and any draft tests outside the disposable copy and source checkout before anyone opens the existing tests. Don't edit the frozen output afterward; anything learned during comparison, including supported corrections or additions to the spec, goes in the comparison report.
-5. **Compare.** Read the existing tests in the original checkout and give each test one label:
+5. **Compare.** Read the existing tests in the original checkout and recommend an action for each test, using these labels where useful:
 
    | Label | Meaning | Default action |
    | --- | --- | --- |
@@ -61,14 +60,14 @@ When stated intent and relied-on behavior disagree, record an open question rath
    | Stale | Evidence establishes that the behavior is no longer intended | Delete |
    | Needs investigation | Asserts behavior missing from the blind spec or recorded as an open question, or intent remains unclear | Preserve while investigating; record supported spec corrections in the comparison report |
 
-   Assess the setup and assertions, not just whether a test exercises the named behavior. Overlapping tests are not redundant when they catch different failures. Record partial coverage and weak assertions explicitly: matching a spec item does not by itself close its coverage gap. A test may map to multiple spec items. When a test mixes assertions that deserve different labels, label it "Pins implementation" if any assertion pins internals; its rewrite keeps the behavioral assertions.
+   Assess the setup and assertions, not just whether a test exercises the named behavior. Overlapping tests are not redundant when they catch different failures. Record partial coverage and weak assertions explicitly: matching a spec item does not by itself close its coverage gap. A test may map to multiple spec items. For mixed assertions, give a primary action and qualify which assertions to keep, change, or remove rather than forcing the whole test into one label. For example: "Keep the behavioral assertions; remove the assertion on the private helper call."
 
    Spec items with no effective coverage become **tests to add**, using any draft test from the blind phase. For partial coverage, propose a focused improvement to an existing test where practical.
 
    For large scopes, split comparison by subsystem, the same way as the blind phase.
 6. **Report.** In order:
    1. defects, open questions, and a link to the complete frozen output and any draft tests;
-   2. the comparison table (test, label, spec item IDs, reason), plus supported spec corrections and unresolved questions. List every test that isn't "Keep" individually; summarize "Keep" tests per file with their counts and spec item IDs;
+   2. the comparison table (test, recommended action, spec item IDs, reason), plus supported spec corrections and unresolved questions. List every test needing changes or investigation individually, including mixed-assertion tests; summarize tests kept unchanged per file with their counts and spec item IDs;
    3. tests to add or improve;
    4. coverage: what was reviewed, left out, and executed, including any sampling.
 7. **Apply authorized changes.** The default output is the report. When the user authorizes selected deletes, rewrites, and additions, apply them; explicit authorization already given counts. Before deleting a test as redundant, inject its spec item's named bug into a scratch copy of the production code and confirm the retained coverage fails; if it doesn't, relabel instead of deleting. Adapt draft tests to the existing suite's conventions, fixtures, and layout rather than pasting them in. Run focused tests and appropriate checks after the edits.
