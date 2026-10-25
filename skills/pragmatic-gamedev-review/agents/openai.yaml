@@ -1,0 +1,6 @@
+interface:
+  display_name: "Pragmatic Gamedev Review"
+  short_description: "Blow, Muratori, and Carmack-style game code review"
+  default_prompt: "Use $pragmatic-gamedev-review to review this game or engine code for unnecessary complexity, needless runtime cost, iteration friction, and shipping risk."
+policy:
+  allow_implicit_invocation: false
