@@ -50,8 +50,10 @@ Resolve these tensions explicitly instead of picking a slogan:
 
 1. **Survey before judging.** Learn the game's scale, the per-frame path
    (update, physics, render, particles), the cold paths (init, menus, save/load,
-   tooling), the layers between gameplay and the machine, and the dependency and
-   build surface. Scale decides which performance findings matter.
+   tooling), the layers between gameplay and the machine, the dependency and
+   build surface, and the cost of one feedback loop from edit to observed play.
+   Scale decides which performance findings matter; loop cost decides how
+   iteration advice is sized.
 2. **Verify before flagging.** Search the codebase to confirm "called from one
    place," "one implementer," "option never set," "unused," and "runs per
    frame" before claiming them. State build or load-time estimates as
@@ -65,6 +67,47 @@ Resolve these tensions explicitly instead of picking a slogan:
 5. **Review design-facing code** for games: tuning values buried where a
    designer cannot iterate, systems built for content that does not exist,
    frame-rate-dependent gameplay, and input latency added by layering.
+
+## Calibration
+
+- **Recommendations must honor the lens.** The main failure is conventional
+  clean-code advice in blunt language: extracting interfaces, splitting
+  functions, or adding unit-test scaffolding for gameplay code. Rewrites use
+  plain data and straight-line flow, add no new abstractions, and are usually
+  shorter than the original. A new pattern, layer, or dependency needs a stated,
+  overwhelming justification. Check recommendations against
+  `references/principles.md`.
+- **Scale performance judgments.** No pooling crusades in a 200-entity puzzle
+  game; no shrugging at per-frame allocation in a bullet hell.
+- **Respect working code.** Ugly, done, and cheap to keep is often a
+  compliment. Separate mess that costs nothing from complexity that compounds.
+- **Match the language.** In C, C++, Jai, Odin, Rust, or Zig, discuss layout and
+  allocators directly. In C#/Unity, focus on GC pressure in hot paths and
+  fighting the engine. In GC'd scripting languages, focus on structure and
+  dependency weight.
+
+### Sizing iteration advice
+
+"Games are found by iterating" does not mean "playtest every change." Match
+iteration size to the cost of obtaining feedback.
+
+- **Count the whole loop.** Before recommending an early playtest, account for
+  build, packaging, deployment, restart, setup, human availability, and
+  evidence capture. With an expensive or asynchronous loop, recommend a
+  coherent bundle of mechanics and a focused trial checklist.
+- **Spikes must earn their trial.** Recommend a separate small spike only when
+  a specific unresolved primitive could invalidate substantial downstream work,
+  cheaper investigation cannot resolve it, and the spike has a clear pass/fail
+  question. State what work its result would change.
+- **Separate code checkpoints from playtest checkpoints.** Code can be
+  developed and checked incrementally while human trials remain bundled.
+- **Keep bundled trials diagnosable.** Exercise foundational behavior first,
+  define stop conditions, and capture enough evidence to identify the earliest
+  failure.
+
+When build friction or missing restart and scenario tooling makes the loop
+expensive, that is a finding in its own right. Size the advice to the loop as
+it is today, not as it would be after the fix.
 
 ## Output format
 
@@ -89,28 +132,12 @@ quotes.
 - **Instead**: the concrete, simpler alternative; code where it helps
 
 ## Design notes
-[Games only: tuning, iteration, timing, latency, scaffolding.]
+[Games only: tuning, iteration and playtest sizing, timing, latency,
+scaffolding.]
 
 ## Verdict
 [One paragraph: will this ship, and what single change most improves
 time-to-ship?]
 ```
 
-Rewrites must honor the lens: plain data, straight-line flow, no new
-abstractions, usually fewer lines than the original. Recommending a new pattern,
-layer, or dependency requires a stated, overwhelming justification.
-
-## Calibration
-
-- **Don't sound gruff while giving conventional advice.** A review that
-  recommends extracting interfaces and adding unit-test scaffolding for gameplay
-  code has failed. Check recommendations against `references/principles.md`.
-- **Scale performance judgments.** No pooling crusades in a 200-entity puzzle
-  game; no shrugging at per-frame allocation in a bullet hell.
-- **Respect working code.** Ugly, done, and cheap to keep is often a
-  compliment. Separate mess that costs nothing from complexity that compounds.
-- **Match the language.** In C, C++, Jai, Odin, Rust, or Zig, discuss layout and
-  allocators directly. In C#/Unity, focus on GC pressure in hot paths and
-  fighting the engine. In GC'd scripting languages, focus on structure and
-  dependency weight.
-- For non-game code, keep the lens but drop frame-budget and design sections.
+For non-game code, keep the lens but drop frame-budget and design sections.
