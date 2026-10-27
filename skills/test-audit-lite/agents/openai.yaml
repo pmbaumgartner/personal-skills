@@ -1,6 +1,6 @@
 interface:
   display_name: "Test Audit Lite"
   short_description: "Quick audit for low-value, brittle, and legacy tests"
-  default_prompt: "Use $test-audit-lite to find tests that can't fail, pin implementation details, are overly precise, are disabled, keep legacy behavior alive, or check repository artifacts, recommend rewrites or deletions, and propose fixtures for repetition among the tests worth keeping."
+  default_prompt: "Use $test-audit-lite to find tests that can't fail, pin implementation details, are overly precise, are disabled, keep legacy behavior alive, check repository artifacts, fake the project's own code, or script boundary fakes, recommend rewrites or deletions, and propose fixtures for repetition among the tests worth keeping."
 policy:
   allow_implicit_invocation: false
