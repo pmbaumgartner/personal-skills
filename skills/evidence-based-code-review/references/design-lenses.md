@@ -27,7 +27,7 @@ Then assess:
 - **Information hiding:** Is each important design decision localized or leaked across modules?
 - **Knowledge-based decomposition:** Are boundaries organized around stable concepts and hidden knowledge, or merely execution order?
 - **Abstraction integrity:** Do adjacent layers offer distinct abstractions, or mostly pass calls and variables through?
-- **Together or apart:** Would combining related state and behavior simplify the interface, or would separation create a genuinely distinct abstraction?
+- **Together or apart:** Would combining related state and behavior simplify the interface, or would separation create a genuinely distinct abstraction? When a module mixes static metadata or policy with heavy runtime dependencies, every metadata caller inherits the runtime dependency cone.
 
 Long cohesive implementations behind simple interfaces may be strong deep modules. Chains of tiny classes or functions may multiply interfaces and cognitive load.
 

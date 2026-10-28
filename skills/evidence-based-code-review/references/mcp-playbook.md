@@ -14,7 +14,8 @@ Use this reference when executing an evidence-based review. Tool schemas can evo
   - [Complexity concentration](#complexity-concentration)
   - [Interface size](#interface-size)
 - [Fan-in and fan-out](#fan-in-and-fan-out)
-- [Shared-state writers](#shared-state-writers)
+  - [Transitive dependency cone](#transitive-dependency-cone)
+- [Shared-state writers and policy scatter](#shared-state-writers-and-policy-scatter)
 - [Duplicate candidates](#duplicate-candidates)
 - [Tracing and source evidence](#tracing-and-source-evidence)
   - [Structural dossier](#structural-dossier)
@@ -285,7 +286,23 @@ These count resolved graph edges, not all runtime calls. Builtins, dynamic dispa
 
 `Function`, `Method`, and `Class` nodes also carry `importance`, an index-time weighted degree. Use `ORDER BY f.importance DESC` as a quick cross-check of the fan-in ranking. It is precomputed over the whole graph and cannot be scoped to production callers or chosen edge types, so rank from the explicit queries.
 
-## Shared-state writers
+### Transitive dependency cone
+
+Measure when a lightweight entry point, script, or domain module appears coupled to a heavy runtime, I/O, or generated subgraph. Query distinct cross-file production dependency edges (`IMPORTS` target labels vary across languages, so symbol dependency edges provide a uniform file graph):
+
+```cypher
+MATCH (src)-[:CALLS|USAGE|CALL_REFERENCE|INHERITS|IMPLEMENTS]->(dst)
+WHERE src.is_test = false AND dst.is_test = false
+  AND src.file_path <> '' AND dst.file_path <> ''
+  AND src.file_path <> dst.file_path
+RETURN DISTINCT src.file_path AS src_file, dst.file_path AS dst_file
+ORDER BY src_file ASC, dst_file ASC
+LIMIT 2000
+```
+
+Compute the reachable file closure `cone(F)` from candidate file `F` client-side, then join with the SCC `by_file` table to sum reachable file count, code lines, and cyclomatic/cognitive complexity. When a small caller has a large dependency cone because it reads static metadata or policy from a runtime module, identify the bridge edge `u -> v` and estimate the counterfactual cone if those facts lived in a pure metadata module.
+
+## Shared-state writers and policy scatter
 
 Find fields and variables written from several files:
 
@@ -300,6 +317,22 @@ LIMIT 20
 ```
 
 State mutated from several files suggests distributed state ownership or caller-managed transitions. Inspect the writers: constructors, builders, and a single owning type writing its own fields are expected; scattered writers that must preserve one invariant are the finding.
+
+For immutable policy, protocol, or configuration constants, query cross-file `USAGE` or `READS` fan-in (restrict to edge types present in `get_graph_schema`):
+
+```cypher
+MATCH (caller)-[:USAGE]->(target:Variable|Class)
+WHERE target.file_path STARTS WITH 'src/'
+  AND caller.is_test = false AND target.is_test = false
+  AND caller.file_path <> target.file_path
+RETURN target.qualified_name AS symbol, target.file_path AS owner_file,
+       count(DISTINCT caller.file_path) AS consumer_files,
+       count(DISTINCT caller) AS consumer_symbols
+ORDER BY consumer_files DESC, consumer_symbols DESC, symbol ASC
+LIMIT 50
+```
+
+High `consumer_files` on a canonical registry or core domain type is expected. High `consumer_files` on low-level building blocks (individual policy constants, topic names, format codes) across sibling modules that assemble parallel lookup tables or dispatch branches indicates scattered policy ownership.
 
 ## Duplicate candidates
 

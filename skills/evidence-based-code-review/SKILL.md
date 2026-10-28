@@ -53,8 +53,9 @@ Use architecture layers, symbol metrics, interface size, fan-in/out, cycles, sim
 - central interfaces and dependency concentration
 - complexity concentration in a small share of production functions
 - shallow modules whose exported surface rivals their hidden complexity
+- oversized transitive dependency cones where a lightweight caller pulls in a heavy runtime subgraph
 - hidden call paths, boundary crossings, and blast radius
-- state written from several modules, suggesting distributed state ownership
+- state written from several modules, or policy/constant symbols read across sibling modules to assemble parallel lookup tables
 - pass-through layers or adjacent layers with similar abstractions
 - duplicated policy, algorithmic risk, and structural unknown unknowns
 
