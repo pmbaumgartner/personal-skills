@@ -28,6 +28,8 @@ Separate the need from a proposed mechanism, inherited convention, or untested e
 
 Separate observations, estimates, and explanations. Check the assumption that creates the most work or could invalidate the recommendation. Use the cheapest adequate evidence: existing artifacts, a rough calculation, a representative case, runtime observation, a focused experiment, or observation of an intended user.
 
+Among explanations that fit the observations, favor the one needing the fewest independent assumptions, such as one cause for all symptoms or a common cause before an exotic one. Then check it rather than assume it. An explanation that keeps needing patches to fit new evidence is weakening.
+
 When feasible, try a direct baseline and let observed failures guide added complexity. Required protections still apply to the experiment.
 
 Challenge the candidate with the case most likely to break it. Say what is known, what remains assumed, and which checks actually ran. For unexplained behavior, use [Diagnose a fault](references/techniques.md#diagnose-a-fault).
@@ -40,7 +42,7 @@ Look for work that can disappear through a clearer representation, a change in t
 
 Imagine the result already works: which decision, handoff, conversion, state, duplicate source of truth, or need for a feature disappeared?
 
-Distinguish familiarity and ease of adoption from simplicity. Name concerns that must be understood or changed together. Prefer models that eliminate invalid combinations and boundaries that contain likely changes, counting the interfaces they add.
+Distinguish familiarity and ease of adoption from simplicity. Name concerns that must be understood or changed together. Prefer models that eliminate invalid combinations and boundaries that contain likely changes, counting the interfaces they add. Count the concepts someone must hold to predict the behavior. A good model has few concepts, each with one meaning, and accounts for the concrete instance from Question 1.
 
 Grug's countercheck: can someone locate, follow, and debug the behavior? Keep related behavior nearby and data flow visible. Simple duplication can cost less than an abstraction that couples unrelated changes; share knowledge when it genuinely must change together. Understand an existing complication's purpose before removing it.
 
