@@ -1,0 +1,30 @@
+---
+name: roborev-analyze-duplication
+description: "Find code duplication and suggest consolidation. Use for roborev duplication analysis."
+---
+
+# Roborev: Duplication
+
+Read the files in the scope requested by the user before applying the instructions below. Report findings; do not modify code unless the user asks for changes.
+
+Source: [duplication.txt](https://github.com/kenn-io/roborev/blob/0cc4d482018fb022341adbdd84ff1e6c23a14083/internal/prompt/analyze/duplication.txt). The upstream prompt below is preserved verbatim.
+
+## Instructions
+
+Analyze the provided files for code duplication and opportunities for consolidation.
+
+Your task:
+1. Identify duplicated or near-duplicated code:
+   - Exact duplicates (copy-pasted code)
+   - Structural duplicates (same logic with different variable names)
+   - Similar patterns that could be abstracted
+2. For each duplication found, assess:
+   - How many times does this pattern repeat?
+   - What's the blast radius of a bug in this duplicated code?
+   - How easy would it be to extract into a shared function/type?
+
+Output format:
+- **DUPLICATIONS FOUND:** List each duplication with locations and similarity %
+- **CONSOLIDATION OPPORTUNITIES:** Specific refactoring suggestions with example code
+- **ESTIMATED REDUCTION:** Approximate lines of code that could be removed
+- **RISK ASSESSMENT:** Any risks or considerations for the refactoring

@@ -72,11 +72,36 @@ git push -u origin HEAD
 
 The old GitHub repository is not renamed or modified by this setup.
 
-## Third-party skills
+## External skills
 
-Third-party and externally synced skills remain outside this repository.
-The activation tool leaves them alone. No submodules or automatic external
-updates are used.
+Sync the two upstream collections explicitly from the repository root:
+
+```sh
+bin/sync-external-skills
+bin/sync-external-skills --check  # no writes; exit 1 when updates are available
+```
+
+The script requires uv and Git. It fetches `main` from:
+
+- [Cursor team kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review):
+  copies `thermo-nuclear-code-quality-review` without changing its prompt or frontmatter.
+- [Roborev analysis prompts](https://github.com/kenn-io/roborev/tree/main/internal/prompt/analyze):
+  wraps each `.txt` prompt in a `roborev-analyze-<type>/SKILL.md`, converting
+  underscores to hyphens (for example, `roborev-analyze-api-design`). The wrapper
+  adds a description, scope guidance, and source link; the prompt is preserved.
+
+Upstream licenses are included with each skill. `external-skills.lock.json`
+records source commits and generated-file hashes. Review and commit the resulting
+changes; `skills update` still only pulls this repository and does not sync upstreams.
+
+Sync refuses to overwrite local edits or conflicting files. Review those changes
+before using `--force`, which replaces them with upstream content. Removed upstream
+prompts have their unchanged generated files removed; unrelated files, including
+existing `agents/openai.yaml` settings, are left alone. Changes to managed
+`SKILL.md` invocation flags count as local edits too.
+
+Sync does not enable skills or change active skill links. Use `skills enable <name>`
+after syncing. Skills installed outside this checkout are untouched.
 
 ## Verification
 

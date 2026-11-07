@@ -1,0 +1,221 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
+"""Vendor external skills from GitHub; never change machine-local activation."""
+
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+LOCK = "external-skills.lock.json"
+CURSOR_PATH = "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
+ROBOREV_PATH = "internal/prompt/analyze"
+DESCRIPTIONS = {
+    "api-design": "Review public API consistency, naming, signatures, and usability.",
+    "architecture": "Review module organization, dependency flow, and architectural boundaries.",
+    "complexity": "Find complexity hotspots and suggest simplifications.",
+    "dead-code": "Find unused exports, unreachable paths, and stale code.",
+    "duplication": "Find code duplication and suggest consolidation.",
+    "refactor": "Identify concrete refactoring opportunities for maintainability.",
+    "security": "Find concrete, exploitable security risks across real trust boundaries.",
+    "test-fixtures": "Find reusable test fixtures, builders, and helpers to reduce duplication.",
+}
+
+
+def git(directory, *args):
+    return subprocess.run(
+        ["git", "-C", str(directory), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+def snapshot(parent, name, repository, path):
+    checkout = parent / name
+    git(
+        parent,
+        "clone",
+        "--branch=main",
+        "--depth=1",
+        "--filter=blob:none",
+        "--sparse",
+        repository,
+        str(checkout),
+    )
+    git(checkout, "sparse-checkout", "set", path)
+    revision = git(checkout, "rev-parse", "HEAD")
+    return checkout, {"repository": repository, "revision": revision, "path": path}
+
+
+def roborev_skill(stem, prompt, url):
+    kind = stem.replace("_", "-")
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", kind):
+        raise ValueError(f"Invalid upstream prompt name: {stem}")
+    if not prompt.strip():
+        raise ValueError(f"Empty upstream prompt: {stem}")
+    name = f"roborev-analyze-{kind}"
+    description = DESCRIPTIONS.get(kind, prompt.strip().splitlines()[0])
+    description += f" Use for roborev {kind} analysis."
+    content = (
+        f"---\nname: {name}\ndescription: {json.dumps(description)}\n---\n\n"
+        f"# Roborev: {kind.replace('-', ' ').title()}\n\n"
+        "Read the files in the scope requested by the user before applying the instructions below. "
+        "Report findings; do not modify code unless the user asks for changes.\n\n"
+        f"Source: [{stem}.txt]({url}). The upstream prompt below is preserved verbatim.\n\n"
+        "## Instructions\n\n" + prompt
+    )
+    return name, content.encode("utf-8")
+
+
+def collect():
+    """Fetch complete, revision-consistent snapshots before touching the collection."""
+    sources = {}
+    files = {}
+    with tempfile.TemporaryDirectory(prefix="sync-external-skills-") as temporary:
+        parent = Path(temporary)
+        cursor, sources["cursor"] = snapshot(
+            parent, "cursor", "https://github.com/cursor/plugins.git", CURSOR_PATH
+        )
+        target = "skills/thermo-nuclear-code-quality-review"
+        skill = (cursor / CURSOR_PATH / "SKILL.md").read_bytes()
+        if not skill.startswith(b"---\nname: thermo-nuclear-code-quality-review\n"):
+            raise ValueError("Unexpected Cursor SKILL.md frontmatter")
+        files[f"{target}/SKILL.md"] = skill
+        files[f"{target}/LICENSE.txt"] = (
+            cursor / "cursor-team-kit/LICENSE"
+        ).read_bytes()
+        revision = sources["cursor"]["revision"]
+        files[f"{target}/SOURCE.md"] = (
+            "# Upstream source\n\n"
+            f"[Cursor team kit](https://github.com/cursor/plugins/blob/{revision}/{CURSOR_PATH}/SKILL.md)\n\n"
+            "Synced by `bin/sync-external-skills`. Edit upstream or expect local edits to block syncing.\n"
+        ).encode()
+
+        roborev, sources["roborev"] = snapshot(
+            parent, "roborev", "https://github.com/kenn-io/roborev.git", ROBOREV_PATH
+        )
+        license_text = (roborev / "LICENSE").read_bytes()
+        prompts = sorted((roborev / ROBOREV_PATH).glob("*.txt"))
+        if not prompts:
+            raise ValueError("No roborev analysis prompts found")
+        revision = sources["roborev"]["revision"]
+        for prompt in prompts:
+            url = f"https://github.com/kenn-io/roborev/blob/{revision}/{ROBOREV_PATH}/{prompt.name}"
+            name, content = roborev_skill(
+                prompt.stem, prompt.read_bytes().decode("utf-8"), url
+            )
+            files[f"skills/{name}/SKILL.md"] = content
+            files[f"skills/{name}/LICENSE.txt"] = license_text
+    return sources, files
+
+
+def digest(content):
+    return hashlib.sha256(content).hexdigest()
+
+
+def managed_path(root, relative):
+    path = Path(relative)
+    if (
+        path.is_absolute()
+        or len(path.parts) < 3
+        or path.parts[0] != "skills"
+        or ".." in path.parts
+    ):
+        raise ValueError(f"Invalid managed path: {relative}")
+    target = root
+    for part in path.parts:
+        target /= part
+        if target.is_symlink():
+            raise ValueError(f"Refusing to write through symlink: {target}")
+    return target
+
+
+def sync(root, sources, files, *, force=False, check=False):
+    lock = root / LOCK
+    if lock.is_symlink():
+        raise ValueError(f"Refusing to overwrite symlink: {lock}")
+    previous = (
+        json.loads(lock.read_text(encoding="utf-8"))["files"] if lock.exists() else {}
+    )
+    manifest = {
+        "sources": sources,
+        "files": {name: digest(content) for name, content in sorted(files.items())},
+    }
+    lock_content = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
+    updates = {}
+    removals = []
+    conflicts = []
+    # Preflight every destination before writing or removing anything.
+    for name in sorted(previous.keys() | files.keys()):
+        target = managed_path(root, name)
+        current = target.read_bytes() if target.exists() else None
+        desired = files.get(name)
+        if current == desired:
+            continue
+        if current is not None and previous.get(name) != digest(current) and not force:
+            conflicts.append(name)
+        if desired is None:
+            removals.append(target)
+        else:
+            updates[target] = desired
+    if conflicts:
+        raise ValueError(
+            "Local edits or unmanaged files would be overwritten:\n  "
+            + "\n  ".join(conflicts)
+            + "\nReview them first; --force replaces them with upstream content."
+        )
+    if not lock.exists() or lock.read_bytes() != lock_content:
+        updates[lock] = lock_content
+    for target in updates:
+        print(f"{'Would write' if check else 'Write'} {target.relative_to(root)}")
+    for target in removals:
+        print(f"{'Would remove' if check else 'Remove'} {target.relative_to(root)}")
+    if not check:
+        for target, content in updates.items():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        for target in removals:
+            target.unlink()
+            if not any(target.parent.iterdir()):
+                target.parent.rmdir()
+    changed = bool(updates or removals)
+    if not changed:
+        print("External skills are up to date.")
+    return changed
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Report pending changes without writing; exit 1 if out of date",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Replace locally edited managed files and conflicting destinations",
+    )
+    args = parser.parse_args()
+    try:
+        sources, files = collect()
+        changed = sync(REPO, sources, files, force=args.force, check=args.check)
+        return 1 if args.check and changed else 0
+    except subprocess.CalledProcessError as error:
+        print(f"sync-external-skills: {error.stderr or error}", file=sys.stderr)
+    except (ValueError, OSError) as error:
+        print(f"sync-external-skills: {error}", file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

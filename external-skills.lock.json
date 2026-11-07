@@ -1,0 +1,35 @@
+{
+  "files": {
+    "skills/roborev-analyze-api-design/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-api-design/SKILL.md": "c8bbb7b36cb0045ac059c142e4067954368f39beb10cea12802905e9dc6964fc",
+    "skills/roborev-analyze-architecture/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-architecture/SKILL.md": "7d18b6c066e07fa9d89a64eae891e71ed11e167c1cb46551a159a4202fb22202",
+    "skills/roborev-analyze-complexity/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-complexity/SKILL.md": "7008c431e51f728fd13b1b3efaa0ad4ad5ec7f64ec0d82cbf016253d9bcbde92",
+    "skills/roborev-analyze-dead-code/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-dead-code/SKILL.md": "eca17c43fa5c07d7b3438e9719a4d0afd7afa5c8e3e4304d566374334c67e464",
+    "skills/roborev-analyze-duplication/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-duplication/SKILL.md": "3807e32c4e8bcb12e00d32387eff93532db30011d0e7fec678aaba59f4237836",
+    "skills/roborev-analyze-refactor/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-refactor/SKILL.md": "c1654256aadd5149ca89a12f266454de023214529bc9760e224d28e6ec9c0a68",
+    "skills/roborev-analyze-security/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-security/SKILL.md": "b1458b7f3bd54fb7bbe7cca47e7c83f796d254a108123d5037231a83f082c283",
+    "skills/roborev-analyze-test-fixtures/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
+    "skills/roborev-analyze-test-fixtures/SKILL.md": "7fb3f0e8d08302bf0b76109f5dc760674fc16072bed8a882670b413c573afede",
+    "skills/thermo-nuclear-code-quality-review/LICENSE.txt": "702f5f331b56aff0e33d8c7826df5202559f894145eb70355c6477b55b5bb8a0",
+    "skills/thermo-nuclear-code-quality-review/SKILL.md": "7faca08b51b643b2ddd0836f92af15574444024685dcc1e677dbbb39ae8c9e8f",
+    "skills/thermo-nuclear-code-quality-review/SOURCE.md": "6dff792fcda53ad77e7f38e97611d2da3eda3d3072cdaa6255e8bc7c4bddd59a"
+  },
+  "sources": {
+    "cursor": {
+      "path": "cursor-team-kit/skills/thermo-nuclear-code-quality-review",
+      "repository": "https://github.com/cursor/plugins.git",
+      "revision": "6b0300214a09fd6029cfb7077043125758cd1fd2"
+    },
+    "roborev": {
+      "path": "internal/prompt/analyze",
+      "repository": "https://github.com/kenn-io/roborev.git",
+      "revision": "0cc4d482018fb022341adbdd84ff1e6c23a14083"
+    }
+  }
+}
