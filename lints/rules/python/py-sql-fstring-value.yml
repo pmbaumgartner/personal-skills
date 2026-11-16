@@ -1,0 +1,21 @@
+id: py-sql-fstring-value
+language: python
+severity: warning
+files: ["**/*.py"]
+ignores: ["**/migrations/**"]
+message: "SQL f-string interpolates value `$V` into the query."
+note: |
+  Pass the value as a query parameter, such as `@name` or `%(name)s`, and keep interpolation for table and column names.
+  Typical failure: `WHERE placed_at < DATE '{cutoff}'` or `LIMIT {limit}` breaks on a value with a quote or the wrong type, opens the query to injection when the value comes from input, and makes each run a new query text that the engine can't cache.
+  Fine for constants and identifiers; the rule already skips UPPER_CASE names and values that don't follow a comparison, `LIMIT`, `OFFSET`, `IN` or a quote.
+rule:
+  kind: interpolation
+  has: { nthChild: 1, pattern: $V }
+  inside:
+    kind: string
+    all:
+      - has: { kind: string_start, regex: '^[rRbB]?[fF]' }
+      - regex: '\b(SELECT|INSERT|UPDATE|DELETE|MERGE)\b'
+  follows: { kind: string_content, regex: "((=|<|>|\\bLIMIT|\\bOFFSET|\\bIN)\\s*\\(?|')$" }
+  not:
+    has: { nthChild: 1, regex: '(^|\.)_?[A-Z][A-Z0-9_]+$' }

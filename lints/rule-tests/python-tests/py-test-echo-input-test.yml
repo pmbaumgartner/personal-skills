@@ -1,0 +1,42 @@
+id: py-test-echo-input
+valid:
+  - |
+    def test_limit(orders):
+        report = summarize(orders, max_rows=2)
+        assert len(report.rows) == 2
+  - |
+    def test_parse():
+        result = parse(text="5")
+        assert result.text == 5
+  - |
+    def test_round_trip(repo):
+        repo.create(name="x")
+        stored = repo.get_by_name("x")
+        assert stored.name == "x"
+  - |
+    def test_optional():
+        item = build(note=None)
+        assert item.note is not None
+  - |
+    def test_other_name():
+        job = start(retries=3)
+        assert job.attempts == 3
+invalid:
+  - |
+    def test_summarize(orders):
+        report = summarize(orders, max_rows=2, currency="USD")
+        assert report.max_rows == 2
+  - |
+    def test_flags():
+        opts = Options.defaults(verbose=False)
+        assert opts.level == 0
+        assert opts.verbose is False
+  - |
+    async def test_create(service):
+        created = await service.create(customer=CUSTOMER_ID)
+        assert created.customer == CUSTOMER_ID
+  - |
+    class ClientTest(TestCase):
+        def test_init(self):
+            client = Client(host="h")
+            assert client.host == "h"

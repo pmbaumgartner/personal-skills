@@ -1,0 +1,45 @@
+id: py-test-echo-input
+language: python
+severity: warning
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py"]
+message: "Asserts `$R.$K` equals the `$K=` argument that built `$R`."
+note: |
+  Delete the assertion. It checks that a value passed in under a name comes back out under the same name, which only restates the signature.
+  Typical failure: `report = summarize(orders, max_rows=2)` then `assert report.max_rows == 2` passes whether or not `summarize` honored the limit. Assert on what the argument changes instead, such as the number of rows in the report.
+  Fine when the call is a real boundary the value must survive, such as a database write read back from a fresh query; then read it back from that query, not from the object you built.
+rule:
+  kind: assert_statement
+  has:
+    kind: comparison_operator
+    regex: '^[\s\S]*?(==|\bis\b)'
+    not: { regex: '\bis\s+not\b|!=' }
+    all:
+      - has:
+          nthChild: 1
+          kind: attribute
+          all:
+            - has: { field: object, kind: identifier, pattern: $R }
+            - has: { field: attribute, pattern: $K }
+      - has:
+          nthChild: 2
+          pattern: $V
+          any: [ { kind: integer }, { kind: float }, { kind: string }, { kind: "true" }, { kind: "false" }, { kind: none }, { kind: identifier }, { kind: attribute } ]
+  follows:
+    stopBy: end
+    kind: expression_statement
+    has:
+      kind: assignment
+      all:
+        - has: { field: left, pattern: $R }
+        - has:
+            field: right
+            any: [ { kind: call }, { kind: await, has: { kind: call } } ]
+            has:
+              stopBy: end
+              kind: keyword_argument
+              all:
+                - has: { field: name, pattern: $K }
+                - has: { field: value, pattern: $V }
+  inside:
+    stopBy: { kind: function_definition }
+    matches: py-test-function

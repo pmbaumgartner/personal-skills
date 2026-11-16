@@ -2,17 +2,29 @@ id: py-test-asserts-sql-text
 language: python
 severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py"]
-message: "Test checks for a SQL fragment in generated query text."
+message: "Test asserts on generated SQL text."
 note: |
   Run the query against an emulator or a fixture table and assert on the rows it returns or the rows it changes.
   Typical failure: `assert "MERGE" in sql` or `assert "WHERE x IS NULL" not in query` passes when the predicate is in the wrong CTE or has the wrong join, and fails when someone reformats the query or renames an alias.
+  Comparing the whole query to a string is worse: it fails on every formatting or alias change and still doesn't prove the query returns the right rows.
   Fine when no engine can run the dialect locally and the fragment is the contract, such as a filter that keeps a query from scanning a whole table; keep one such assertion, not one per clause.
 utils:
   sql-string:
     kind: string
     regex: '\b(SELECT|MERGE|INSERT|UPDATE|DELETE|JOIN|WHERE|GROUP BY|ORDER BY|BEGIN TRANSACTION|CREATE (OR REPLACE )?(TEMP )?TABLE|WITH \w+ AS|QUALIFY|PARTITION BY|UNION ALL|EXISTS)\b'
+  full-query:
+    any:
+      - { kind: string, regex: '\bSELECT\b[\s\S]*\bFROM\b|\b(INSERT INTO|DELETE FROM|MERGE INTO)\b' }
+      - { kind: concatenated_string, regex: '\bSELECT\b[\s\S]*\bFROM\b|\b(INSERT INTO|DELETE FROM|MERGE INTO)\b' }
 rule:
   any:
+    - kind: comparison_operator
+      regex: '=='
+      inside: { kind: assert_statement, stopBy: end }
+      has:
+        any:
+          - matches: full-query
+          - { kind: parenthesized_expression, has: { matches: full-query } }
     - kind: assert_statement
       has:
         stopBy: end

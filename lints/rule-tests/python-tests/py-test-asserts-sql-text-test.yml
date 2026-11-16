@@ -10,7 +10,22 @@ valid:
   - |
     def test_status(result):
         assert result.status == "DELETE"
+  - |
+    def test_fetch(db):
+        assert db.fetch_all("SELECT 1 AS x FROM t") == [{"x": 1}]
+  - |
+    def test_method(request):
+        assert request.method == "DELETE"
 invalid:
+  - |
+    def test_report_sql():
+        assert render_report_sql(limit=5) == (
+            "SELECT id, total "
+            "FROM orders ORDER BY total DESC LIMIT 5"
+        )
+  - |
+    def test_delete(sql):
+        assert sql == "DELETE FROM t WHERE id = @id"
   - |
     def test_repair(sql):
         assert "MERGE INTO t" in sql

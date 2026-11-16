@@ -3,7 +3,9 @@ valid:
   - assert parse("a", limit=MAX_ITEMS) == ["a"]
   - assert config.timeout_s == 30
   - assert MAX_ITEMS == computed_limit()
+  - assert result.limit == MAX_ITEMS
 invalid:
   - assert MAX_ITEMS == 100
   - assert settings.DEFAULT_FORMAT == "json"
   - assert pkg.SUPPORTED == ("a", "b")
+  - assert result.limit == MAX_ITEMS == 500

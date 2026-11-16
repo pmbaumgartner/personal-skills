@@ -1,0 +1,23 @@
+id: py-sql-fstring-value
+valid:
+  - |
+    query = f"SELECT id FROM `{schema}.{table}` WHERE placed_at < @cutoff"
+  - |
+    query = f"SELECT id FROM t WHERE state = '{State.OPEN}' AND region = '{config.HOME_REGION}' LIMIT {_MAX_ROWS}"
+  - |
+    message = f"limit = {limit}"
+  - |
+    query = "SELECT id FROM t WHERE placed_at < '{cutoff}'"
+invalid:
+  - |
+    query = f"SELECT id FROM t WHERE DATE(placed_at) < DATE '{cutoff}'"
+  - |
+    query = f"""
+        SELECT id FROM t
+        ORDER BY placed_at
+        LIMIT {limit}
+    """
+  - |
+    query = f"DELETE FROM t WHERE id = {order_id}"
+  - |
+    query = f"SELECT id FROM t WHERE code IN ({codes})"
