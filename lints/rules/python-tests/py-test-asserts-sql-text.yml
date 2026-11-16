@@ -7,11 +7,12 @@ note: |
   Run the query against an emulator or a fixture table and assert on the rows it returns or the rows it changes.
   Typical failure: `assert "MERGE" in sql` or `assert "WHERE x IS NULL" not in query` passes when the predicate is in the wrong CTE or has the wrong join, and fails when someone reformats the query or renames an alias.
   Comparing the whole query to a string is worse: it fails on every formatting or alias change and still doesn't prove the query returns the right rows.
+  Membership checks against variables named `sql`, `query`, `*_sql` or `*_query` are also leads, even when the fragment has no SQL keyword. Those names can refer to non-SQL data; review those hits before changing the test.
   Fine when no engine can run the dialect locally and the fragment is the contract, such as a filter that keeps a query from scanning a whole table; keep one such assertion, not one per clause.
 utils:
   sql-string:
     kind: string
-    regex: '\b(SELECT|MERGE|INSERT|UPDATE|DELETE|JOIN|WHERE|GROUP BY|ORDER BY|BEGIN TRANSACTION|CREATE (OR REPLACE )?(TEMP )?TABLE|WITH \w+ AS|QUALIFY|PARTITION BY|UNION ALL|EXISTS)\b'
+    regex: '\b(SELECT|MERGE|INSERT|UPDATE|DELETE|JOIN|WHERE|GROUP BY|ORDER BY|LIMIT|BEGIN TRANSACTION|CREATE (OR REPLACE )?(TEMP )?TABLE|WITH \w+ AS|QUALIFY|PARTITION BY|UNION ALL|EXISTS)\b'
   full-query:
     any:
       - { kind: string, regex: '\bSELECT\b[\s\S]*\bFROM\b|\b(INSERT INTO|DELETE FROM|MERGE INTO)\b' }
@@ -37,3 +38,12 @@ rule:
         - has:
             field: arguments
             has: { nthChild: 1, matches: sql-string }
+    - kind: assert_statement
+      has:
+        stopBy: end
+        all:
+          - any:
+              - pattern: $FRAGMENT in $QUERY
+              - pattern: $FRAGMENT not in $QUERY
+          - has: { nthChild: 1, kind: string }
+          - has: { nthChild: 2, kind: identifier, regex: '(^|_)(sql|query)$' }

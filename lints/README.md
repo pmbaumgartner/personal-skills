@@ -65,7 +65,7 @@ rule:
   regex: "(^|_)page(s)?(_|$)"
 ```
 
-A test that patches the project's own code instead of running it needs the package name. For a package named `mypkg`:
+A test that patches the project's own code instead of running it needs the package name. For a package named `mypkg`, with tests that also use `from mypkg import jobs`:
 
 ```yaml
 id: test-patches-own-module
@@ -76,14 +76,30 @@ message: "Test replaces project code `$T`."
 note: "Run the real code and fake only system boundaries, unless it pulls in a dependency tests can't build."
 rule:
   any:
-    - pattern: patch($T $$$)
-    - pattern: mock.patch($T $$$)
-    - pattern: mocker.patch($T $$$)
-    - pattern: monkeypatch.setattr($T, $$$)
-  has:
-    field: arguments
-    has: { nthChild: 1, kind: string, regex: '^["'']mypkg\.' }
+    - all:
+        - any:
+            - pattern: patch($T $$$)
+            - pattern: mock.patch($T $$$)
+            - pattern: mocker.patch($T $$$)
+            - pattern: monkeypatch.setattr($T, $$$)
+        - has:
+            field: arguments
+            has: { nthChild: 1, kind: string, regex: '^["'']mypkg\.' }
+    - all:
+        - any:
+            - pattern: patch.object($T, $$$)
+            - pattern: mock.patch.object($T, $$$)
+            - pattern: mocker.patch.object($T, $$$)
+            - pattern: monkeypatch.setattr($T, $$$)
+        - has:
+            field: arguments
+            has:
+              nthChild: 1
+              any: [{ kind: identifier }, { kind: attribute }]
+              regex: '^(mypkg(\.|$)|jobs$)'
 ```
+
+Replace `mypkg` and the imported module name `jobs` with the repository's package and known module bindings. Include aliases explicitly; this rule does not resolve imports. Keep genuine system-boundary patches even when the boundary is exposed through project code.
 
 ## Standard linter settings
 

@@ -16,6 +16,15 @@ valid:
   - |
     def test_method(request):
         assert request.method == "DELETE"
+  - |
+    def test_results(rows):
+        assert "item_id, total" in rows
+  - |
+    def test_binding(query, expected):
+        assert expected in query
+  - |
+    def test_result(query_result):
+        assert "ready" in query_result
 invalid:
   - |
     def test_report_sql():
@@ -39,3 +48,18 @@ invalid:
     class ViewTest(TestCase):
         def test_view(self):
             self.assertIn("GROUP BY", self.view_sql)
+  - |
+    def test_limit(statement):
+        assert "LIMIT @row_limit" in statement
+  - |
+    def test_predicate(query):
+        assert "created_at < @cutoff" in query
+  - |
+    def test_columns(report_sql):
+        assert "item_id, total" in report_sql
+  - |
+    def test_predicate_removed(report_query):
+        assert "archived_at IS NULL" not in report_query
+  - |
+    def test_columns(sql):
+        assert "item_id, total" in sql

@@ -2,7 +2,31 @@ id: py-test-mock-call-assertion
 valid:
   - assert result == expected
   - total = sink.call_count
+  - |
+    def collect_calls(sink):
+        calls = sink.call_args_list
+        return calls
+  - |
+    def test_setup(sink):
+        sink.call_count = 0
+        assert sink.enabled
+  - |
+    def test_result(result):
+        total = result.total
+        assert total == 2
 invalid:
   - client.send.assert_called_once_with(payload)
   - sink.assert_not_called()
   - assert client.send.call_count == 2
+  - |
+    def test_arguments(client):
+        parameters = client.query.call_args.kwargs["parameters"]
+        assert parameters["mode"] == "active"
+  - |
+    def test_calls(sink):
+        calls = sink.call_args_list
+        assert len(calls) == 2
+  - |
+    async def test_awaited(client):
+        arguments = client.send.await_args_list
+        assert len(arguments) == 1

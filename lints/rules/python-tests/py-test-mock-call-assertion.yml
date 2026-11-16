@@ -2,17 +2,28 @@ id: py-test-mock-call-assertion
 language: python
 severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
-message: "Asserts how a mock was called."
+message: "Asserts or inspects how a mock was called."
 note: |
   Call assertions often pin implementation: they fail on refactors that keep the behavior.
   Keep one only when the mock is a system boundary (network, filesystem, clock, another process) and the call checks a choice or transformation the unit makes.
   An argument the test supplied that passes through unchanged is forwarding, not behavior.
+  Assigning call metadata to a variable can hide the same coupling. Follow its use before changing the test; reading boundary arguments can check a meaningful application decision.
+utils:
+  call-metadata:
+    kind: attribute
+    has: { field: attribute, regex: '^(call_count|call_args|call_args_list|mock_calls|await_count|await_args|await_args_list)$' }
 rule:
   any:
     - kind: call
       has:
         field: function
         regex: '\.(assert_called|assert_called_once|assert_called_with|assert_called_once_with|assert_has_calls|assert_any_call|assert_not_called|assert_awaited\w*)$'
-    - kind: attribute
-      has: { field: attribute, regex: '^(call_count|call_args|call_args_list|mock_calls|await_count|await_args)$' }
+    - matches: call-metadata
       inside: { kind: assert_statement, stopBy: end }
+    - kind: assignment
+      inside: { matches: py-test-function, stopBy: end }
+      has:
+        field: right
+        any:
+          - matches: call-metadata
+          - has: { matches: call-metadata, stopBy: end }
