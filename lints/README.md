@@ -123,7 +123,13 @@ TypeScript rules use the tsx grammar for both `.ts` and `.tsx` files (see `sgcon
 
 ## Adding a rule
 
-1. Write `rules/<language>/<id>.yml`. Prefix the id with `py-`, `rs-`, `ts-` or `go-`, or `py-test-` in `rules/python-tests/`. Its `message` says what was found. Its `note` says how to fix the problem, describes the failure it prevents (`Typical failure: …`), and says when a hit is fine. Someone reading only the rule file should understand it.
+1. Write `rules/<language>/<id>.yml`. Prefix the id with `py-`, `rs-`, `ts-` or `go-`, or `py-test-` in `rules/python-tests/`. Someone reading only the rule file should understand it.
+   - `message`: one short sentence that says what was found, using metavariables such as `$NAME`. Leave the reason and the fix to the note.
+   - `note`: one idea per line, in this order:
+     1. The fix, as a command (`Use …`, `Delete …`, `Assert …`).
+     2. The failure it prevents, as `Typical failure: …` with a small concrete example.
+     3. When a hit is fine (`Fine when …`) and which cases the rule exempts.
+   - Put identifiers and code in backticks.
 2. Write `rule-tests/<language>/<id>-test.yml` with `valid` cases (including the exemptions you chose) and an `invalid` case for each pattern branch.
 3. If the rule belongs to a new family, add it to the family list above.
 4. Run the tests:

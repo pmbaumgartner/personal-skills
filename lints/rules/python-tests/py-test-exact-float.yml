@@ -4,8 +4,8 @@ severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Exact equality with `$F`, a float that's probably computed."
 note: |
+  Use `pytest.approx` or `math.isclose` with the tolerance the behavior specifies.
   Exact float equality breaks on harmless changes in operation order or platform.
-  Use pytest.approx (or math.isclose) with the tolerance the behavior specifies.
 rule:
   kind: comparison_operator
   regex: '=='

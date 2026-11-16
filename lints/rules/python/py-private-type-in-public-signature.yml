@@ -4,9 +4,8 @@ severity: warning
 ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
 message: "Public function `$NAME` uses a private type in its signature."
 note: |
-  Callers can't import or name the type they're expected to pass or receive.
   Make the type public, or make the function private.
-  Typical failure: `create_server(cache: _Cache)`, which callers must build without being able to import the type.
+  Typical failure: `create_server(cache: _Cache)`, where callers must build a type they can't import or name.
 utils:
   # A project-private class. `module._Name` belongs to another package and is importable
   # (lxml's `etree._Element`); a module-level TypeVar is private by convention.

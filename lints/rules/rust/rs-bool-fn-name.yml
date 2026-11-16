@@ -4,8 +4,8 @@ severity: warning
 ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
 message: "Public function `$NAME` returns bool but isn't named like a question."
 note: |
-  Use is_/has_/can_/should_ (or a verb such as contains/matches) so call sites read as conditions.
-  Typical failure: `scanned(page) -> bool` reads like an action at the call site; `is_scanned` doesn't.
+  Use `is_`, `has_`, `can_` or `should_`, or a verb such as `contains` or `matches`.
+  Typical failure: `scanned(page) -> bool` reads like an action at the call site; `is_scanned` reads like a condition.
 rule:
   kind: function_item
   all:

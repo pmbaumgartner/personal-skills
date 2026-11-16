@@ -4,8 +4,8 @@ severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Test reaches into private `$NAME`."
 note: |
-  Tests that reach into private names fail on refactors that keep the behavior.
-  Test through the public behavior that uses it, or make it public if callers need it. Production seams that exist only for tests should go with the test.
+  Test through the public behavior that uses it, or make it public if callers need it. Delete production seams that exist only for tests.
+  Tests on private names fail on refactors that keep the behavior.
 rule:
   any:
     - kind: attribute

@@ -5,8 +5,8 @@ ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conft
 message: "Field `$NAME` stores a kind as `str`."
 note: |
   Use a named `Literal` alias or a `StrEnum`. If other fields depend on the kind, use one dataclass per kind and a union.
-  Fine when the set of values really is open.
   Typical failure: records told apart by a `status` string and by which keys are present, with the checks repeated in every consumer.
+  Fine when the set of values is open.
 rule:
   kind: assignment
   all:

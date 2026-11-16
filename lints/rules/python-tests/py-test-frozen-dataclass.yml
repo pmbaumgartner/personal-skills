@@ -4,7 +4,8 @@ severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Test checks that a frozen dataclass can't be assigned to."
 note: |
-  This tests the dataclasses module, not the project: `frozen=True` is its guarantee, and the declaration already says it. Delete the test.
+  Delete the test.
+  `frozen=True` is a guarantee of the dataclasses module, and the declaration already states it.
 rule:
   any:
     - pattern: pytest.raises(FrozenInstanceError $$$)

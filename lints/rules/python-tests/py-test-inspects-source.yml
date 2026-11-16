@@ -4,8 +4,8 @@ severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Test reads source code or docs instead of running behavior."
 note: |
-  Checking that text exists in a file breaks on rewording and passes when the behavior is broken.
-  Run the code, or run the documented example (doctest) instead of grepping for it.
+  Run the code, or run the documented example as a doctest.
+  Checking for text in a file breaks on rewording and passes when the behavior is broken.
 rule:
   any:
     - pattern: inspect.getsource($$$)

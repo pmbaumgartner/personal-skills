@@ -1,10 +1,11 @@
 id: rs-pub-fn-anyhow-result
 language: rust
 severity: info
-message: "Public function `$NAME` returns an anyhow error, which erases error kinds for library callers."
+message: "Public function `$NAME` returns an anyhow error."
 note: |
-  Fine in binaries and application glue. In a library's public API, return a typed error enum.
-  Typical failure: public methods return anyhow::Result while the typed error enum stays crate-private, so callers can't match on error kinds.
+  In a library's public API, return a typed error enum.
+  Typical failure: public methods return `anyhow::Result` while the typed error enum stays crate-private, so callers can't match on error kinds.
+  Fine in binaries and application glue.
 ignores: ["**/main.rs", "**/bin/**", "**/build.rs", "**/tests/**", "**/examples/**", "**/benches/**", "**/vendor/**"]
 rule:
   kind: function_item

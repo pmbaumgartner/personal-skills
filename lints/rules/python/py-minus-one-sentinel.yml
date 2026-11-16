@@ -4,9 +4,9 @@ severity: warning
 ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
 message: "`$NAME` defaults to -1 as a hidden \"none\" value."
 note: |
-  Use `int | None = None` so the absence of a value is visible in the type.
-  Conventional -1 parameters (axis, dim, index, n_jobs) are exempt.
-  Typical failure: `count=-1` meaning "all", which a caller can mistake for a real value or pass by accident.
+  Use `int | None = None` so a missing value shows in the type.
+  Typical failure: `count=-1` means "all", and a caller mistakes it for a real value or passes it by accident.
+  Conventional -1 parameters (`axis`, `dim`, `index`, `n_jobs`) are exempt.
 rule:
   any:
     - kind: typed_default_parameter

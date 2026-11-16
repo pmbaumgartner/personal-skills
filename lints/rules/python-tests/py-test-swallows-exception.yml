@@ -2,9 +2,10 @@ id: py-test-swallows-exception
 language: python
 severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
-message: "A test catches every exception, so failures inside the try can't fail it."
+message: "Test catches every exception."
 note: |
-  Let unexpected errors propagate, or use pytest.raises with a specific type.
+  Let unexpected errors propagate, or use `pytest.raises` with a specific type.
+  Failures inside the `try` can't fail the test.
 rule:
   kind: except_clause
   # bare `except:`, or `except Exception` / `except (Exception, ...)`, with or without `as e`

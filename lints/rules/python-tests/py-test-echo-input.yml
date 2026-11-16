@@ -4,9 +4,9 @@ severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py"]
 message: "Asserts `$R.$K` equals the `$K=` argument that built `$R`."
 note: |
-  Delete the assertion. It checks that a value passed in under a name comes back out under the same name, which only restates the signature.
-  Typical failure: `report = summarize(orders, max_rows=2)` then `assert report.max_rows == 2` passes whether or not `summarize` honored the limit. Assert on what the argument changes instead, such as the number of rows in the report.
-  Fine when the call is a real boundary the value must survive, such as a database write read back from a fresh query; then read it back from that query, not from the object you built.
+  Assert on what the argument changes, or delete the assertion.
+  Typical failure: `report = summarize(orders, max_rows=2)` then `assert report.max_rows == 2` passes whether or not `summarize` honored the limit. Count the rows in the report instead.
+  Fine when the value must survive a real boundary, such as a database write. Then read it back with a fresh query, not from the object you built.
 rule:
   kind: assert_statement
   has:

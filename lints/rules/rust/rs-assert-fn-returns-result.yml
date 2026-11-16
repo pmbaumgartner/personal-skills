@@ -2,10 +2,10 @@ id: rs-assert-fn-returns-result
 language: rust
 severity: warning
 ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
-message: "`$NAME` returns a Result, but `assert_` in Rust suggests a panic."
+message: "`$NAME` is named `assert_` but returns a Result."
 note: |
-  Rename to check_*/validate_* (or make it panic).
-  Typical failure: callers see `assert_valid(x)` and assume it panics, then drop the returned Result.
+  Rename it `check_*` or `validate_*`, or make it panic.
+  Typical failure: callers read `assert_valid(x)` as a panic and drop the returned Result.
 rule:
   kind: function_item
   all:

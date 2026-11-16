@@ -4,8 +4,9 @@ severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "`$NAME` only checks that a result exists or has a type."
 note: |
-  `is not None`, isinstance, hasattr, callable and `len(x) > 0` pass for almost any wrong result.
-  Assert the values the behavior promises. Ignore the hit when the type itself is the contract ("returns a numpy array").
+  Assert the values the behavior promises.
+  `is not None`, `isinstance`, `hasattr`, `callable` and `len(x) > 0` pass for almost any wrong result.
+  Fine when the type is the contract, such as "returns a numpy array".
 utils:
   weak-assert:
     kind: assert_statement

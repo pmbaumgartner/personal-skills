@@ -5,8 +5,8 @@ ignores: ["**/test/**", "**/tests/**", "**/e2e/**", "**/*.test.*", "**/*.spec.*"
 message: "`$NAME` stores a kind as `string`."
 note: |
   Use a union of string literals, and a discriminated union when other properties depend on the kind.
-  Fine when the set of values really is open, such as a MIME type.
   Typical failure: typed error codes widened to `string` at a worker or HTTP boundary, or results told apart with `"items" in result` instead of a `kind`.
+  Fine when the set of values is open, such as a MIME type.
 utils:
   kind-name:
     regex: '^(kind|type|status|state|mode|backend|phase|stage|variant|action|category)$'

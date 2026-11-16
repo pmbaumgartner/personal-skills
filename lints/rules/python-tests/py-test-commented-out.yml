@@ -4,7 +4,8 @@ severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Commented-out test code."
 note: |
-  Commented-out tests never run but read like coverage. Delete them; version control keeps the history.
+  Delete it. Version control keeps the history.
+  Commented-out tests never run but read like coverage.
 rule:
   kind: comment
   # `# assert x == y` is code; `# assert that the cache is cleared` is prose.

@@ -5,7 +5,7 @@ ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conft
 message: "Public function `$NAME` returns a bare tuple of 3 or more values."
 note: |
   Return a dataclass or NamedTuple so callers use names, not positions.
-  Typical failure: a function returning `(index, embeddings, chunks)`, so every caller unpacks by position and a reorder breaks them silently.
+  Typical failure: every caller unpacks `(index, embeddings, chunks)` by position, and a reorder breaks them silently.
 rule:
   kind: function_definition
   all:

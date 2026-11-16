@@ -2,9 +2,9 @@ id: rs-duration-without-unit
 language: rust
 severity: warning
 ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
-message: "`$NAME` is a bare number with no unit in its name."
+message: "`$NAME` is a number with no unit in its name."
 note: |
-  Use std::time::Duration, or add the unit (timeout_s, delay_ms, memory_limit_mib).
+  Use `std::time::Duration`, or add the unit (`timeout_s`, `delay_ms`, `memory_limit_mib`).
   Typical failure: Rust takes `timeout_s` while a binding or CLI says `timeout`, and the two drift apart.
 utils:
   unitless-name:

@@ -2,9 +2,10 @@ id: py-test-raises-broad-exception
 language: python
 severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
-message: "Expecting any Exception passes on unrelated failures (a typo, a TypeError)."
+message: "Test expects any exception."
 note: |
   Expect the specific error type the behavior raises.
+  A broad expectation also passes on unrelated failures, such as a typo or a TypeError.
 rule:
   any:
     - pattern: pytest.raises(Exception $$$)

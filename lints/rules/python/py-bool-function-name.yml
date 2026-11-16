@@ -4,9 +4,9 @@ severity: warning
 ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
 message: "`$NAME` returns bool but isn't named like a question."
 note: |
-  Prefix predicates with is_/has_/can_/should_, or use a third-person verb (contains, shows_on), so call sites read as conditions.
-  Properties are exempt: adjective properties such as `closed` are idiomatic.
-  Typical failure: `scanned(page) -> bool` reads like an action at the call site; `is_scanned` doesn't.
+  Prefix it with `is_`, `has_`, `can_` or `should_`, or use a third-person verb (`contains`, `shows_on`).
+  Typical failure: `scanned(page) -> bool` reads like an action at the call site; `is_scanned` reads like a condition.
+  Properties are exempt. Adjective properties such as `closed` are idiomatic.
 rule:
   kind: function_definition
   all:

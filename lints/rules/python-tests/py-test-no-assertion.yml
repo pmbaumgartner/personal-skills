@@ -2,10 +2,11 @@ id: py-test-no-assertion
 language: python
 severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
-message: "`$NAME` has no assertion, so it passes unless the code raises."
+message: "`$NAME` has no assertion."
 note: |
-  The test fails only if the code raises. Assert the behavior the test is named for, or delete it.
-  Helpers named assert_*/check_*/expect_*/verify_* count as assertions; rename a helper that asserts so it's recognized.
+  Assert the behavior the test is named for, or delete it.
+  Without an assertion, the test fails only if the code raises.
+  Helpers named `assert_*`, `check_*`, `expect_*` or `verify_*` count as assertions. Rename a helper that asserts so it's recognized.
 rule:
   matches: py-test-function
   has: { field: name, pattern: $NAME }

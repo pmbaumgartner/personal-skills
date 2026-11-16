@@ -4,8 +4,9 @@ severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Test asserts that something no longer exists."
 note: |
-  The absence of removed behavior isn't a contract unless something outside the tests (docs, a deprecation policy) says so.
-  Reintroducing it isn't a regression; test the supported behavior it would break instead.
+  Delete the test, and test the supported behavior that reintroducing the removed code would break.
+  Absence of removed behavior isn't a contract, so bringing it back isn't a regression.
+  Fine when docs or a deprecation policy promise the removal.
 rule:
   any:
     - pattern: assert not hasattr($$$)

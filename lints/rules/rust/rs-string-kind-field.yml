@@ -5,8 +5,8 @@ ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/
 message: "Field `$NAME` stores a kind as a string."
 note: |
   Use an enum (with `#[serde(rename_all = "snake_case")]` for the wire format), and move fields that only some kinds have into the variants.
-  Fine when the set of values really is open, such as a status passed through from another program.
-  Typical failure: `kind: String` plus several Options whose meaning depends on it, decoded again with string matches and `unwrap_or("")` fallbacks in every consumer.
+  Typical failure: `kind: String` plus several Options whose meaning depends on it, decoded again with string matches and `unwrap_or("")` in every consumer.
+  Fine when the set of values is open, such as a status passed through from another program.
 rule:
   kind: field_declaration
   all:

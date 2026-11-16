@@ -4,9 +4,9 @@ severity: warning
 ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
 message: "Public function `$NAME` has a single-letter parameter `$P`."
 note: |
-  Parameter names are documentation for public functions; say what the value is.
-  Closures, private helpers and idiomatic letters (f, i, j, k, m, n, s, x, y, z) are exempt (clippy::min_ident_chars is too noisy for that).
+  Name the parameter for what the value is. In a public function, parameter names are documentation.
   Typical failure: related functions take `p`, meaning one kind of offset in some and another kind in others.
+  Closures, private helpers and idiomatic letters (`f`, `i`, `j`, `k`, `m`, `n`, `s`, `x`, `y`, `z`) are exempt.
 rule:
   kind: function_item
   all:

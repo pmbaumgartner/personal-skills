@@ -5,7 +5,7 @@ files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "
 message: "Test looks like it protects legacy or deprecated behavior."
 note: |
   If the old form, alias or shim is no longer supported, delete it together with this test.
-  Keep it only if docs or users still rely on the compatibility path.
+  Fine when docs or users still rely on the compatibility path.
 rule:
   any:
     - matches: py-test-function

@@ -4,8 +4,8 @@ severity: warning
 ignores: ["**/test/**", "**/tests/**", "**/e2e/**", "**/*.test.*", "**/*.spec.*", "**/scripts/**", "**/vendor/**", "**/dist/**"]
 message: "`$NAME` is a number with no unit in its name."
 note: |
-  Add the unit (timeoutMs, delaySeconds) so callers can't pass seconds where milliseconds are expected.
-  Typical failure: one layer passes seconds and another expects milliseconds, and nothing in the names shows it.
+  Add the unit (`timeoutMs`, `delaySeconds`).
+  Typical failure: one layer passes seconds, another expects milliseconds, and nothing in the names shows it.
 utils:
   unitless-name:
     regex: '(?i)(^|[a-z0-9_])(timeout|duration|delay|interval|gap|ttl|period|elapsed|latency|wait)$'

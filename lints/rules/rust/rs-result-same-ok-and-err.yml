@@ -2,10 +2,10 @@ id: rs-result-same-ok-and-err
 language: rust
 severity: warning
 ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
-message: "`Result<$T, $T>`: the `Err` side has the same type as `Ok`, so it probably isn't an error."
+message: "`Result<$T, $T>` uses the same type for `Ok` and `Err`."
 note: |
-  If both outcomes are valid, name them with an enum (e.g. `Mapped::{Kept(n), Replaced(n)}`).
-  Typical failure: `map_offset -> Result<usize, usize>`, where Err means "removed; here is the replacement" rather than failure.
+  If both outcomes are valid, name them with an enum, such as `Mapped::{Kept(n), Replaced(n)}`.
+  Typical failure: `map_offset -> Result<usize, usize>`, where `Err` means "removed; here is the replacement", not failure.
 rule:
   pattern:
     context: "type X = Result<$T, $T>;"

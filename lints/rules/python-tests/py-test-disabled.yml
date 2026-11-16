@@ -4,8 +4,8 @@ severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Test is permanently skipped or expected to fail."
 note: |
-  A permanently skipped test protects nothing. Delete it, or fix it if it covers supported behavior nothing else does.
-  Conditional skips (skipif, a missing tool) are not flagged.
+  Delete it, or fix it if it covers supported behavior that nothing else covers.
+  A permanently skipped test protects nothing. Conditional skips (`skipif`, a missing tool) aren't flagged.
 rule:
   any:
     - kind: decorator

@@ -4,8 +4,9 @@ severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Asserts a full human-readable message."
 note: |
-  Full-message assertions break on any rewording. Fine when the message is a contract (CLI output scripts parse, an error code).
-  Otherwise assert the error type and the one detail that matters (the file name, the bad value) with `in` or `match=`.
+  Assert the error type and the one detail that matters (the file name, the bad value) with `in` or `match=`.
+  Full-message assertions break on any rewording.
+  Fine when the message is a contract, such as CLI output that scripts parse or an error code.
 rule:
   kind: assert_statement
   any:

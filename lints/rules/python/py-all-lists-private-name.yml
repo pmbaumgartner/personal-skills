@@ -2,10 +2,9 @@ id: py-all-lists-private-name
 language: python
 severity: warning
 ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
-message: "`__all__` exports a private (underscore) name."
+message: "`__all__` exports a private name."
 note: |
-  Either drop the underscore because the name is supported API, or leave it out of `__all__`.
-  Tests may import private names from the module directly.
+  Drop the underscore if the name is supported API. Otherwise leave it out of `__all__`; tests can import private names directly.
   Typical failure: `__all__` advertises helpers whose underscore says they aren't supported.
 rule:
   kind: string

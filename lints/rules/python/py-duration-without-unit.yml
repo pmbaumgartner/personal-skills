@@ -4,8 +4,8 @@ severity: warning
 ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
 message: "`$NAME` is a number with no unit in its name."
 note: |
-  Add the unit (timeout_s, delay_ms, memory_limit_mib) or use a unit type such as timedelta.
-  Typical failure: the Python API takes `timeout` in seconds while the native layer takes `timeout_ms`, and nothing in the names shows the mismatch.
+  Add the unit (`timeout_s`, `delay_ms`, `memory_limit_mib`) or use a unit type such as `timedelta`.
+  Typical failure: the Python API takes `timeout` in seconds, the native layer takes `timeout_ms`, and nothing in the names shows the mismatch.
 utils:
   unitless-name:
     regex: '(?i)(^|_)(timeout|duration|delay|interval|gap|ttl|period|elapsed|latency|wait|memory|memory_limit|mem_limit)$'

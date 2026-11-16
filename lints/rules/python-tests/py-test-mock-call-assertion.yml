@@ -4,10 +4,10 @@ severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
 message: "Asserts or inspects how a mock was called."
 note: |
-  Call assertions often pin implementation: they fail on refactors that keep the behavior.
-  Keep one only when the mock is a system boundary (network, filesystem, clock, another process) and the call checks a choice or transformation the unit makes.
-  An argument the test supplied that passes through unchanged is forwarding, not behavior.
-  Assigning call metadata to a variable can hide the same coupling. Follow its use before changing the test; reading boundary arguments can check a meaningful application decision.
+  Assert on the unit's result or effect instead.
+  Call assertions pin implementation and fail on refactors that keep the behavior. A test-supplied argument that passes through unchanged is forwarding, not behavior.
+  Fine when the mock is a system boundary (network, filesystem, clock, another process) and the call checks a choice or transformation the unit makes.
+  Call metadata assigned to a variable is also flagged. Follow its use before changing the test.
 utils:
   call-metadata:
     kind: attribute

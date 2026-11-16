@@ -2,7 +2,7 @@ id: py-test-tautology
 language: python
 severity: warning
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
-message: "This assertion can't fail."
+message: "Assertion can't fail."
 note: |
   Compare against an independently known expected value.
 rule:

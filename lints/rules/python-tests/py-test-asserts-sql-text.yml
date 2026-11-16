@@ -4,11 +4,10 @@ severity: info
 files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py"]
 message: "Test asserts on generated SQL text."
 note: |
-  Run the query against an emulator or a fixture table and assert on the rows it returns or the rows it changes.
-  Typical failure: `assert "MERGE" in sql` or `assert "WHERE x IS NULL" not in query` passes when the predicate is in the wrong CTE or has the wrong join, and fails when someone reformats the query or renames an alias.
-  Comparing the whole query to a string is worse: it fails on every formatting or alias change and still doesn't prove the query returns the right rows.
-  Membership checks against variables named `sql`, `query`, `*_sql` or `*_query` are also leads, even when the fragment has no SQL keyword. Those names can refer to non-SQL data; review those hits before changing the test.
-  Fine when no engine can run the dialect locally and the fragment is the contract, such as a filter that keeps a query from scanning a whole table; keep one such assertion, not one per clause.
+  Run the query against an emulator or a fixture table and assert on the rows it returns or changes.
+  Typical failure: `assert "MERGE" in sql` or `assert "WHERE x IS NULL" not in query` passes when the predicate is in the wrong CTE or join, and fails when someone reformats the query or renames an alias. Comparing the whole query string fails on every such change and still proves nothing about the rows.
+  Variables named `sql`, `query`, `*_sql` or `*_query` are flagged even when the fragment has no SQL keyword. Check that they hold SQL before changing the test.
+  Fine when no engine can run the dialect locally and the fragment is the contract, such as a filter that prevents a full table scan. Keep one such assertion, not one per clause.
 utils:
   sql-string:
     kind: string

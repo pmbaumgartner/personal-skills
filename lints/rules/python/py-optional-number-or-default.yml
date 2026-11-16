@@ -2,11 +2,11 @@ id: py-optional-number-or-default
 language: python
 severity: info
 ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
-message: "`$P or ...` replaces an explicit 0 in optional number `$P` with the fallback."
+message: "`$P or ...` replaces an explicit 0 with the fallback."
 note: |
-  Write `$P if $P is not None else <fallback>`, or reject 0 explicitly when it is invalid.
-  Typical failure: `retries = retries or DEFAULT_RETRIES` turns a caller's explicit `retries=0` into the default, and `index or 1` skips the first element of a zero-based sequence.
-  Fine when 0 can't be a real value (a year, an enum whose 0 means unspecified, a timestamp); the rule skips `or 0` and `or None`.
+  Write `$P if $P is not None else <fallback>`, or reject 0 explicitly when it's invalid.
+  Typical failure: `retries = retries or DEFAULT_RETRIES` turns a caller's `retries=0` into the default, and `index or 1` skips the first element of a zero-based sequence.
+  Fine when 0 can't be a real value, such as a year, a timestamp or an enum whose 0 means unspecified. The rule skips `or 0` and `or None`.
 rule:
   pattern: $P or $D
   not:

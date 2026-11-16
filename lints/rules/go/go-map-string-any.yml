@@ -4,9 +4,9 @@ severity: warning
 ignores: ["**/*_test.go", "**/testdata/**", "**/vendor/**", "**/examples/**"]
 message: "`map[string]any` in a signature or struct field."
 note: |
-  Decode into a struct with json tags at the boundary, and pass that on. Lookups by string key and type assertions on the map turn bad input into zero values without an error.
-  Fine at a truly schemaless boundary, such as arbitrary user metadata passed through.
-  Typical failure: JSON used as an internal interface, ending in chains like `m["items"].([]any)[0].(map[string]any)` that break silently when the shape changes.
+  Decode into a struct with json tags at the boundary and pass that on.
+  Typical failure: JSON used as an internal interface, with chains like `m["items"].([]any)[0].(map[string]any)` that turn shape changes into zero values instead of errors.
+  Fine at a truly schemaless boundary, such as user metadata passed through.
 rule:
   kind: map_type
   regex: '^map\[string\](any|interface\{\})$'
