@@ -1,0 +1,9 @@
+id: py-main-discards-exit-code
+valid:
+  - raise SystemExit(main())
+  - sys.exit(main())
+invalid:
+  - main()
+  - |
+    if __name__ == "__main__":
+        main()

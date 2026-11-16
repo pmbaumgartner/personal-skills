@@ -1,0 +1,12 @@
+id: py-test-frozen-dataclass
+valid:
+  - |
+    with pytest.raises(ValidationError):
+        Range(start=2, end=1)
+invalid:
+  - |
+    with pytest.raises(FrozenInstanceError):
+        point.x = 3
+  - |
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        point.x = 3

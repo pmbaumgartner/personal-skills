@@ -1,0 +1,29 @@
+id: py-frozen-dataclass-mutable-field
+language: python
+severity: warning
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "Frozen dataclass field `$NAME` has a mutable type, so the object can still change."
+note: |
+  Use tuple, frozenset, or a read-only Mapping, and convert in `__post_init__`.
+  Typical failure: `style: dict` on a frozen dataclass, mutated in place by a caller that assumed a copy.
+rule:
+  kind: assignment
+  all:
+    - has:
+        field: left
+        kind: identifier
+        pattern: $NAME
+    - has:
+        field: type
+        regex: '(^|[\s|(\[,])(list|dict|set|bytearray|List|Dict|Set|deque|defaultdict|OrderedDict|Counter)\b'
+  inside:
+    kind: expression_statement
+    inside:
+      kind: block
+      inside:
+        kind: class_definition
+        inside:
+          kind: decorated_definition
+          has:
+            kind: decorator
+            regex: 'frozen\s*=\s*True|^@(attrs\.|attr\.)?frozen\b'

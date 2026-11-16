@@ -1,0 +1,18 @@
+id: py-test-asserts-mock-return-value
+valid:
+  - |
+    def test_fetch(mocker):
+        client = mocker.Mock()
+        client.fetch.return_value = {"id": 1, "name": " Ada "}
+        assert service(client) == User(id=1, name="Ada")
+invalid:
+  - |
+    def test_fetch(mocker):
+        client = mocker.Mock()
+        client.fetch.return_value = {"id": 1}
+        assert service(client) == {"id": 1}
+  - |
+    def test_fetch(mocker):
+        expected = object()
+        client.fetch.return_value = expected
+        assert expected == service(client)

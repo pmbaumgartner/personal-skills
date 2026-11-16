@@ -1,0 +1,8 @@
+id: py-test-exact-float
+valid:
+  - assert ratio == pytest.approx(0.3333)
+  - assert duration == 1.5
+  - assert score == 0.25
+invalid:
+  - assert ratio == 0.3333
+  - assert 0.142857 == compute()

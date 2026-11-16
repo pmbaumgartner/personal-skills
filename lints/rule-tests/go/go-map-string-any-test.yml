@@ -1,0 +1,18 @@
+id: go-map-string-any
+valid:
+  - |
+    func parse(raw []byte) (Envelope, error) {
+        var e Envelope
+        return e, json.Unmarshal(raw, &e)
+    }
+  - |
+    func f() {
+        var object map[string]any
+        _ = object
+    }
+  - "type Counts struct { ByName map[string]int }"
+invalid:
+  - "func asStringMap(value any) map[string]any { return nil }"
+  - "func handle(fields map[string]interface{}) {}"
+  - "type Message struct { Payload map[string]any }"
+  - "func encode(ms []Message) []map[string]any { return nil }"

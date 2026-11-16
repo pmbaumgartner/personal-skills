@@ -1,0 +1,7 @@
+id: rs-pub-fn-anyhow-result
+valid:
+  - "pub fn open(path: &Path) -> Result<Store, StoreError> { todo!() }"
+  - "fn open(path: &Path) -> anyhow::Result<Store> { todo!() }"
+invalid:
+  - "pub fn open(path: &Path) -> anyhow::Result<Store> { todo!() }"
+  - "pub fn open(path: &Path) -> Result<Store, anyhow::Error> { todo!() }"

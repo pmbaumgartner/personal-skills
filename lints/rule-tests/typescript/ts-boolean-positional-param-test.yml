@@ -1,0 +1,17 @@
+id: ts-boolean-positional-param
+valid:
+  - "export function setEnabled(enabled: boolean): void {}"
+  - "export function accept(page: Page, options: { force: boolean }) {}"
+  - "function accept(page: Page, force: boolean) {}"
+  - |
+    export class Controller {
+      private accept(page: Page, force: boolean) {}
+      set visible(value: boolean) {}
+    }
+invalid:
+  - "export function layoutCell(cell: CellText, width: number, ellipsis: boolean): CellText[] { return [] }"
+  - |
+    export class SaveController {
+      accept(page: Page, force: boolean) {}
+    }
+  - "export const accept = (page: Page, force?: boolean) => {};"

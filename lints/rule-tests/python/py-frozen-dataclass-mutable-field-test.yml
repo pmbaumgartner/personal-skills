@@ -1,0 +1,20 @@
+id: py-frozen-dataclass-mutable-field
+valid:
+  - |
+    @dataclass(frozen=True)
+    class Label:
+        names: tuple[str, ...] = ()
+        style: Mapping[str, int] = field(default_factory=dict)
+  - |
+    @dataclass
+    class Mutable:
+        style: dict[str, int]
+invalid:
+  - |
+    @dataclass(frozen=True)
+    class Label:
+        style: dict[str, int]
+  - |
+    @dataclass(frozen=True, slots=True)
+    class Stats:
+        languages: set[str] | None = None

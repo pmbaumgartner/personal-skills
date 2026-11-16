@@ -1,0 +1,6 @@
+# A pytest or unittest test function or method.
+id: py-test-function
+language: python
+rule:
+  kind: function_definition
+  has: { field: name, regex: '^test' }

@@ -1,0 +1,25 @@
+id: rs-single-char-pub-param
+language: rust
+severity: warning
+ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
+message: "Public function `$NAME` has a single-letter parameter `$P`."
+note: |
+  Parameter names are documentation for public functions; say what the value is.
+  Closures, private helpers and idiomatic letters (f, i, j, k, m, n, s, x, y, z) are exempt (clippy::min_ident_chars is too noisy for that).
+  Typical failure: related functions take `p`, meaning one kind of offset in some and another kind in others.
+rule:
+  kind: function_item
+  all:
+    - has: { kind: visibility_modifier, regex: '^pub$' }
+    - has: { field: name, pattern: $NAME }
+    - has:
+        field: parameters
+        has:
+          kind: parameter
+          has:
+            field: pattern
+            kind: identifier
+            regex: '^[a-z]$'
+            # idioms: f (Formatter), i/j/k/m/n (indices, counts), s (&str), x/y/z (coordinates, data)
+            not: { regex: '^[fijkmnsxyz]$' }
+            pattern: $P

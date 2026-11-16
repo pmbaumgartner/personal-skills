@@ -1,0 +1,26 @@
+# A function a module's users can call: an exported function or const arrow function,
+# or a non-private method of an exported class.
+id: ts-exported-function
+language: tsx
+rule:
+  any:
+    - kind: function_declaration
+      inside: { kind: export_statement }
+    - kind: arrow_function
+      inside:
+        kind: variable_declarator
+        inside:
+          kind: lexical_declaration
+          inside: { kind: export_statement }
+    - kind: method_definition
+      all:
+        - not: { has: { kind: accessibility_modifier, regex: '^(private|protected)$' } }
+        - not: { has: { field: name, kind: private_property_identifier } }
+        - not: { has: { field: name, regex: '^_' } }
+      inside:
+        kind: class_body
+        inside:
+          any:
+            - kind: class_declaration
+            - kind: abstract_class_declaration
+          inside: { kind: export_statement }

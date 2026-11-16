@@ -103,8 +103,14 @@ existing `agents/openai.yaml` settings, are left alone. Changes to managed
 Sync does not enable skills or change active skill links. Use `skills enable <name>`
 after syncing. Skills installed outside this checkout are untouched.
 
+## Lint rules
+
+`lints/` holds shared ast-grep rules for problems that code reviews keep finding. So far they cover API design, untyped data and test value, but those families aren't exhaustive.
+See `lints/README.md` for running them in other repositories; each rule's YAML file documents the rule.
+
 ## Verification
 
 ```sh
 uv run --python '>=3.9' -m unittest discover -s tests -v
+ast-grep test -c lints/sgconfig.yml --skip-snapshot-tests
 ```

@@ -1,0 +1,11 @@
+id: py-test-asserts-removal
+valid:
+  - |
+    with pytest.raises(ImportError, match="pkg[plot]"):
+        plot(result)
+  - assert hasattr(result, "path")
+invalid:
+  - assert not hasattr(pkg, "render_legacy")
+  - |
+    with pytest.raises(ImportError):
+        import pkg.old_module

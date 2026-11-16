@@ -1,0 +1,18 @@
+id: py-test-legacy-behavior
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Test looks like it protects legacy or deprecated behavior."
+note: |
+  If the old form, alias or shim is no longer supported, delete it together with this test.
+  Keep it only if docs or users still rely on the compatibility path.
+rule:
+  any:
+    - matches: py-test-function
+      has:
+        field: name
+        regex: '(legacy|deprecat|backward_compat|alias|shim|migrat)'
+    - pattern: pytest.warns(DeprecationWarning $$$)
+    - pattern: pytest.warns(PendingDeprecationWarning $$$)
+    - pattern: pytest.warns(FutureWarning $$$)
+    - pattern: pytest.deprecated_call($$$)

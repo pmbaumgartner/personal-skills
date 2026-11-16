@@ -1,0 +1,9 @@
+id: ts-string-kind-property
+valid:
+  - 'interface Issue { status: "open" | "closed"; title: string }'
+  - "type Loaded = { kind: LoadKind };"
+  - "class Store { readonly status: StoreStatus = 'idle'; }"
+invalid:
+  - "interface Issue { status: string; title: string }"
+  - "type Item = { kind?: string };"
+  - "class Run { mode: string | undefined; }"

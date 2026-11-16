@@ -1,0 +1,7 @@
+id: rs-pub-fn-string-error
+valid:
+  - "pub fn parse(text: &str) -> Result<Config, ConfigError> { todo!() }"
+  - "pub(crate) fn parse(text: &str) -> Result<Config, String> { todo!() }"
+  - "fn parse(text: &str) -> Result<Config, String> { todo!() }"
+invalid:
+  - "pub fn parse(text: &str) -> Result<Config, String> { todo!() }"

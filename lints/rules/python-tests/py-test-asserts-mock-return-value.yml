@@ -1,0 +1,19 @@
+id: py-test-asserts-mock-return-value
+language: python
+severity: warning
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "`$NAME` asserts the value its own mock was configured to return."
+note: |
+  The test passes whatever the unit does with the value, as long as it passes it through.
+  Assert something the unit computes or decides from that value.
+rule:
+  matches: py-test-function
+  has: { field: name, pattern: $NAME }
+  all:
+    - has: { stopBy: end, pattern: "$M.return_value = $V" }
+    - has:
+        stopBy: end
+        any:
+          - pattern: assert $R == $V
+          - pattern: assert $V == $R
+          - pattern: $S.assertEqual($R, $V)

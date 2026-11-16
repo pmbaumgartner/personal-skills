@@ -1,0 +1,22 @@
+id: py-minus-one-sentinel
+language: python
+severity: warning
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "`$NAME` defaults to -1 as a hidden \"none\" value."
+note: |
+  Use `int | None = None` so the absence of a value is visible in the type.
+  Conventional -1 parameters (axis, dim, index, n_jobs) are exempt.
+  Typical failure: `count=-1` meaning "all", which a caller can mistake for a real value or pass by accident.
+rule:
+  any:
+    - kind: typed_default_parameter
+    - kind: default_parameter
+  all:
+    - has:
+        field: name
+        pattern: $NAME
+        not:
+          regex: '^(axis|dim|.*_axis|.*_dim|n_jobs|jobs|index|idx|.*_index|offset|start|stop|step|level|verbose|verbosity|priority)$'
+    - has:
+        field: value
+        regex: '^-\s*1$'

@@ -1,0 +1,6 @@
+id: rs-assert-fn-returns-result
+valid:
+  - "pub fn check_safe_comment(text: &str) -> Result<(), Error> { Ok(()) }"
+  - "fn assert_sorted(items: &[u32]) { assert!(items.is_sorted()) }"
+invalid:
+  - "pub fn assert_valid_name(text: &str) -> Result<(), Error> { Ok(()) }"

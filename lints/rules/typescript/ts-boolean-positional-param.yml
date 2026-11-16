@@ -1,0 +1,25 @@
+id: ts-boolean-positional-param
+language: tsx
+severity: warning
+ignores: ["**/test/**", "**/tests/**", "**/e2e/**", "**/*.test.*", "**/*.spec.*", "**/scripts/**", "**/vendor/**", "**/dist/**"]
+message: "Exported function takes a positional boolean `$P`; call sites will read `f(x, true)`."
+note: |
+  Use an options object (`{ force: true }`), a string union, or two named functions.
+  Single-parameter functions and setters are exempt, since their name already says what the flag means.
+  Typical failure: `save(doc, true)`, where the call site doesn't say what `true` means.
+rule:
+  kind: formal_parameters
+  regex: ','
+  inside:
+    matches: ts-exported-function
+  not:
+    inside:
+      kind: method_definition
+      has: { regex: '^set$' }
+  has:
+    any:
+      - kind: required_parameter
+      - kind: optional_parameter
+    all:
+      - has: { field: pattern, kind: identifier, pattern: $P }
+      - has: { field: type, regex: '^:\s*boolean$' }

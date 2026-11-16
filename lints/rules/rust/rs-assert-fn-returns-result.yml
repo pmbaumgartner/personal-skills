@@ -1,0 +1,13 @@
+id: rs-assert-fn-returns-result
+language: rust
+severity: warning
+ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
+message: "`$NAME` returns a Result, but `assert_` in Rust suggests a panic."
+note: |
+  Rename to check_*/validate_* (or make it panic).
+  Typical failure: callers see `assert_valid(x)` and assume it panics, then drop the returned Result.
+rule:
+  kind: function_item
+  all:
+    - has: { field: name, pattern: $NAME, regex: '^assert_' }
+    - has: { field: return_type, regex: '^((std::|core::)?result::)?Result\b|^\w+::Result\b' }

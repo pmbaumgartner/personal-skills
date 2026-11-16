@@ -1,0 +1,9 @@
+id: rs-duration-without-unit
+valid:
+  - "pub struct Options { pub timeout_s: f64, pub wait: Duration, timeout: f64 }"
+  - "pub fn start(timeout: Duration) {}"
+  - "fn start(timeout: f64) {}"
+invalid:
+  - "pub struct Options { pub timeout: f64 }"
+  - "pub struct Options { pub delay: Option<u64> }"
+  - "pub fn start(memory_limit: u64) {}"

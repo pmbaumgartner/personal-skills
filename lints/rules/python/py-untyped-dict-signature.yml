@@ -1,0 +1,27 @@
+id: py-untyped-dict-signature
+language: python
+severity: warning
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "Public function `$NAME` passes data as an untyped dict."
+note: |
+  Parse the dict into a dataclass or TypedDict at the boundary, and pass that on. Defaults and validation then live in one place.
+  Fine at a truly schemaless boundary, such as arbitrary user metadata passed through.
+  Serializers (`to_dict`, `as_dict`, `from_dict`, `to_json`, `from_json`) are exempt.
+  Typical failure: config passed around as `dict[str, Any]`, with the same defaults copied into every `.get(key, default)` call site.
+utils:
+  untyped-dict:
+    regex: '^(dict|Dict|Mapping|MutableMapping)\[str, ?(Any|object)\]'
+rule:
+  kind: function_definition
+  all:
+    - has:
+        field: name
+        pattern: $NAME
+        regex: '^[^_]'
+    - not:
+        has: { field: name, regex: '^(to|as|from)_(dict|json)$' }
+    - any:
+        - has: { field: return_type, matches: untyped-dict }
+        - has:
+            field: parameters
+            has: { stopBy: end, kind: type, matches: untyped-dict }

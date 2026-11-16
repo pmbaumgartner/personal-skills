@@ -1,0 +1,31 @@
+id: py-bool-function-name
+language: python
+severity: warning
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "`$NAME` returns bool but isn't named like a question."
+note: |
+  Prefix predicates with is_/has_/can_/should_, or use a third-person verb (contains, shows_on), so call sites read as conditions.
+  Properties are exempt: adjective properties such as `closed` are idiomatic.
+  Typical failure: `scanned(page) -> bool` reads like an action at the call site; `is_scanned` doesn't.
+rule:
+  kind: function_definition
+  all:
+    - has:
+        field: return_type
+        regex: '^bool$'
+    - has:
+        field: name
+        pattern: $NAME
+        not:
+          any:
+            - regex: '^(_|is_|has_|can_|should_|was_|were_|will_|did_|does_|test_|check|validate|any_|all_)'
+            # third-person verbs read as questions: contains, matches, shows_on
+            - regex: '^[a-z]+s(_|$)'
+            # frames_are_current, item_has_owner
+            - regex: '_(is|are|has|have|can|should|was|were)_'
+  not:
+    inside:
+      kind: decorated_definition
+      has:
+        kind: decorator
+        regex: '^@(\w+\.)*(property|cached_property|overload)\b'

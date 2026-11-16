@@ -1,0 +1,6 @@
+id: py-all-lists-private-name
+valid:
+  - __all__ = ["search", "__version__"]
+invalid:
+  - __all__ = ["search", "_pair_key"]
+  - __all__ += ["_resolve_chunk"]

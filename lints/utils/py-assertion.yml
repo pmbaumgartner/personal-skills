@@ -1,0 +1,12 @@
+# Anything that can fail a test: assert, raise, pytest.raises/warns/fail,
+# unittest self.assert*, or a helper named (_)assert_*/check_*/expect_*/verify_*.
+id: py-assertion
+language: python
+rule:
+  any:
+    - kind: assert_statement
+    - kind: raise_statement
+    - kind: call
+      has:
+        field: function
+        regex: '(^|\.)_*(raises|warns|deprecated_call|fail|assert\w*|\w+_assert\w*|check\w*|expect\w*|verify\w*)$'

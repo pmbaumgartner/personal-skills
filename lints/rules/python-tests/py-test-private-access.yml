@@ -1,0 +1,15 @@
+id: py-test-private-access
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Test reaches into private `$NAME`."
+note: |
+  Tests that reach into private names fail on refactors that keep the behavior.
+  Test through the public behavior that uses it, or make it public if callers need it. Production seams that exist only for tests should go with the test.
+rule:
+  any:
+    - kind: attribute
+      has: { field: attribute, pattern: $NAME, regex: '^_[a-z0-9]\w*$' }
+      not: { has: { field: object, regex: '^(self|cls|mocker|monkeypatch|mock|sys|os)$' } }
+    - kind: import_from_statement
+      has: { field: name, stopBy: end, regex: '^_[a-z0-9]\w*$', pattern: $NAME }

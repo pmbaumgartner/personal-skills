@@ -1,0 +1,8 @@
+id: py-test-mock-call-assertion
+valid:
+  - assert result == expected
+  - total = sink.call_count
+invalid:
+  - client.send.assert_called_once_with(payload)
+  - sink.assert_not_called()
+  - assert client.send.call_count == 2

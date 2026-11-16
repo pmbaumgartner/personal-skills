@@ -1,0 +1,19 @@
+id: py-test-exact-message
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Asserts a full human-readable message."
+note: |
+  Full-message assertions break on any rewording. Fine when the message is a contract (CLI output scripts parse, an error code).
+  Otherwise assert the error type and the one detail that matters (the file name, the bad value) with `in` or `match=`.
+rule:
+  kind: assert_statement
+  any:
+    - pattern: assert str($E) == $S
+    - pattern: assert $S == str($E)
+    - pattern: assert str($E.value) == $S
+    - pattern: assert $E.value.args[0] == $S
+  has:
+    stopBy: end
+    kind: string
+    regex: '(\S+\s+){4,}'

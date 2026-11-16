@@ -1,0 +1,12 @@
+# Shared ast-grep rules for problems code reviews keep finding.
+# Run from any repository:  ast-grep scan -c <path-to>/lints/sgconfig.yml src/ tests/
+ruleDirs:
+  - rules
+testConfigs:
+  - testDir: rule-tests
+# TypeScript rules are written against the tsx grammar so one rule covers .ts and .tsx.
+# The tsx parser misreads old-style `<T>value` casts in .ts files; `value as T` is fine.
+languageGlobs:
+  tsx: ["*.ts", "*.mts", "*.cts"]
+utilDirs:
+  - utils

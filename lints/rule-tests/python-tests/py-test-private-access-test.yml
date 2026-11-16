@@ -1,0 +1,8 @@
+id: py-test-private-access
+valid:
+  - assert parse("a") == ["a"]
+  - self._fixture = make()
+  - monkeypatch.setattr(module, "now", fake_now)
+invalid:
+  - assert parser._tokenize("a") == ["a"]
+  - from pkg.parser import _tokenize

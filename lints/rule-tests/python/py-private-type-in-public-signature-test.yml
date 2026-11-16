@@ -1,0 +1,11 @@
+id: py-private-type-in-public-signature
+valid:
+  - "def create_server(cache: Cache) -> None: ..."
+  - "def _create_server(cache: _Cache) -> None: ..."
+  - "def search(top_k=_DEFAULT_TOP_K) -> list[Result]: ..."
+  - |
+    class _Cache:
+        def get(self, key: _Entry) -> None: ...
+invalid:
+  - "def create_server(cache: _Cache, default_source: str | None = None) -> Server: ..."
+  - "def load() -> _RawIndex: ..."

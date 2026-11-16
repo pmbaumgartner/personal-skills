@@ -1,0 +1,18 @@
+id: py-test-large-parametrize
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "parametrize with 8 or more cases."
+note: |
+  Many cases often fall in the same equivalence class and catch the same bug.
+  Keep one case per branch or boundary.
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '(^|\.)parametrize$' }
+    - has:
+        field: arguments
+        has:
+          nthChild: 2
+          any: [ { kind: list }, { kind: tuple } ]
+          has: { nthChild: 8 }

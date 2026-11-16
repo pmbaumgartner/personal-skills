@@ -1,0 +1,19 @@
+id: rs-pub-fn-string-error
+language: rust
+severity: warning
+ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
+message: "Public function `$NAME` returns `Result<_, String>`."
+note: |
+  A String error can't be matched on, doesn't implement std::error::Error, and doesn't work with `?` into anyhow.
+  Return a typed error (thiserror) or at least a newtype that implements Error.
+  Typical failure: errors cross a language binding as text, so callers can't map them to proper exception types.
+rule:
+  kind: function_item
+  all:
+    - has: { kind: visibility_modifier, regex: '^pub$' }
+    - has: { field: name, pattern: $NAME }
+    - has:
+        field: return_type
+        pattern:
+          context: "type X = Result<$T, String>;"
+          selector: generic_type

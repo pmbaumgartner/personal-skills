@@ -1,0 +1,7 @@
+id: py-test-commented-out
+valid:
+  - "# Regression test for issue 12: render must not drop the last frame."
+invalid:
+  - "# def test_render():"
+  - "#     assert render() == expected"
+  - "# @pytest.mark.parametrize('x', [1, 2])"

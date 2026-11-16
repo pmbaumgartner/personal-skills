@@ -1,0 +1,9 @@
+id: py-test-exact-message
+valid:
+  - assert str(err) == "empty input"
+  - assert "sections.json" in str(err)
+invalid:
+  - |
+    assert str(err) == "Cannot read sections.json: expected a list of sections"
+  - |
+    assert str(exc.value) == "the build plan is missing, run build first"

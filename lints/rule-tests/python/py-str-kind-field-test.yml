@@ -1,0 +1,21 @@
+id: py-str-kind-field
+valid:
+  - |
+    @dataclass
+    class Run:
+        status: Status
+        name: str
+  - |
+    def write(path: Path, mode: str) -> None: ...
+  - |
+    class Settings:
+        def __init__(self, mode: str) -> None:
+            self.mode: str = mode
+invalid:
+  - |
+    @dataclass(frozen=True)
+    class Outcome:
+        status: str
+  - |
+    class Event(TypedDict):
+        kind: str | None

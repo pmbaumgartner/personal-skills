@@ -1,0 +1,22 @@
+id: rs-bool-fn-name
+language: rust
+severity: warning
+ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
+message: "Public function `$NAME` returns bool but isn't named like a question."
+note: |
+  Use is_/has_/can_/should_ (or a verb such as contains/matches) so call sites read as conditions.
+  Typical failure: `scanned(page) -> bool` reads like an action at the call site; `is_scanned` doesn't.
+rule:
+  kind: function_item
+  all:
+    - has: { kind: visibility_modifier, regex: '^pub$' }
+    - has: { field: return_type, regex: '^bool$' }
+    - has:
+        field: name
+        pattern: $NAME
+        not:
+          any:
+            - regex: '^(is_|has_|can_|should_|was_|will_|eq|ne|lt|le|gt|ge|any|all)(_|$)'
+            # third-person verbs read as questions: contains, matches, starts_with
+            - regex: '^[a-z]+s(_|$)'
+            - regex: '_(is|are|has|have|can|should|was|were)_'

@@ -1,0 +1,8 @@
+id: py-test-tautology
+valid:
+  - assert result == expected
+  - self.assertTrue(result.ok)
+invalid:
+  - assert True
+  - assert result == result
+  - self.assertEqual(value, value)

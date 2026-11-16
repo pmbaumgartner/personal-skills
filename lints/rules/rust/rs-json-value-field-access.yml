@@ -1,0 +1,17 @@
+id: rs-json-value-field-access
+language: rust
+severity: warning
+ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
+message: "Reads the `$K` field from untyped JSON."
+note: |
+  Deserialize into a struct or tagged enum once at the boundary (`#[derive(Deserialize)]`, `serde_json::from_value`) and pass the typed value on. A misspelled key here silently becomes null.
+  Fine at a truly schemaless boundary, such as arbitrary user metadata passed through.
+  Typical failure: events built with `json!({"type": "started"})` and matched with `event["type"] == "started"`, so a typo on either side compiles and never matches.
+rule:
+  any:
+    - pattern: $V[$K].$M($$$)
+    - pattern: $V[$K] == $X
+    - pattern: $V.get($K).and_then($F)
+constraints:
+  K: { kind: string_literal }
+  M: { regex: '^as_(str|u64|i64|f64|bool|array|object)$' }

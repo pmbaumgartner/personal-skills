@@ -1,0 +1,22 @@
+id: ts-bool-fn-name
+language: tsx
+severity: warning
+ignores: ["**/test/**", "**/tests/**", "**/e2e/**", "**/*.test.*", "**/*.spec.*", "**/scripts/**", "**/vendor/**", "**/dist/**"]
+message: "Exported function `$NAME` returns boolean but isn't named like a question."
+note: |
+  Use is/has/can/should (or a verb such as contains/matches) so call sites read as conditions.
+  Type guards (`x is T`), third-person verbs (contains, matches) and React hooks (use*) are exempt.
+  Typical failure: `hasOption(name)` that actually answers "is this flag enabled", and returns false for options that take a value.
+rule:
+  matches: ts-exported-function
+  all:
+    - has: { field: return_type, regex: '^:\s*(boolean|Promise<boolean>)$' }
+    - any:
+        - has: { field: name, pattern: $NAME }
+        - inside: { kind: variable_declarator, has: { field: name, pattern: $NAME } }
+    - not:
+        any:
+          - has: { field: name, regex: '^(is|has|can|should|was|were|will|did|does|check|validate|use)([A-Z_]|$)|^[a-z]+s([A-Z]|$)|(Is|Are|Has|Have|Can|Should)[A-Z]' }
+          - inside:
+              kind: variable_declarator
+              has: { field: name, regex: '^(is|has|can|should|was|were|will|did|does|check|validate|use)([A-Z_]|$)|^[a-z]+s([A-Z]|$)|(Is|Are|Has|Have|Can|Should)[A-Z]' }

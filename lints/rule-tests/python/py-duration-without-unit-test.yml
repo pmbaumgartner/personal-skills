@@ -1,0 +1,15 @@
+id: py-duration-without-unit
+valid:
+  - "def process(paths, *, timeout_s: float = 30.0, memory_limit_mib: int = 2048): ..."
+  - "def _probe(duration: float): ..."
+  - "def wait(timeout: timedelta): ..."
+  - |
+    def run():
+        timeout = 30
+invalid:
+  - "def process(paths, *, timeout: float = 30.0): ..."
+  - "def process(paths, memory_limit: int): ..."
+  - DEFAULT_TIMEOUT = 30.0
+  - |
+    class SplitSettings:
+        merge_gap: float = 0.3

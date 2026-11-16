@@ -1,0 +1,25 @@
+id: py-str-kind-field
+language: python
+severity: warning
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "Field `$NAME` stores a kind as `str`."
+note: |
+  Use a named `Literal` alias or a `StrEnum`. If other fields depend on the kind, use one dataclass per kind and a union.
+  Fine when the set of values really is open.
+  Typical failure: records told apart by a `status` string and by which keys are present, with the checks repeated in every consumer.
+rule:
+  kind: assignment
+  all:
+    - has:
+        field: left
+        kind: identifier
+        pattern: $NAME
+        regex: '^(kind|type_|status|state|mode|backend|phase|stage|variant|action|category)$'
+    - has:
+        field: type
+        regex: '^(str|str \| None|None \| str|Optional\[str\])$'
+  inside:
+    kind: expression_statement
+    inside:
+      kind: block
+      inside: { kind: class_definition }

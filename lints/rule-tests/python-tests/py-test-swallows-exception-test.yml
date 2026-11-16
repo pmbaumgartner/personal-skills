@@ -1,0 +1,39 @@
+id: py-test-swallows-exception
+valid:
+  - |
+    def test_render():
+        try:
+            render()
+        except ValidationError as exc:
+            assert "larger" in str(exc)
+  - |
+    def test_parse():
+        try:
+            parse("")
+        except ValueError:
+            pass
+  - |
+    def helper():
+        try:
+            cleanup()
+        except Exception:
+            pass
+invalid:
+  - |
+    def test_parse():
+        try:
+            parse("a")
+        except Exception as exc:
+            print(exc)
+  - |
+    def test_parse():
+        try:
+            assert parse("a") == ["a"]
+        except Exception:
+            pass
+  - |
+    def test_parse():
+        try:
+            assert parse("a") == ["a"]
+        except:
+            pass

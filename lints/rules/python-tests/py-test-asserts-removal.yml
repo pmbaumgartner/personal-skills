@@ -1,0 +1,24 @@
+id: py-test-asserts-removal
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Test asserts that something no longer exists."
+note: |
+  The absence of removed behavior isn't a contract unless something outside the tests (docs, a deprecation policy) says so.
+  Reintroducing it isn't a regression; test the supported behavior it would break instead.
+rule:
+  any:
+    - pattern: assert not hasattr($$$)
+    - pattern: $S.assertFalse(hasattr($$$))
+    # `with pytest.raises(ImportError): import pkg.old`, not an optional-dependency error message
+    - kind: with_statement
+      all:
+        - has:
+            stopBy: end
+            any:
+              - pattern: pytest.raises(ImportError $$$)
+              - pattern: pytest.raises(ModuleNotFoundError $$$)
+        - has:
+            field: body
+            has: { any: [ { kind: import_statement }, { kind: import_from_statement } ] }
+    - pattern: assert importlib.util.find_spec($$$) is None

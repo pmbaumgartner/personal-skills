@@ -1,0 +1,7 @@
+id: rs-result-same-ok-and-err
+valid:
+  - "pub fn map_offset(offset: usize) -> Mapped { todo!() }"
+  - "fn parse(text: &str) -> Result<usize, ParseError> { todo!() }"
+invalid:
+  - "pub fn map_offset(offset: usize) -> Result<usize, usize> { todo!() }"
+  - "fn markup(text: &str) -> Result<String, String> { todo!() }"

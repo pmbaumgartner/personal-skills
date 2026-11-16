@@ -1,0 +1,32 @@
+id: ts-duration-without-unit
+language: tsx
+severity: warning
+ignores: ["**/test/**", "**/tests/**", "**/e2e/**", "**/*.test.*", "**/*.spec.*", "**/scripts/**", "**/vendor/**", "**/dist/**"]
+message: "`$NAME` is a number with no unit in its name."
+note: |
+  Add the unit (timeoutMs, delaySeconds) so callers can't pass seconds where milliseconds are expected.
+  Typical failure: one layer passes seconds and another expects milliseconds, and nothing in the names shows it.
+utils:
+  unitless-name:
+    regex: '(?i)(^|[a-z0-9_])(timeout|duration|delay|interval|gap|ttl|period|elapsed|latency|wait)$'
+  number-type:
+    regex: '^[?]?:\s*number(\s*\|\s*(undefined|null))*$'
+rule:
+  any:
+    - kind: property_signature
+      all:
+        - has: { field: name, pattern: $NAME, matches: unitless-name }
+        - has: { field: type, matches: number-type }
+    - kind: public_field_definition
+      all:
+        - has: { field: name, pattern: $NAME, matches: unitless-name }
+        - has: { field: type, matches: number-type }
+    - any:
+        - kind: required_parameter
+        - kind: optional_parameter
+      all:
+        - has: { field: pattern, pattern: $NAME, matches: unitless-name }
+        - has: { field: type, matches: number-type }
+      inside:
+        kind: formal_parameters
+        inside: { matches: ts-exported-function }

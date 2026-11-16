@@ -1,0 +1,28 @@
+id: py-wide-tuple-return
+language: python
+severity: warning
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "Public function `$NAME` returns a bare tuple of 3 or more values."
+note: |
+  Return a dataclass or NamedTuple so callers use names, not positions.
+  Typical failure: a function returning `(index, embeddings, chunks)`, so every caller unpacks by position and a reorder breaks them silently.
+rule:
+  kind: function_definition
+  all:
+    - has:
+        field: name
+        pattern: $NAME
+        regex: '^[^_]'
+    - has:
+        field: return_type
+        has:
+          kind: generic_type
+          all:
+            - has:
+                kind: identifier
+                regex: '^(tuple|Tuple)$'
+            - has:
+                kind: type_parameter
+                has:
+                  kind: type
+                  nthChild: 3

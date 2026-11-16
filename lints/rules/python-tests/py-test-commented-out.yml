@@ -1,0 +1,10 @@
+id: py-test-commented-out
+language: python
+severity: warning
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Commented-out test code."
+note: |
+  Commented-out tests never run but read like coverage. Delete them; version control keeps the history.
+rule:
+  kind: comment
+  regex: '^#\s*((async\s+)?def test|assert\s|@pytest\.)'

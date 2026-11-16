@@ -1,0 +1,9 @@
+id: rs-single-char-pub-param
+valid:
+  - "pub fn reply_to_thread(source: &str, item_offset: usize) {}"
+  - "pub fn parse(s: &str, n: usize) {}"
+  - "fn private(p: usize) {}"
+  - "pub fn apply(items: &[u32]) { items.iter().map(|x| x + 1); }"
+invalid:
+  - "pub fn reply_to_thread(s: &str, p: usize) {}"
+  - "pub fn to_rgba(&self, c: &[f32]) {}"

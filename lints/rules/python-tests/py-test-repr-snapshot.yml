@@ -1,0 +1,13 @@
+id: py-test-repr-snapshot
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Asserts a whole repr or snapshot."
+note: |
+  A snapshot fails on any incidental change (field order, formatting, new fields).
+  Assert the specified properties, unless the full serialized form is the contract.
+rule:
+  any:
+    - pattern: assert repr($X) == $S
+    - pattern: assert $X == snapshot
+    - pattern: assert snapshot == $X

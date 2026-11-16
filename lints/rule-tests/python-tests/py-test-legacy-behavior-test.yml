@@ -1,0 +1,18 @@
+id: py-test-legacy-behavior
+valid:
+  - |
+    def test_compatibility_candidates_do_not_use_hevc():
+        assert "hevc" not in candidates()
+  - |
+    def test_render_writes_output():
+        assert render()
+invalid:
+  - |
+    def test_legacy_flag_still_works():
+        assert run(["--out", "x"])
+  - |
+    def test_old_name_is_alias():
+        assert old_name is new_name
+  - |
+    with pytest.warns(DeprecationWarning):
+        old_api()

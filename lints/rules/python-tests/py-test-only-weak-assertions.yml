@@ -1,0 +1,37 @@
+id: py-test-only-weak-assertions
+language: python
+severity: warning
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "`$NAME` only checks that a result exists or has a type."
+note: |
+  `is not None`, isinstance, hasattr, callable and `len(x) > 0` pass for almost any wrong result.
+  Assert the values the behavior promises. Ignore the hit when the type itself is the contract ("returns a numpy array").
+utils:
+  weak-assert:
+    kind: assert_statement
+    any:
+      - pattern: assert $X is not None
+      - pattern: assert $X is not None, $MSG
+      - pattern: assert isinstance($$$)
+      - pattern: assert isinstance($$$), $MSG
+      - pattern: assert hasattr($$$)
+      - pattern: assert callable($$$)
+      - pattern: assert len($X) > 0
+      - pattern: assert len($X) >= 1
+      - pattern: assert True
+  weak-unittest:
+    kind: call
+    has: { field: function, regex: '\.(assertIsNotNone|assertIsInstance|assertTrue)$' }
+rule:
+  matches: py-test-function
+  has: { field: name, pattern: $NAME }
+  all:
+    - has:
+        stopBy: end
+        any: [ { matches: weak-assert }, { matches: weak-unittest } ]
+    - not:
+        has:
+          stopBy: end
+          matches: py-assertion
+          not:
+            any: [ { matches: weak-assert }, { matches: weak-unittest } ]

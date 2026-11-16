@@ -1,0 +1,25 @@
+id: py-test-only-weak-assertions
+valid:
+  - |
+    def test_load():
+        config = load()
+        assert config is not None
+        assert config.name == "demo"
+  - |
+    def test_type():
+        assert isinstance(load(), Config)
+        with pytest.raises(ValueError):
+            load("bad")
+invalid:
+  - |
+    def test_load():
+        config = load()
+        assert config is not None
+  - |
+    def test_load():
+        assert isinstance(load(), Config)
+        assert len(load().items) > 0
+  - |
+    class TestLoad(unittest.TestCase):
+        def test_load(self):
+            self.assertIsNotNone(load())

@@ -1,0 +1,6 @@
+id: py-test-repr-snapshot
+valid:
+  - assert result.name == "demo"
+invalid:
+  - assert repr(config) == "Config(name='demo', size=3)"
+  - assert render(doc) == snapshot

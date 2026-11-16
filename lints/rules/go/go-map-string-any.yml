@@ -1,0 +1,18 @@
+id: go-map-string-any
+language: go
+severity: warning
+ignores: ["**/*_test.go", "**/testdata/**", "**/vendor/**", "**/examples/**"]
+message: "`map[string]any` in a signature or struct field."
+note: |
+  Decode into a struct with json tags at the boundary, and pass that on. Lookups by string key and type assertions on the map turn bad input into zero values without an error.
+  Fine at a truly schemaless boundary, such as arbitrary user metadata passed through.
+  Typical failure: JSON used as an internal interface, ending in chains like `m["items"].([]any)[0].(map[string]any)` that break silently when the shape changes.
+rule:
+  kind: map_type
+  regex: '^map\[string\](any|interface\{\})$'
+  any:
+    - inside: { stopBy: end, kind: parameter_declaration }
+    - inside: { stopBy: end, kind: field_declaration }
+    - inside: { stopBy: end, kind: function_declaration, field: result }
+    - inside: { stopBy: end, kind: method_declaration, field: result }
+    - inside: { stopBy: end, kind: func_literal, field: result }

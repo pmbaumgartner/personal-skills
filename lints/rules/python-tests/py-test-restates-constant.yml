@@ -1,0 +1,24 @@
+id: py-test-restates-constant
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Asserts that constant `$C` equals a literal, restating the source."
+note: |
+  This fails when someone intentionally changes the value, and catches nothing else.
+  Test behavior that depends on the constant, or delete it.
+rule:
+  kind: assert_statement
+  has:
+    kind: comparison_operator
+    all:
+      - has:
+          nthChild: 1
+          any:
+            - kind: identifier
+              regex: '^[A-Z][A-Z0-9_]+$'
+              pattern: $C
+            - kind: attribute
+              has: { field: attribute, regex: '^[A-Z][A-Z0-9_]+$', pattern: $C }
+      - has:
+          nthChild: 2
+          any: [ { kind: integer }, { kind: float }, { kind: string }, { kind: "true" }, { kind: "false" }, { kind: list }, { kind: tuple }, { kind: dictionary }, { kind: set } ]

@@ -1,0 +1,9 @@
+id: rs-json-value-field-access
+valid:
+  - 'fn f(args: &[String]) -> bool { args[0] == "install" }'
+  - 'fn f(event: &Event) -> bool { matches!(event, Event::Started) }'
+  - 'fn f(m: &HashMap<u32, Value>) -> Option<&str> { m.get(&1).and_then(Value::as_str) }'
+invalid:
+  - 'fn f(event: &Value) -> bool { event["type"] == "started" }'
+  - 'fn f(r: &Value) -> u64 { r["document"].as_u64().unwrap_or(u64::MAX) }'
+  - 'fn f(item: &Value) -> Option<&str> { item.get("commentId").and_then(Value::as_str) }'

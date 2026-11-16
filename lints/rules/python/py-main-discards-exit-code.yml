@@ -1,0 +1,13 @@
+id: py-main-discards-exit-code
+language: python
+severity: error
+files: ["**/__main__.py"]
+message: "`main()`'s return value is discarded, so `python -m` always exits 0."
+note: |
+  Write `raise SystemExit(main())`.
+  Typical failure: `python -m pkg` prints an error and still exits 0, so scripts and CI treat the failure as success.
+rule:
+  pattern: main($$$ARGS)
+  inside:
+    kind: expression_statement
+fix: raise SystemExit(main($$$ARGS))

@@ -1,0 +1,9 @@
+id: py-test-restates-constant
+valid:
+  - assert parse("a", limit=MAX_ITEMS) == ["a"]
+  - assert config.timeout_s == 30
+  - assert MAX_ITEMS == computed_limit()
+invalid:
+  - assert MAX_ITEMS == 100
+  - assert settings.DEFAULT_FORMAT == "json"
+  - assert pkg.SUPPORTED == ("a", "b")

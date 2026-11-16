@@ -1,0 +1,19 @@
+id: py-test-disabled
+language: python
+severity: warning
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py", "**/conftest.py"]
+message: "Test is permanently skipped or expected to fail."
+note: |
+  A permanently skipped test protects nothing. Delete it, or fix it if it covers supported behavior nothing else does.
+  Conditional skips (skipif, a missing tool) are not flagged.
+rule:
+  any:
+    - kind: decorator
+      regex: '^@(pytest\.mark\.skip|pytest\.mark\.xfail|unittest\.skip|skip)\b(?:\(|$)'
+    # pytest.skip(...) as an unconditional statement directly in a test body
+    - pattern: pytest.skip($$$)
+      inside:
+        kind: expression_statement
+        inside:
+          kind: block
+          inside: { matches: py-test-function }

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Mine Lint Candidates"
+  short_description: "Turn recurring review findings into ast-grep rules"
+  default_prompt: "Use $mine-lint-candidates to mine past review sessions across agents for findings that recur across projects, prove candidate ast-grep rules against the repositories they came from, and add the ones that hold up to the lint pack."
+policy:
+  allow_implicit_invocation: false

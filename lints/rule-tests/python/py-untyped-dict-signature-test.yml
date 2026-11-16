@@ -1,0 +1,12 @@
+id: py-untyped-dict-signature
+valid:
+  - "def plan_build(config: BuildConfig) -> BuildPlan: ..."
+  - "def _load(raw: dict[str, Any]) -> Config: ..."
+  - |
+    class Chunk:
+        def to_dict(self) -> dict[str, Any]: ...
+  - "def counts(words: list[str]) -> dict[str, int]: ..."
+invalid:
+  - "def plan_build(config: dict[str, Any]) -> BuildPlan: ..."
+  - "def build_report(runs: list[Run]) -> dict[str, object]: ..."
+  - "def validate(document: Mapping[str, Any] | None) -> None: ..."

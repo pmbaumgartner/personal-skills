@@ -1,0 +1,7 @@
+id: py-minus-one-sentinel
+valid:
+  - "def render(limit: int | None = None): ..."
+  - "def mean(x, axis=-1, n_jobs=-1): ..."
+invalid:
+  - "def render(limit: int = -1): ..."
+  - "def render(limit=-1): ..."

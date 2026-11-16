@@ -1,0 +1,8 @@
+id: py-wide-tuple-return
+valid:
+  - "def pair() -> tuple[int, str]: ..."
+  - "def rows() -> tuple[int, ...]: ..."
+  - "def _internal() -> tuple[int, str, bool]: ..."
+  - "def nested() -> dict[str, tuple[int, str, bool]]: ..."
+invalid:
+  - "def load_project(project) -> tuple[Path, Path, int, bool]: ..."

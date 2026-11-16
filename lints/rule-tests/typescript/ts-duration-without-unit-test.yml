@@ -1,0 +1,9 @@
+id: ts-duration-without-unit
+valid:
+  - "export interface Options { timeoutMs: number; delaySeconds?: number }"
+  - "export function wait(retryDelayMs: number) {}"
+  - "function local(timeout: number) {}"
+invalid:
+  - "export interface Options { timeout: number }"
+  - "export interface Options { retryDelay?: number | undefined }"
+  - "export function wait(retryDelay: number, label: string) {}"

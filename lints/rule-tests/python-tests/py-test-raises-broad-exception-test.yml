@@ -1,0 +1,13 @@
+id: py-test-raises-broad-exception
+valid:
+  - |
+    with pytest.raises(ValueError, match="empty"):
+        parse("")
+invalid:
+  - |
+    with pytest.raises(Exception):
+        parse("")
+  - |
+    with pytest.raises(Exception, match="empty"):
+        parse("")
+  - self.assertRaises(Exception, parse, "")

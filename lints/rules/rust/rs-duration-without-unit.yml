@@ -1,0 +1,31 @@
+id: rs-duration-without-unit
+language: rust
+severity: warning
+ignores: ["**/tests/**", "**/benches/**", "**/examples/**", "**/vendor/**", "**/build.rs"]
+message: "`$NAME` is a bare number with no unit in its name."
+note: |
+  Use std::time::Duration, or add the unit (timeout_s, delay_ms, memory_limit_mib).
+  Typical failure: Rust takes `timeout_s` while a binding or CLI says `timeout`, and the two drift apart.
+utils:
+  unitless-name:
+    regex: '(^|_)(timeout|duration|delay|interval|gap|ttl|period|elapsed|latency|wait|memory|memory_limit|mem_limit)$'
+  number-type:
+    regex: '^(Option<\s*)?(f32|f64|u8|u16|u32|u64|u128|usize|i8|i16|i32|i64|i128|isize)(\s*>)?$'
+rule:
+  any:
+    # pub struct fields
+    - kind: field_declaration
+      all:
+        - has: { kind: visibility_modifier, regex: '^pub$' }
+        - has: { field: name, pattern: $NAME, matches: unitless-name }
+        - has: { field: type, matches: number-type }
+    # parameters of pub functions
+    - kind: parameter
+      all:
+        - has: { field: pattern, pattern: $NAME, matches: unitless-name }
+        - has: { field: type, matches: number-type }
+      inside:
+        kind: parameters
+        inside:
+          kind: function_item
+          has: { kind: visibility_modifier, regex: '^pub$' }

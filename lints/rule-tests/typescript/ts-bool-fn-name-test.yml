@@ -1,0 +1,10 @@
+id: ts-bool-fn-name
+valid:
+  - "export function isFlagEnabled(args: string[], name: string): boolean { return true }"
+  - "export function containsRange(a: Range, b: Range): boolean { return true }"
+  - "export function isPage(value: unknown): value is Page { return true }"
+  - "export function useIsFocused(): boolean { return true }"
+  - "function reconcile(cy: Core): boolean { return true }"
+invalid:
+  - "export function reconcileGraph(cy: Core, elements: GraphElement[]): boolean { return true }"
+  - "export const flagSet = (args: string[], name: string): boolean => true;"
