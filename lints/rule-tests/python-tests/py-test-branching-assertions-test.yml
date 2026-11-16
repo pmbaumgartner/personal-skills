@@ -1,0 +1,46 @@
+id: py-test-branching-assertions
+valid:
+  - |
+    def test_apply__dry_run__leaves_rows_unchanged(table):
+        apply(table, dry_run=True)
+        assert table.rows == ORIGINAL_ROWS
+  - |
+    def test_apply(table, dry_run):
+        if dry_run:
+            table.freeze()
+        result = apply(table, dry_run=dry_run)
+        assert result.ok
+  - |
+    def test_rows(rows):
+        for row in rows:
+            if row.kind == "skip":
+                continue
+            assert row.valid
+  - |
+    class ApplyTest(TestCase):
+        def test_apply(self):
+            if self.flag:
+                self.assertTrue(apply())
+invalid:
+  - |
+    def test_apply(table, dry_run):
+        apply(table, dry_run=dry_run)
+        if dry_run:
+            assert table.rows == ORIGINAL_ROWS
+        else:
+            assert table.rows == UPDATED_ROWS
+  - |
+    def test_parse(text, expected_rule):
+        result = parse(text)
+        if expected_rule is None:
+            assert result is None
+  - |
+    def test_fetch(raises):
+        if raises:
+            with pytest.raises(FetchError):
+                fetch()
+  - |
+    class ApplyTest(TestCase):
+        def test_apply(self, dry_run=False):
+            if dry_run:
+                self.assertEqual(count(), 5)

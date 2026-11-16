@@ -1,10 +1,10 @@
 id: rs-bool-fn-name
 valid:
-  - "pub fn has_ocr_layer(glyphs: usize) -> bool { true }"
+  - "pub fn has_children(nodes: usize) -> bool { true }"
   - "pub fn contains(&self, offset: usize) -> bool { true }"
   - "pub fn starts_with(&self, prefix: &str) -> bool { true }"
-  - "fn ocr_layer(glyphs: usize) -> bool { true }"
+  - "fn children(nodes: usize) -> bool { true }"
   - "impl PartialEq for Page { fn eq(&self, other: &Self) -> bool { true } }"
 invalid:
-  - "pub fn ocr_layer(glyphs: usize) -> bool { true }"
+  - "pub fn children(nodes: usize) -> bool { true }"
   - "pub fn interpolate(&self) -> bool { true }"

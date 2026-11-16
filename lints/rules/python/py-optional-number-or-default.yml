@@ -1,0 +1,27 @@
+id: py-optional-number-or-default
+language: python
+severity: info
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "`$P or ...` replaces an explicit 0 in optional number `$P` with the fallback."
+note: |
+  Write `$P if $P is not None else <fallback>`, or reject 0 explicitly when it is invalid.
+  Typical failure: `retries = retries or DEFAULT_RETRIES` turns a caller's explicit `retries=0` into the default, and `index or 1` skips the first element of a zero-based sequence.
+  Fine when 0 can't be a real value (a year, an enum whose 0 means unspecified, a timestamp); the rule skips `or 0` and `or None`.
+rule:
+  pattern: $P or $D
+  not:
+    has: { field: right, regex: '^(0|0\.0|None)$' }
+  inside:
+    kind: function_definition
+    stopBy: { kind: function_definition }
+    has:
+      field: parameters
+      has:
+        any:
+          - kind: typed_default_parameter
+          - kind: typed_parameter
+        all:
+          - has: { kind: identifier, pattern: $P }
+          - has:
+              field: type
+              regex: '^["'']?(Optional\[(int|float)\]|(int|float) ?\| ?None|None ?\| ?(int|float))["'']?$'

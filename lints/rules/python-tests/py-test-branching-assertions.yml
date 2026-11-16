@@ -1,0 +1,26 @@
+id: py-test-branching-assertions
+language: python
+severity: info
+files: ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/test/**/*.py"]
+message: "`$N` picks its assertions with `if` on parameter `$P`."
+note: |
+  Split it into one test per branch, each named for its scenario, or parametrize the expected value instead of the check.
+  Typical failure: `if dry_run: assert unchanged else: assert updated` hides which case broke, and a parametrize case that never sets the flag leaves one branch untested.
+  Fine when the branch only chooses setup and every case runs the same assertions.
+rule:
+  kind: if_statement
+  all:
+    - has:
+        field: condition
+        any:
+          - { kind: identifier, pattern: $P }
+          - has: { stopBy: end, kind: identifier, pattern: $P }
+    - has: { stopBy: end, matches: py-assertion }
+    - inside:
+        stopBy: { kind: function_definition }
+        matches: py-test-function
+        all:
+          - has: { field: name, pattern: $N }
+          - has: { field: parameters, has: { stopBy: end, kind: identifier, pattern: $P } }
+constraints:
+  P: { not: { regex: '^(self|cls)$' } }

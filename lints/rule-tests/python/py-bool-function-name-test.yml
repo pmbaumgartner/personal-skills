@@ -1,6 +1,6 @@
 id: py-bool-function-name
 valid:
-  - "def has_ocr_layer(glyphs: int) -> bool: ..."
+  - "def has_children(nodes: int) -> bool: ..."
   - "def frames_are_current(project) -> bool: ..."
   - "def shows_on(self, segment) -> bool: ..."
   - "def _helper() -> bool: ..."
@@ -9,5 +9,5 @@ valid:
         @property
         def closed(self) -> bool: ...
 invalid:
-  - "def ocr_layer(glyphs: int) -> bool: ..."
+  - "def children(nodes: int) -> bool: ..."
   - "def over_cap(stats: dict) -> bool: ..."

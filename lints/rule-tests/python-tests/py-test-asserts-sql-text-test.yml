@@ -1,0 +1,26 @@
+id: py-test-asserts-sql-text
+valid:
+  - |
+    def test_report(db):
+        rows = db.execute(build_report_sql("t"))
+        assert rows == [{"id": 1}]
+  - |
+    def test_names(names):
+        assert "select me" in names
+  - |
+    def test_status(result):
+        assert result.status == "DELETE"
+invalid:
+  - |
+    def test_repair(sql):
+        assert "MERGE INTO t" in sql
+  - |
+    def test_filter(query):
+        assert "WHERE deleted_at IS NULL" not in query
+  - |
+    def test_writes(writes):
+        assert any("INSERT INTO tmp" in s for s in writes)
+  - |
+    class ViewTest(TestCase):
+        def test_view(self):
+            self.assertIn("GROUP BY", self.view_sql)

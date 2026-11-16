@@ -1,0 +1,33 @@
+id: py-optional-number-or-default
+valid:
+  - |
+    def run(retries: int | None = None):
+        return retries if retries is not None else 100
+  - |
+    def run(name: str | None = None):
+        return name or "default"
+  - |
+    def run(retries: int | None = None):
+        return (retries or 0) + 1
+  - |
+    def run(retries):
+        return retries or 100
+  - |
+    def outer(n: int | None = None):
+        def inner(n):
+            return n or 2
+        return inner
+invalid:
+  - |
+    def run(retries: int | None = None):
+        return retries or 100
+  - |
+    def run(index: int | None, first: int):
+        return index or first
+  - |
+    from typing import Optional
+    def run(timeout: Optional[float] = None):
+        return timeout or 30.0
+  - |
+    def run(*, limit: "None | int" = None):
+        return limit or 200
