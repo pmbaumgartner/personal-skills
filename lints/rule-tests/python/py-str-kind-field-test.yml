@@ -11,7 +11,18 @@ valid:
     class Settings:
         def __init__(self, mode: str) -> None:
             self.mode: str = mode
+  - |
+    @dataclass
+    class Upload:
+        content_type: str
+        exception_type: str
+        reason: str
 invalid:
+  - |
+    @dataclass
+    class Payment:
+        payment_method: str | None
+        outcome: str
   - |
     @dataclass(frozen=True)
     class Outcome:

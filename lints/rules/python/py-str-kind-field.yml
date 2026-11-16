@@ -14,7 +14,9 @@ rule:
         field: left
         kind: identifier
         pattern: $NAME
-        regex: '^(kind|type_|status|state|mode|backend|phase|stage|variant|action|category)$'
+        regex: '^(kind|type_|status|state|mode|backend|phase|stage|variant|action|category|outcome|role|method|[a-z0-9_]+_(kind|type|status|state|mode|stage|category|outcome|method))$'
+        # Open sets: MIME types and exception class names.
+        not: { regex: '(^|_)(content|mime|media|file|exception|error)_type$' }
     - has:
         field: type
         regex: '^(str|str \| None|None \| str|Optional\[str\])$'

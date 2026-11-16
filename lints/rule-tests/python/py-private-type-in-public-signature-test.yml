@@ -6,6 +6,11 @@ valid:
   - |
     class _Cache:
         def get(self, key: _Entry) -> None: ...
+  - "def parent(elem: etree._Element) -> str: ..."
+  - |
+    T = TypeVar("T")
+    _Item = TypeVar("_Item")
+    def first(kind: type[_Item]) -> _Item: ...
 invalid:
   - "def create_server(cache: _Cache, default_source: str | None = None) -> Server: ..."
   - "def load() -> _RawIndex: ..."

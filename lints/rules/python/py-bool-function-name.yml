@@ -21,6 +21,8 @@ rule:
             - regex: '^(_|is_|has_|can_|should_|was_|were_|will_|did_|does_|test_|check|validate|any_|all_)'
             # third-person verbs read as questions: contains, matches, shows_on
             - regex: '^[a-z]+s(_|$)'
+            # path_exists, name_matches
+            - regex: '_(exists|matches|contains|equals|includes|overlaps)$'
             # frames_are_current, item_has_owner
             - regex: '_(is|are|has|have|can|should|was|were)_'
   not:

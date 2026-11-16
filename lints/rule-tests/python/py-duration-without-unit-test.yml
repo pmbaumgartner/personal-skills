@@ -6,7 +6,9 @@ valid:
   - |
     def run():
         timeout = 30
+  - MAX_SKIPPED_ITEMS_GAP = 1
 invalid:
+  - "def split(text, *, gap: float = 0.5): ..."
   - "def process(paths, *, timeout: float = 30.0): ..."
   - "def process(paths, memory_limit: int): ..."
   - DEFAULT_TIMEOUT = 30.0

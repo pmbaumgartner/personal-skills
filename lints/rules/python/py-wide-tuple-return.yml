@@ -26,3 +26,5 @@ rule:
                 has:
                   kind: type
                   nthChild: 3
+          # A fixed-size vector of one numeric type (a bounding box, a color) is conventional.
+          not: { regex: '^(tuple|Tuple)\[(float(, float)+|int(, int)+)\]$' }

@@ -4,5 +4,7 @@ valid:
   - "def rows() -> tuple[int, ...]: ..."
   - "def _internal() -> tuple[int, str, bool]: ..."
   - "def nested() -> dict[str, tuple[int, str, bool]]: ..."
+  - "def bbox() -> tuple[float, float, float, float]: ..."
 invalid:
+  - "def split(text) -> tuple[str, str, str]: ..."
   - "def load_project(project) -> tuple[Path, Path, int, bool]: ..."

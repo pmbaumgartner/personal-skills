@@ -9,6 +9,12 @@ note: |
 utils:
   unitless-name:
     regex: '(?i)(^|_)(timeout|duration|delay|interval|gap|ttl|period|elapsed|latency|wait|memory|memory_limit|mem_limit)$'
+    # An integer gap is usually a count of items, not a time.
+    not:
+      all:
+        - regex: '(?i)(^|_)gap$'
+        - not: { inside: { stopBy: end, kind: assignment, any: [ { has: { field: type, regex: '^float' } }, { has: { field: right, kind: float } } ] } }
+        - not: { inside: { stopBy: end, any: [ { kind: typed_parameter }, { kind: typed_default_parameter } ], has: { field: type, regex: '^float' } } }
   number-type:
     regex: '^(int|float)(\s*\|\s*None)?$|^Optional\[(int|float)\]$'
   public-function-param:

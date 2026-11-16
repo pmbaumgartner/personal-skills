@@ -17,6 +17,11 @@ valid:
     class TestParse(unittest.TestCase):
         def test_parse(self):
             self.assertEqual(parse("a"), ["a"])
+  - |
+    @pytest.mark.parametrize("value, expected", [("", pytest.raises(ValueError))])
+    def test_parse(value, expected):
+        with expected:
+            parse(value)
 invalid:
   - |
     def test_parse():

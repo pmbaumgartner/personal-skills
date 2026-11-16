@@ -7,4 +7,5 @@ note: |
   Commented-out tests never run but read like coverage. Delete them; version control keeps the history.
 rule:
   kind: comment
-  regex: '^#\s*((async\s+)?def test|assert\s|@pytest\.)'
+  # `# assert x == y` is code; `# assert that the cache is cleared` is prose.
+  regex: '^#\s*((async\s+)?def test|assert\s+[\w.\[\]()"'']+\s*(==|!=|<=|>=|<|>|\bis\b|\bin\b|\bnot\b|,|$)|@pytest\.)'

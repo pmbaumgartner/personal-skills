@@ -7,6 +7,22 @@ note: |
   Callers can't import or name the type they're expected to pass or receive.
   Make the type public, or make the function private.
   Typical failure: `create_server(cache: _Cache)`, which callers must build without being able to import the type.
+utils:
+  # A project-private class. `module._Name` belongs to another package and is importable
+  # (lxml's `etree._Element`); a module-level TypeVar is private by convention.
+  private-type-name:
+    kind: identifier
+    pattern: $T
+    regex: '^_[A-Z][a-z]'
+    not:
+      any:
+        - inside: { kind: attribute }
+        - inside:
+            kind: module
+            stopBy: end
+            has:
+              kind: expression_statement
+              has: { kind: assignment, all: [ { has: { field: left, pattern: $T } }, { has: { field: right, regex: '^(typing\.)?(TypeVar|ParamSpec|TypeVarTuple)\(' } } ] }
 rule:
   kind: function_definition
   all:
@@ -20,16 +36,10 @@ rule:
             has:
               kind: type
               stopBy: end
-              has:
-                kind: identifier
-                regex: '^_[A-Z][a-z]'
-                stopBy: end
+              has: { matches: private-type-name, stopBy: end }
         - has:
             field: return_type
-            has:
-              kind: identifier
-              regex: '^_[A-Z][a-z]'
-              stopBy: end
+            has: { matches: private-type-name, stopBy: end }
   not:
     any:
       - inside:

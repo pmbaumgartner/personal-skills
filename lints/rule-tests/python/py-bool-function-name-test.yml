@@ -8,6 +8,7 @@ valid:
     class File:
         @property
         def closed(self) -> bool: ...
+  - "def path_exists(path: str) -> bool: ..."
 invalid:
   - "def children(nodes: int) -> bool: ..."
   - "def over_cap(stats: dict) -> bool: ..."

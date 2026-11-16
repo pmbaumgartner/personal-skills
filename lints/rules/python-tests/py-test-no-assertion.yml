@@ -10,6 +10,11 @@ rule:
   matches: py-test-function
   has: { field: name, pattern: $NAME }
   not:
-    has:
-      stopBy: end
-      matches: py-assertion
+    any:
+      - has:
+          stopBy: end
+          matches: py-assertion
+      # `with expected:` where a parametrize case passes `pytest.raises(...)` or `nullcontext()`
+      - all:
+          - has: { stopBy: end, kind: with_item, has: { kind: identifier, pattern: $CTX } }
+          - has: { field: parameters, has: { stopBy: end, kind: identifier, pattern: $CTX } }
