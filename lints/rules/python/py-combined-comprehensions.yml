@@ -1,0 +1,75 @@
+id: py-combined-comprehensions
+language: python
+severity: info
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "Two comprehensions are combined in one expression."
+note: |
+  Assign each comprehension or aggregate to a named variable, then combine the names (`after - before`).
+  Typical failure: `sum(cost(i) for i, _, _ in a) - sum(cost(j) for j, _ in b)` makes readers track two loops and their bindings at once, and the formatter splits it mid-call.
+  Fine when every comprehension is a plain projection, such as `[a.key for a in left] + [b.key for b in right]`: one `for` over a single name, no `if`, and a name, attribute or call on a single name (`len(group)`) as the body. The rule skips those.
+  Comprehensions nested inside other call arguments, such as `Q(id__in=[...]) | Q(...)`, are exempt.
+utils:
+  comprehension:
+    any:
+      - kind: generator_expression
+      - kind: list_comprehension
+      - kind: set_comprehension
+      - kind: dictionary_comprehension
+  # A plain projection: one `for` over a single name, no `if`, and a body that is a name, an attribute,
+  # or a call on a single name (`len(group)`).
+  simple-comprehension:
+    matches: comprehension
+    all:
+      - has:
+          field: body
+          any:
+            - kind: identifier
+            - kind: attribute
+            - kind: call
+              all:
+                - has: { field: function, any: [ { kind: identifier }, { kind: attribute } ] }
+                - has: { field: arguments, kind: argument_list, has: { nthChild: 1, kind: identifier }, not: { has: { nthChild: 2 } } }
+      - has: { kind: for_in_clause, has: { field: left, kind: identifier } }
+    not:
+      any:
+        - has: { kind: if_clause }
+        - has: { kind: for_in_clause, follows: { kind: for_in_clause, stopBy: end } }
+  complex-comprehension:
+    matches: comprehension
+    not: { matches: simple-comprehension }
+  # A comprehension, or a call that takes one directly (`sum(x for x in xs)`, `len([...])`).
+  aggregate:
+    any:
+      - matches: comprehension
+      - kind: call
+        has:
+          field: arguments
+          any:
+            - kind: generator_expression
+            - { kind: argument_list, has: { matches: comprehension } }
+  complex-aggregate:
+    any:
+      - matches: complex-comprehension
+      - kind: call
+        has:
+          field: arguments
+          any:
+            - matches: complex-comprehension
+            - { kind: argument_list, has: { matches: complex-comprehension } }
+  # An aggregate, possibly inside parentheses or another operator: `a + (b - sum(...))`.
+  has-aggregate:
+    any:
+      - matches: aggregate
+      - has:
+          matches: aggregate
+          stopBy: { not: { any: [ { kind: binary_operator }, { kind: parenthesized_expression } ] } }
+rule:
+  kind: binary_operator
+  all:
+    - has: { field: left, matches: has-aggregate }
+    - has: { field: right, matches: has-aggregate }
+    - has:
+        matches: complex-aggregate
+        stopBy: { not: { any: [ { kind: binary_operator }, { kind: parenthesized_expression } ] } }
+  # Report a chain such as `a + b + c` once, at the outermost operator.
+  not: { inside: { kind: binary_operator } }

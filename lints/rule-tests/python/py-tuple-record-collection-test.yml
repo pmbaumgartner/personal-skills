@@ -1,0 +1,18 @@
+id: py-tuple-record-collection
+valid:
+  - "items: list[Item] = []"
+  - "pairs: list[tuple[str, int]] = []"
+  - "def split(text) -> tuple[str, str, str]: ..."
+  - "seen: set[tuple[str, int, int]] = set()"
+  - "index: dict[tuple[str, int, int], Item] = {}"
+  - "boxes: list[tuple[float, float, float, float]] = []"
+  - "rows: list[tuple[str, ...]] = []"
+  - "index: abc.Mapping[typing.Tuple[str, int, int], Item] = {}"
+invalid:
+  - "items: list[tuple[str, int, float]] = []"
+  - "def _load(path) -> Iterator[tuple[str, int, float]]: ..."
+  - "def render(items: Sequence[tuple[str, str, str]]) -> str: ..."
+  - "by_name: dict[str, tuple[str, int, float]] = {}"
+  - "by_name: abc.Mapping[str, typing.Tuple[str, int, float]] = {}"
+  - "def rows() -> abc.Iterator[typing.Tuple[str, int, float]]: ..."
+  - "@dataclass\nclass Order:\n    lines: list[tuple[str, int, float]]"

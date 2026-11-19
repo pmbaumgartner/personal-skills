@@ -1,0 +1,41 @@
+id: py-tuple-record-collection
+language: python
+severity: warning
+ignores: ["**/tests/**", "**/test/**", "**/test_*.py", "**/*_test.py", "**/conftest.py", "**/scripts/**", "**/benchmarks/**", "**/bench/**", "**/docs/**", "**/examples/**", "**/vendor/**"]
+message: "`$T` stores records as positional tuples."
+note: |
+  Define a frozen dataclass or NamedTuple for the element and use it in the collection (`list[Item]`).
+  Typical failure: `items: list[tuple[str, int, float]]` is read by position in several loops, each loop names the fields differently, and adding a field silently breaks every unpack.
+  Fine for composite keys: dict keys and set members are exempt. Tuples of one numeric type (a bounding box, a color) are exempt.
+utils:
+  # Collection whose elements are records. Sets and dict keys are left out: tuples there are composite keys.
+  record-collection:
+    regex: '^([A-Za-z_]\w*\.)*(list|List|Sequence|MutableSequence|Collection|Iterable|Iterator|Generator|AsyncIterator|AsyncIterable|deque|PCollection|dict|Dict|Mapping|MutableMapping|defaultdict|OrderedDict)$'
+  key-collection:
+    regex: '^([A-Za-z_]\w*\.)*(dict|Dict|Mapping|MutableMapping|defaultdict|OrderedDict)$'
+rule:
+  pattern: $T
+  not: { regex: '^(typing\.)?(tuple|Tuple)\[\s*(float(\s*,\s*float)+|int(\s*,\s*int)+)\s*,?\s*\]$' }
+  any:
+    # Builtin-style generics: `list[tuple[a, b, c]]`.
+    - kind: generic_type
+      all:
+        - has: { kind: identifier, regex: '^(tuple|Tuple)$' }
+        - has: { kind: type_parameter, has: { kind: type, nthChild: 3 } }
+        - inside:
+            kind: type
+            not: { all: [ { nthChild: 1 }, { inside: { kind: type_parameter, inside: { kind: generic_type, has: { nthChild: 1, matches: key-collection } } } } ] }
+            inside:
+              kind: type_parameter
+              inside: { kind: generic_type, has: { nthChild: 1, matches: record-collection } }
+    # Qualified generics parse as subscripts: `abc.Iterator[typing.Tuple[a, b, c]]`.
+    - kind: subscript
+      not: { nthChild: 1 }
+      all:
+        - has: { field: value, regex: '^(typing\.)?(tuple|Tuple)$' }
+        # `nthChild` counts the value first, so a fourth named child is the third element.
+        - has: { nthChild: 4 }
+        - inside:
+            kind: subscript
+            has: { field: value, matches: record-collection }
+            not: { all: [ { has: { field: value, matches: key-collection } }, { has: { nthChild: 2, pattern: $T } } ] }

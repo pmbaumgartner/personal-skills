@@ -1,0 +1,18 @@
+id: py-combined-comprehensions
+valid:
+  - "total = sum(item.price for item in items)"
+  - "after = sum(cost(i) for i in new)\nbefore = sum(cost(i) for i in old)\ndelta = after - before"
+  - "share = sum(item.price for item in items) / len(items)"
+  - "names = [item.name for item in items] + extra"
+  - "query = Q(id__in=[m.id for m in a]) | Q(ref__in=[m.ref for m in b])"
+  - "keys = [a.key for a in left] + [b.key for b in right]"
+  - "total = sum(a.size for a in left) + sum(b for b in right)"
+  - "total = sum(len(r) for r in left) + sum(len(r) for r in right)"
+invalid:
+  - "delta = sum(cost(i.raw) for i in new) - sum(cost(i.raw) for i in old)"
+  - "both = [a.name for a in left if a.active] + [b.name for b in right]"
+  - "both = [a.key for a in left] + [cost(b, rate) for b in right]"
+  - "both = [k for k, _ in left] + [b.key for b in right]"
+  - "total = base + sum(x.size for x in a) + max(len(y.items) for y in b)"
+  - "ratio = len({k for k in a if k}) / len([v for v in b])"
+  - "ids = {u.id for u in removed} | (active - {u.id for u in invited if u.ok})"

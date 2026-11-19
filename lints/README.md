@@ -1,9 +1,10 @@
 # Custom lint rules
 
-These are ast-grep rules for problems that code reviews keep finding and that standard linters (ruff, clippy, Biome/ESLint, go vet) don't cover. So far they fall into three families:
+These are ast-grep rules for problems that code reviews keep finding and that standard linters (ruff, clippy, Biome/ESLint, go vet) don't cover. So far they fall into four families:
 
 - **API design:** public signatures and names that mislead callers, such as positional booleans, durations without units, and errors returned as strings.
-- **Untyped data:** kinds stored as strings and records passed as untyped JSON maps.
+- **Untyped data:** kinds stored as strings and records passed as untyped JSON maps or positional tuples.
+- **Dense expressions:** several loops packed into one expression, where named intermediate values would read better.
 - **Test value:** Python tests that can't fail, pin implementation details, or protect behavior that is no longer supported.
 
 The families aren't a closed list. New recurring findings may not fit any of them and start a family of their own.
