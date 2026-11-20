@@ -39,6 +39,20 @@ Useful options:
 
 Severities are `error` (definite bugs), `warning` (design findings) and `info` (context-dependent). A scan exits non-zero only on errors.
 
+## Claude Code hook
+
+`claude-stop-hook` runs these rules when a Claude Code agent finishes its turn. It scans only lines changed since `HEAD` (plus untracked files), so existing findings in a file don't block unrelated work. When an `error` or `warning` rule matches a changed line, the hook tells the agent to keep going and deal with the finding. Each finding is reported only once per session, so the hook can't get stuck in a loop. It does nothing outside a git repository or when `ast-grep` is missing.
+
+Register it in `~/.claude/settings.json` with an absolute path:
+
+```json
+"hooks": {
+  "Stop": [
+    { "hooks": [{ "type": "command", "command": "<path-to>/lints/claude-stop-hook", "timeout": 60 }] }
+  ]
+}
+```
+
 ## Repository-local rules
 
 A repository can combine these rules with its own. Put this `sgconfig.yml` in the repository, with absolute paths to this directory:

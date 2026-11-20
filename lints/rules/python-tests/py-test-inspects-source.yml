@@ -6,6 +6,7 @@ message: "Test reads source code or docs instead of running behavior."
 note: |
   Run the code, or run the documented example as a doctest.
   Checking for text in a file breaks on rewording and passes when the behavior is broken.
+  Exempts paths rooted at `tmp_path`, `tmpdir`, a `tmp`/`temp` name or a `self` attribute, which usually hold files the test or the code under test wrote.
 rule:
   any:
     - pattern: inspect.getsource($$$)
@@ -18,3 +19,7 @@ rule:
             stopBy: end
             kind: string
             regex: '(\.py|README(\.md)?|CHANGELOG(\.md)?|AGENTS\.md|CLAUDE\.md)["'']$|["'']/?(src|docs)/'
+        - not:
+            any:
+              - has: { field: function, has: { field: object, regex: &test-root '^\(*\s*(self\.|tmp_path\b|tmpdir\b|tmp|temp)' } }
+              - has: { field: arguments, regex: *test-root }

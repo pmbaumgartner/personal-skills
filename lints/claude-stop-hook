@@ -1,0 +1,122 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
+"""Claude Code Stop hook: run the shared ast-grep rules on lines changed since HEAD.
+
+Reads the hook payload on stdin. When rules flag changed lines that this session has
+not been told about yet, prints a `block` decision so the agent reviews them before
+it finishes. Each finding is reported once per session, so the hook cannot loop.
+"""
+
+import json
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+CONFIG = Path(__file__).resolve().parent / "sgconfig.yml"
+SEVERITIES = {"error", "warning"}
+EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+HUNK = re.compile(r"^@@ -\S+ \+(\d+)(?:,(\d+))? @@")
+
+
+def git(root, *args):
+    return subprocess.run(
+        ["git", "-c", "core.quotePath=false", *args],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+
+
+def changed_lines(root):
+    """Map each changed file to its changed line numbers, or None for a new file."""
+    base = (
+        "HEAD"
+        if git(root, "rev-parse", "--verify", "-q", "HEAD").returncode == 0
+        else EMPTY_TREE
+    )
+    diff = git(root, "diff", "-U0", "--no-color", "--no-ext-diff", base).stdout
+    changed = {}
+    path = None
+    for line in diff.splitlines():
+        if line.startswith("+++ "):
+            path = line[6:] if line.startswith("+++ b/") else None
+        elif path and (hunk := HUNK.match(line)):
+            start, count = int(hunk[1]), int(hunk[2] or 1)
+            changed.setdefault(path, set()).update(range(start, start + count))
+    untracked = git(root, "ls-files", "--others", "--exclude-standard", "-z").stdout
+    changed.update(dict.fromkeys(filter(None, untracked.split("\0"))))
+    return {p: lines for p, lines in changed.items() if (root / p).is_file()}
+
+
+def touches(finding, lines):
+    if lines is None:
+        return True
+    span = finding["range"]
+    return any(
+        n in lines for n in range(span["start"]["line"] + 1, span["end"]["line"] + 2)
+    )
+
+
+def format_finding(finding):
+    line = finding["range"]["start"]["line"] + 1
+    head = f"{finding['file']}:{line} [{finding['severity']}] {finding['ruleId']}: {finding['message']}"
+    note = "".join(
+        f"\n    {n}" for n in (finding.get("note") or "").strip().splitlines()
+    )
+    return head + note
+
+
+def main():
+    payload = json.load(sys.stdin)
+    if not shutil.which("ast-grep"):
+        return 0
+    top = git(payload["cwd"], "rev-parse", "--show-toplevel")
+    if top.returncode != 0:
+        return 0
+    root = Path(top.stdout.strip())
+    changed = changed_lines(root)
+    if not changed:
+        return 0
+    scan = subprocess.run(
+        ["ast-grep", "scan", "-c", str(CONFIG), "--json=compact", *changed],
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+    findings = [
+        f
+        for f in json.loads(scan.stdout or "[]")
+        if f["severity"] in SEVERITIES and touches(f, changed[f["file"]])
+    ]
+
+    session = re.sub(r"[^A-Za-z0-9_-]", "", payload["session_id"])
+    state = Path(tempfile.gettempdir()) / "claude-lint-hook" / f"{session}.json"
+    seen = set(json.loads(state.read_text())) if state.exists() else set()
+    new = {}
+    for f in findings:
+        new.setdefault("\0".join((f["file"], f["ruleId"], f["text"])), f)
+    for key in seen:
+        new.pop(key, None)
+    if not new:
+        return 0
+    state.parent.mkdir(parents=True, exist_ok=True)
+    state.write_text(json.dumps(sorted(seen | new.keys())))
+
+    reason = (
+        "Lint rules flagged lines changed since the last commit. Each hit is a lead, not a verdict: "
+        "fix the real problems, and for any hit that is fine say why in one line. "
+        "These findings will not be reported again this session.\n\n"
+        + "\n".join(format_finding(f) for f in new.values())
+    )
+    print(json.dumps({"decision": "block", "reason": reason}))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

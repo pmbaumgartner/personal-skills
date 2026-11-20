@@ -2,7 +2,11 @@ id: py-test-inspects-source
 valid:
   - assert (tmp_path / "output.json").read_text() == expected
   - assert out.read_text().startswith("WEBVTT")
+  - assert (tmp_path / "README.md").read_text() == expected
+  - instructions = (self.home / ".pi" / "AGENTS.md").read_bytes()
+  - text = open(temp_dir / "CLAUDE.md").read()
 invalid:
   - source = inspect.getsource(module)
   - text = (ROOT / "README.md").read_text()
   - assert "def main" in Path("src/pkg/cli.py").read_text()
+  - text = open(ROOT / "AGENTS.md").read()
