@@ -1,35 +1,85 @@
 {
   "files": {
     "skills/roborev-analyze-api-design/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-api-design/SKILL.md": "c8bbb7b36cb0045ac059c142e4067954368f39beb10cea12802905e9dc6964fc",
+    "skills/roborev-analyze-api-design/SKILL.md": "08f157081db4ebe725616e75a0cbed0040aa27a3e3da639c7287d64888f17f6d",
     "skills/roborev-analyze-architecture/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-architecture/SKILL.md": "7d18b6c066e07fa9d89a64eae891e71ed11e167c1cb46551a159a4202fb22202",
+    "skills/roborev-analyze-architecture/SKILL.md": "a0c2159698951702344da646f696364e0bd6cae462669f1fc24d6e2812829f4f",
     "skills/roborev-analyze-complexity/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-complexity/SKILL.md": "7008c431e51f728fd13b1b3efaa0ad4ad5ec7f64ec0d82cbf016253d9bcbde92",
+    "skills/roborev-analyze-complexity/SKILL.md": "30c37792a3d7d84dee4ed159a257a41ce2c94e21ee730f703d812a14584b47ba",
     "skills/roborev-analyze-dead-code/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-dead-code/SKILL.md": "eca17c43fa5c07d7b3438e9719a4d0afd7afa5c8e3e4304d566374334c67e464",
+    "skills/roborev-analyze-dead-code/SKILL.md": "08e3af9f769d4deb6863b6b4e3079eba10f850f7e2bb761444342ebe185de714",
     "skills/roborev-analyze-duplication/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-duplication/SKILL.md": "3807e32c4e8bcb12e00d32387eff93532db30011d0e7fec678aaba59f4237836",
+    "skills/roborev-analyze-duplication/SKILL.md": "686af647f832fc85baeee9a12698d7ad9be2d6c864527ab64b974d463866f485",
     "skills/roborev-analyze-refactor/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-refactor/SKILL.md": "c1654256aadd5149ca89a12f266454de023214529bc9760e224d28e6ec9c0a68",
+    "skills/roborev-analyze-refactor/SKILL.md": "688347b4f387def9140ec6033080cbdfb697e06471a6cc1cffb48340fcf12dd3",
     "skills/roborev-analyze-security/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-security/SKILL.md": "b1458b7f3bd54fb7bbe7cca47e7c83f796d254a108123d5037231a83f082c283",
+    "skills/roborev-analyze-security/SKILL.md": "0fa7ff65236c8505786ee6a7a64ad1aa8c3d1fe999ab0041c11684f3757681a7",
     "skills/roborev-analyze-test-fixtures/LICENSE.txt": "f7440e20d28e4a11ed8ede489f90405e038b4da4d9281bcb1540bf9cde5d9c71",
-    "skills/roborev-analyze-test-fixtures/SKILL.md": "7fb3f0e8d08302bf0b76109f5dc760674fc16072bed8a882670b413c573afede",
+    "skills/roborev-analyze-test-fixtures/SKILL.md": "1e6d7c8af0e9547efb7a813c4302f9f48fa02d0824169a795246bfd7d25202b1",
+    "skills/show-me/LICENSE.txt": "5f13c18ea00ea5c1384f41745feeca774079164f7f59a92e4ac0899ad217b26f",
+    "skills/show-me/SKILL.md": "434a2346cc95e313b0d367d477dda2e23ba642dd2181757415a09500664af100",
+    "skills/show-me/SOURCE.md": "f94f2ddf3387eeafb288506ec8481c212874f9d128c6e1e56cfb401c056a260a",
+    "skills/show-me/agents/openai.yaml": "a1499d95abd8447558c535fe5554adcc3c9b988a0a39264a6283d430effe1e94",
+    "skills/skill-creator-claude/LICENSE.txt": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+    "skills/skill-creator-claude/SKILL.md": "866f43098c717c0ecd614e20e567a364204e623f299e03549876e95dd01e919a",
+    "skills/skill-creator-claude/SOURCE.md": "c8a6b558a6130723d99a1a74b919d3c2cd8b552291a077577bc99e8c202b6c21",
+    "skills/skill-creator-claude/agents/analyzer.md": "bf68f4cac5a56c673a928c2e6d619586c5b93ea364026ab37547772cb45a663a",
+    "skills/skill-creator-claude/agents/comparator.md": "fe1fc9787c495d864c5d6eada47396478572325fde1b33a96d78bf4b849b7a3e",
+    "skills/skill-creator-claude/agents/grader.md": "57134da0c1a4eea33fbd74a1c9c44aa814f07d6bc64de303edb586f941e5d21a",
+    "skills/skill-creator-claude/assets/eval_review.html": "ce477dcc74dc1c0d1d3352646a79167b5a63634e936b1019160025065974e452",
+    "skills/skill-creator-claude/eval-viewer/generate_review.py": "fc9d1b9243fe5ab6012ebd579bd76d0035de1b79fd3b969de114defab26478fb",
+    "skills/skill-creator-claude/eval-viewer/viewer.html": "a53213426ee1100441d701a3a0d49cda7a842f992d2c36463f4d3cc0258575fa",
+    "skills/skill-creator-claude/references/schemas.md": "8e8876180a8989b406a4d3edddf875b04cdfd5805cc8616686d552b11ce4455f",
+    "skills/skill-creator-claude/scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "skills/skill-creator-claude/scripts/aggregate_benchmark.py": "123ef128ea5ccc01a4b1ac212ef5567f21e9c13d3d240609780beeb3200c49aa",
+    "skills/skill-creator-claude/scripts/generate_report.py": "13df7118a3c50c83c4c3250a606d5f2b20b25a3d44cbc392b3d669ec75281453",
+    "skills/skill-creator-claude/scripts/improve_description.py": "87d864570220b699fac52da309d2d6efdb060647bfebc74f768128e646accf80",
+    "skills/skill-creator-claude/scripts/package_skill.py": "1a33059b0db1ef73375d46d513e5ea81369d2e8838c970597b0d52ddef8d1c0f",
+    "skills/skill-creator-claude/scripts/quick_validate.py": "67cf5703402013936c8fb75ad6a1afecd8841d45cc5e606b634eb05825fde365",
+    "skills/skill-creator-claude/scripts/run_eval.py": "43e3b8f80dbf69c343967ba77e268fae991d9fa3ed68b32a0ff02532cd48657f",
+    "skills/skill-creator-claude/scripts/run_loop.py": "7bd6f674203168520517eec94c55f493c0d154339b061b4d7c0f0dad187d0f21",
+    "skills/skill-creator-claude/scripts/utils.py": "3af8ae62c40c73ab712207436a0d9a981e845f25c5a7040229eb189cc8e45bb1",
+    "skills/skill-creator-codex/SKILL.md": "77798a293dd35832cf1f9151527c260db1afc1eb3ec5e5044d7eff73beee2710",
+    "skills/skill-creator-codex/SOURCE.md": "a741ab9a6eda968e68d8b57c2d3c9a583e41735c55c1039a89d5a0781989db85",
+    "skills/skill-creator-codex/agents/openai.yaml": "d07d21b93fcf3d4dc8d9a3399c05fc226a49a333a96d3e1c68b451b8dd9eade6",
+    "skills/skill-creator-codex/assets/skill-creator-small.svg": "6591bf8ea9bb9435890dbdea299e0d2bd05f3aa893a335d26e4c535e93c8e7fb",
+    "skills/skill-creator-codex/assets/skill-creator.png": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162",
+    "skills/skill-creator-codex/license.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "skills/skill-creator-codex/references/openai_yaml.md": "ffac39318e408108141d40f820968e59f70434a891694f9bf1d25be8237b150c",
+    "skills/skill-creator-codex/scripts/generate_openai_yaml.py": "dfc6109dfbf788caa6414d773608ef579e40bcbc77b34ecd390b25856a25a56b",
+    "skills/skill-creator-codex/scripts/init_skill.py": "bf0656a5f9d8d8cdecf0245eaf27e1df8e0e9b6d40ccdda814eb8e3d5f6992c8",
+    "skills/skill-creator-codex/scripts/quick_validate.py": "c00bc75b31db6df63970d320a226bcc5467e71130d9e170826c33337a36e31e7",
     "skills/thermo-nuclear-code-quality-review/LICENSE.txt": "702f5f331b56aff0e33d8c7826df5202559f894145eb70355c6477b55b5bb8a0",
     "skills/thermo-nuclear-code-quality-review/SKILL.md": "7faca08b51b643b2ddd0836f92af15574444024685dcc1e677dbbb39ae8c9e8f",
-    "skills/thermo-nuclear-code-quality-review/SOURCE.md": "6dff792fcda53ad77e7f38e97611d2da3eda3d3072cdaa6255e8bc7c4bddd59a"
+    "skills/thermo-nuclear-code-quality-review/SOURCE.md": "9abb37214fdb2db885f5d32c3bf7a978b9f6712826a3b429fa0ad265577d018c",
+    "skills/tncqr2/references/thermo-nuclear-code-quality-review.LICENSE.txt": "702f5f331b56aff0e33d8c7826df5202559f894145eb70355c6477b55b5bb8a0",
+    "skills/tncqr2/references/thermo-nuclear-code-quality-review.md": "7faca08b51b643b2ddd0836f92af15574444024685dcc1e677dbbb39ae8c9e8f"
   },
   "sources": {
+    "anthropic": {
+      "path": "skills/skill-creator",
+      "repository": "https://github.com/anthropics/skills.git",
+      "revision": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba"
+    },
+    "codex": {
+      "path": "codex-rs/skills/src/assets/samples/skill-creator",
+      "repository": "https://github.com/openai/codex.git",
+      "revision": "1985925638538b75d5c6058ed3c18afcf1fe21cc"
+    },
     "cursor": {
       "path": "cursor-team-kit/skills/thermo-nuclear-code-quality-review",
       "repository": "https://github.com/cursor/plugins.git",
-      "revision": "6b0300214a09fd6029cfb7077043125758cd1fd2"
+      "revision": "005d8f6e8ec057b738adcd08a08b30db0478402d"
+    },
+    "humanlayer": {
+      "path": "plugins/show-me/skills/show-me",
+      "repository": "https://github.com/humanlayer/skills.git",
+      "revision": "4d69d20f6e9b57b4fcf0d501ccfb1be961f0f329"
     },
     "roborev": {
       "path": "internal/prompt/analyze",
       "repository": "https://github.com/kenn-io/roborev.git",
-      "revision": "0cc4d482018fb022341adbdd84ff1e6c23a14083"
+      "revision": "07d40a249d5cff617ac9b10b273c6a587ec8bf8f"
     }
   }
 }

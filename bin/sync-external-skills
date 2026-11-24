@@ -18,6 +18,9 @@ REPO = Path(__file__).resolve().parent.parent
 LOCK = "external-skills.lock.json"
 CURSOR_PATH = "cursor-team-kit/skills/thermo-nuclear-code-quality-review"
 ROBOREV_PATH = "internal/prompt/analyze"
+ANTHROPIC_PATH = "skills/skill-creator"
+CODEX_PATH = "codex-rs/skills/src/assets/samples/skill-creator"
+HUMANLAYER_PATH = "plugins/show-me/skills/show-me"
 DESCRIPTIONS = {
     "api-design": "Review public API consistency, naming, signatures, and usability.",
     "architecture": "Review module organization, dependency flow, and architectural boundaries.",
@@ -76,6 +79,47 @@ def roborev_skill(stem, prompt, url):
     return name, content.encode("utf-8")
 
 
+def rename_skill_frontmatter(content, old_name, new_name):
+    expected = f"---\nname: {old_name}\n".encode()
+    if not content.startswith(expected):
+        raise ValueError(f"Unexpected SKILL.md frontmatter (expected name: {old_name})")
+    replacement = f"---\nname: {new_name}\n".encode()
+    return replacement + content[len(expected) :]
+
+
+def collect_skill_tree(
+    source_dir, target_name, *, upstream_name, source_label, source_url
+):
+    if not source_dir.is_dir():
+        raise ValueError(f"Upstream skill directory not found: {source_dir}")
+    collected = {}
+    prefix = f"skills/{target_name}"
+    for entry in sorted(source_dir.rglob("*")):
+        if entry.is_symlink():
+            raise ValueError(f"Refusing to copy upstream symlink: {entry}")
+        if not entry.is_file():
+            continue
+        relative = entry.relative_to(source_dir).as_posix()
+        content = entry.read_bytes()
+        if relative == "SKILL.md":
+            content = rename_skill_frontmatter(content, upstream_name, target_name)
+        collected[f"{prefix}/{relative}"] = content
+    if f"{prefix}/SKILL.md" not in collected:
+        raise ValueError(f"Upstream skill missing SKILL.md: {source_dir}")
+    rename_note = (
+        f" Renamed from `{upstream_name}` to `{target_name}`."
+        if upstream_name != target_name
+        else ""
+    )
+    collected[f"{prefix}/SOURCE.md"] = (
+        "# Upstream source\n\n"
+        f"[{source_label}]({source_url})\n\n"
+        f"Synced by `bin/sync-external-skills`.{rename_note} "
+        "Edit upstream or expect local edits to block syncing.\n"
+    ).encode()
+    return collected
+
+
 def collect():
     """Fetch complete, revision-consistent snapshots before touching the collection."""
     sources = {}
@@ -89,10 +133,13 @@ def collect():
         skill = (cursor / CURSOR_PATH / "SKILL.md").read_bytes()
         if not skill.startswith(b"---\nname: thermo-nuclear-code-quality-review\n"):
             raise ValueError("Unexpected Cursor SKILL.md frontmatter")
+        cursor_license = (cursor / "cursor-team-kit/LICENSE").read_bytes()
         files[f"{target}/SKILL.md"] = skill
-        files[f"{target}/LICENSE.txt"] = (
-            cursor / "cursor-team-kit/LICENSE"
-        ).read_bytes()
+        files[f"{target}/LICENSE.txt"] = cursor_license
+        # tncqr2 layers its additions on this skill and links to the copy.
+        reference = "skills/tncqr2/references/thermo-nuclear-code-quality-review"
+        files[f"{reference}.md"] = skill
+        files[f"{reference}.LICENSE.txt"] = cursor_license
         revision = sources["cursor"]["revision"]
         files[f"{target}/SOURCE.md"] = (
             "# Upstream source\n\n"
@@ -115,6 +162,55 @@ def collect():
             )
             files[f"skills/{name}/SKILL.md"] = content
             files[f"skills/{name}/LICENSE.txt"] = license_text
+
+        anthropic, sources["anthropic"] = snapshot(
+            parent,
+            "anthropic",
+            "https://github.com/anthropics/skills.git",
+            ANTHROPIC_PATH,
+        )
+        revision = sources["anthropic"]["revision"]
+        files.update(
+            collect_skill_tree(
+                anthropic / ANTHROPIC_PATH,
+                "skill-creator-claude",
+                upstream_name="skill-creator",
+                source_label="Anthropic skills",
+                source_url=f"https://github.com/anthropics/skills/tree/{revision}/{ANTHROPIC_PATH}",
+            )
+        )
+
+        codex, sources["codex"] = snapshot(
+            parent, "codex", "https://github.com/openai/codex.git", CODEX_PATH
+        )
+        revision = sources["codex"]["revision"]
+        files.update(
+            collect_skill_tree(
+                codex / CODEX_PATH,
+                "skill-creator-codex",
+                upstream_name="skill-creator",
+                source_label="OpenAI Codex",
+                source_url=f"https://github.com/openai/codex/tree/{revision}/{CODEX_PATH}",
+            )
+        )
+
+        humanlayer, sources["humanlayer"] = snapshot(
+            parent,
+            "humanlayer",
+            "https://github.com/humanlayer/skills.git",
+            HUMANLAYER_PATH,
+        )
+        revision = sources["humanlayer"]["revision"]
+        files.update(
+            collect_skill_tree(
+                humanlayer / HUMANLAYER_PATH,
+                "show-me",
+                upstream_name="show-me",
+                source_label="HumanLayer skills",
+                source_url=f"https://github.com/humanlayer/skills/tree/{revision}/{HUMANLAYER_PATH}",
+            )
+        )
+        files["skills/show-me/LICENSE.txt"] = (humanlayer / "LICENSE").read_bytes()
     return sources, files
 
 
@@ -185,8 +281,10 @@ def sync(root, sources, files, *, force=False, check=False):
             target.write_bytes(content)
         for target in removals:
             target.unlink()
-            if not any(target.parent.iterdir()):
-                target.parent.rmdir()
+            parent = target.parent
+            while parent != root / "skills" and not any(parent.iterdir()):
+                parent.rmdir()
+                parent = parent.parent
     changed = bool(updates or removals)
     if not changed:
         print("External skills are up to date.")

@@ -74,7 +74,7 @@ The old GitHub repository is not renamed or modified by this setup.
 
 ## External skills
 
-Sync the two upstream collections explicitly from the repository root:
+Sync the upstream collections explicitly from the repository root:
 
 ```sh
 bin/sync-external-skills
@@ -84,11 +84,20 @@ bin/sync-external-skills --check  # no writes; exit 1 when updates are available
 The script requires uv and Git. It fetches `main` from:
 
 - [Cursor team kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review):
-  copies `thermo-nuclear-code-quality-review` without changing its prompt or frontmatter.
+  copies `thermo-nuclear-code-quality-review` without changing its prompt or frontmatter,
+  and copies its `SKILL.md` and license into `tncqr2/references/`, which `tncqr2` links to.
 - [Roborev analysis prompts](https://github.com/kenn-io/roborev/tree/main/internal/prompt/analyze):
   wraps each `.txt` prompt in a `roborev-analyze-<type>/SKILL.md`, converting
   underscores to hyphens (for example, `roborev-analyze-api-design`). The wrapper
   adds a description, scope guidance, and source link; the prompt is preserved.
+- [Anthropic skills](https://github.com/anthropics/skills/tree/main/skills/skill-creator):
+  copies `skill-creator` and its supporting files, renaming the skill and its
+  `SKILL.md` frontmatter `name` to `skill-creator-claude`.
+- [OpenAI Codex](https://github.com/openai/codex/tree/main/codex-rs/skills/src/assets/samples/skill-creator):
+  copies `skill-creator` and its supporting files, renaming the skill and its
+  `SKILL.md` frontmatter `name` to `skill-creator-codex`.
+- [HumanLayer skills](https://github.com/humanlayer/skills/tree/main/plugins/show-me/skills/show-me):
+  copies `show-me` and its supporting files, adding the repository license.
 
 Upstream licenses are included with each skill. `external-skills.lock.json`
 records source commits and generated-file hashes. Review and commit the resulting

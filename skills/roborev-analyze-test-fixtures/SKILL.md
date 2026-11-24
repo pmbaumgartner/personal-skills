@@ -7,7 +7,7 @@ description: "Find reusable test fixtures, builders, and helpers to reduce dupli
 
 Read the files in the scope requested by the user before applying the instructions below. Report findings; do not modify code unless the user asks for changes.
 
-Source: [test_fixtures.txt](https://github.com/kenn-io/roborev/blob/0cc4d482018fb022341adbdd84ff1e6c23a14083/internal/prompt/analyze/test_fixtures.txt). The upstream prompt below is preserved verbatim.
+Source: [test_fixtures.txt](https://github.com/kenn-io/roborev/blob/07d40a249d5cff617ac9b10b273c6a587ec8bf8f/internal/prompt/analyze/test_fixtures.txt). The upstream prompt below is preserved verbatim.
 
 ## Instructions
 

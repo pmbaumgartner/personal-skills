@@ -1,0 +1,6 @@
+interface:
+  display_name: "Thermo-Nuclear Code Quality Review 2.0"
+  short_description: "Evidence-checked thermo-nuclear code quality review"
+  default_prompt: "Use $tncqr2 to review this code or plan and list findings by ID."
+policy:
+  allow_implicit_invocation: false
