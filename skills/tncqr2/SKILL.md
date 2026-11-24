@@ -11,6 +11,16 @@ Read [references/thermo-nuclear-code-quality-review.md](references/thermo-nuclea
 ## Scope
 - **No diff given.** For "all code" or when there is no diff, review the whole codebase; don't look for a branch diff first.
 - **Plans.** A plan or design document can be reviewed too. Check its steps against the current code and against what the user said they want.
+- **Stacks.** For a stacked branch, also review the cumulative diff from trunk to the top branch. Cross-layer problems don't show in any single layer's diff.
+
+## Structure
+Ask these once per change, across files, not per hunk:
+- **Same edit, many places.** If the diff makes the same edit in several places, ask why those places don't call one function.
+- **Import direction.** Each new import should point at a lower-level module. Flag a module that borrows utilities from a sibling's business module, or two modules that import each other's internals.
+- **Home matches description.** If a docstring or name says the code is independent of the module it lives in, it belongs elsewhere.
+- **Parallel definitions.** Before accepting code that finds or computes something, look for existing code that does the same. If both stay, check that they agree on edge cases.
+- **Stale workarounds.** If the change, or an earlier layer of the stack, removed the reason for a workaround, remove the workaround. Don't extend it.
+- **One path per value.** If a value now reaches its destination by two routes, ask whether it can arrive one way.
 
 ## Claims
 - **Ran or read.** Say for each finding whether you ran something or only read the code. Call a finding verified only if a command, test or run in this session showed it. Run a cheap check before calling a finding a blocker.
