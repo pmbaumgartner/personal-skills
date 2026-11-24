@@ -60,7 +60,7 @@ Look for:
 - comments or names that cannot state the abstraction clearly
 - changes that preserve behavior but leave future modifications less local
 
-When an interface is unclear, sketch its public contract and explanatory comment. Difficulty stating the contract simply is design evidence. For a non-trivial redesign, compare at least two plausible interface shapes by module depth, information hiding, special-case reduction, consistency, and total cognitive load.
+When an interface is unclear, sketch its public contract and explanatory comment. Difficulty stating the contract simply is design evidence.
 
 ## Interpretation cautions
 
@@ -77,23 +77,8 @@ When an interface is unclear, sketch its public contract and explanatory comment
 
 ## Redesign discipline
 
-Do not prescribe a redesign without examining callers and constraints. Prefer the smallest direction that:
+Do not prescribe a redesign without examining callers and constraints. Prefer a direction that localizes knowledge, deepens a useful module, simplifies an interface, removes caller coordination, or defines a special case out of existence.
 
-- localizes knowledge
-- deepens a useful module
-- simplifies an interface
-- removes caller coordination
-- defines a special case out of existence
-
-For each justified direction, establish:
-
-- **Canonical ownership:** where the relevant knowledge should live
-- **Target contract:** what ordinary callers should need to know afterward
-- **Complexity deletion:** which branches, modes, wrappers, or coordination disappear
-- **Existing leverage:** which sound seam should be preserved or deepened
-- **Blast radius:** which representative callers and boundaries must change
-- **Safe first step:** the smallest independently useful move and its verification
-
-Test the direction against a simplification counterfactual: would changing ownership, the state model, or the default flow remove concepts, or only extract and rename the same complexity? Prefer deletion when the source supports it. For a non-trivial redesign, compare at most two plausible interface shapes. Accept that no simpler design may be justified.
+Test it against the simplification counterfactual: would changing ownership, the state model, or the default flow remove concepts, or only extract and rename the same complexity? Prefer deletion when the source supports it, and accept that no simpler design may be justified.
 
 State uncertainty when evidence cannot distinguish a successful deep module from a risky concentration of responsibility.

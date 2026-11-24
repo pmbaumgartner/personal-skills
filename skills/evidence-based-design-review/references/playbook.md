@@ -1,11 +1,10 @@
-# MCP Playbook
+# Tool Playbook
 
-Use this reference when executing an evidence-based review. Tool schemas can evolve; inspect current descriptors if a call is rejected.
+`scripts/collect.py` makes the standard SCC and graph calls. Use this reference for follow-up calls, for environments with only MCP servers, and when the collector fails. Tool schemas can evolve; inspect current descriptors or `--help` if a call is rejected.
 
 ## Contents
 
-- [Independent lane discipline](#independent-lane-discipline)
-- [Runtime tool syntax](#runtime-tool-syntax)
+- [Invocation forms](#invocation-forms)
 - [SCC calls](#scc-calls)
 - [Index setup and coverage](#index-setup-and-coverage)
 - [Architecture and changed-code scope](#architecture-and-changed-code-scope)
@@ -18,90 +17,51 @@ Use this reference when executing an evidence-based review. Tool schemas can evo
 - [Shared-state writers and policy scatter](#shared-state-writers-and-policy-scatter)
 - [Duplicate candidates](#duplicate-candidates)
 - [Tracing and source evidence](#tracing-and-source-evidence)
-  - [Structural dossier](#structural-dossier)
-- [Dead-code candidates](#dead-code-candidates)
 - [Hidden change coupling](#hidden-change-coupling)
-- [Design-concern evidence matrix](#design-concern-evidence-matrix)
 
-## Independent lane discipline
+## Invocation forms
 
-Treat SCC and codebase-memory as complementary discovery lanes, not a serial filter:
+For MCP tools, discover them and confirm the exact invocation form with a harmless call such as `list_projects` or a tool descriptor. Do not assume namespacing from the displayed server name: one gateway may accept a flat tool name with a separate server selector (`tool="analyze", server="scc"`), while another exposes prefixed names. Use only the form the runtime returns and accepts; if one fails, rediscover rather than guessing.
 
-1. Establish shared scope, production roots, exclusions, and snapshot caveats.
-2. Complete and validate the SCC ranking independently.
-3. Complete and validate the graph candidate set and structural hypotheses independently.
-4. Only then synthesize the union by design concern or change path, preserving SCC-only, graph-only, overlapping, and contradictory signals.
-5. Source-validate a bounded selection that includes material lane-unique candidates; overlap is corroboration, not an admission requirement.
+For the SCC CLI, confirm `scc --help` lists `--hotspots`, `--coupling`, and `--coupling-for`.
 
-Run the lanes concurrently when practical. If calls must be serial, do not use early results from one lane to narrow, suppress, or rerank the other. Do not combine unlike metrics into a pseudo-precise score.
-
-Use SCC primarily to establish maintenance pressure and exposure. Use graph evidence to establish structural shape, ownership, dependency direction, caller coordination, and blast radius. Neither role vetoes a lane-unique signal.
-
-Use SCC for history evidence: frequency, churn, and co-change. The graph's `FILE_CHANGES_WITH` edges and `File.change_count` come from the same git log, filtered and without rename tracking, so they neither corroborate SCC nor rank candidates. Use the graph to explain history instead: map a diff to symbols with `detect_changes`, and test whether SCC's co-change pairs and hotspots have structural dependencies.
-
-## Runtime tool syntax
-
-Discover the tools, then confirm the exact invocation form with a harmless call such as `list_projects` or a tool descriptor. Record the successful form in the review basis. Do not assume namespacing from the displayed server name. For example, one gateway may accept a flat tool name with a separate server selector:
-
-```text
-tool="list_projects", server="codebase-memory-mcp"
-tool="analyze", server="scc"
-```
-
-Another runtime may expose prefixed names. Use only the form returned and accepted by that runtime; if `server/tool` fails, rediscover rather than guessing.
+Record the forms used in the evidence basis.
 
 ## SCC calls
 
-Use one explicit history depth. Keep history calls at the repository root, but choose file-analysis paths from the Git/filesystem inventory and graph-coverage reconciliation.
+Use one explicit history depth for every history call. Keep history calls at the repository root, but choose file-analysis paths from the Git/filesystem inventory and graph-coverage reconciliation.
 
-For a small, homogeneous repository with bounded output:
+The MCP server and the CLI expose the same analyses:
 
-```text
-analyze({
-  path: "/absolute/repo",
-  by_file: true,
-  cognitive: true,
-  no_min_gen: true,
-  sort: "complexity",
-  limit: 100
-})
-```
+| Purpose | MCP | CLI |
+|---|---|---|
+| File complexity | `analyze({path, by_file: true, cognitive: true, no_min_gen: true, sort: "complexity", limit: 100})` | `scc --by-file --cognitive --no-min-gen --sort complexity --format json PATH` |
+| Scale and languages | `analyze({path, by_file: false, cognitive: true, no_min_gen: true})` | `scc --cognitive --no-min-gen --format json PATH` |
+| Hotspots | `hotspots({path: REPO, depth: 1000, limit: 50})` | `scc --hotspots --depth 1000 --format json REPO` |
+| Repo-wide coupling | `coupling({path: REPO, depth: 1000, limit: 50})` | `scc --coupling --depth 1000 --format json REPO` |
+| One file's co-change partners (diff reviews) | `coupling({path: REPO, file: "relative/path.ext", depth: 1000, limit: 30})` | `scc --coupling-for relative/path.ext --depth 1000 --format json REPO` |
+| Complexity-weighted coupling | — | `scc --coupling-weighted --depth 1000 --format json REPO` |
 
-For a large, polyglot, monorepo, or artifact-heavy repository, an optional compact root summary can establish scale and languages:
+MCP calls take absolute paths. The CLI has no `limit`, so trim its output client-side. CLI file analysis returns rows grouped by language with capitalized keys (`Location`, `Code`, `Complexity`, `Cognitive`); its history reports use the same fields as the MCP tools.
 
-```text
-analyze({path: "/absolute/repo", by_file: false, cognitive: true, no_min_gen: true})
-```
+For a small, homogeneous repository, one by-file analysis at the root is enough. For a large, polyglot, monorepo, or artifact-heavy repository, take a compact root summary for scale and languages, then analyze the discovered owned components separately. Use complexity-weighted coupling when repo-wide coupling is dominated by data, generated, or lock files.
 
-Then analyze the discovered owned categories or components separately; these paths are examples, not conventions:
-
-```text
-analyze({path: "/absolute/repo/component-a", by_file: true, cognitive: true, no_min_gen: true, sort: "complexity", limit: 100})
-analyze({path: "/absolute/repo/packages/service-b", by_file: true, cognitive: true, no_min_gen: true, sort: "complexity", limit: 100})
-```
-
-Always keep history analysis at the repository root:
-
-```text
-hotspots({path: "/absolute/repo", depth: 1000, limit: 50})
-coupling({path: "/absolute/repo", depth: 1000, limit: 50})
-coupling({path: "/absolute/repo", file: "relative/path.ext", depth: 1000, limit: 30})
-```
-
-If repo-wide coupling is dominated by data, generated, or lock files, the SCC CLI can weight pairs by file complexity: `scc --coupling-weighted --format json --depth 1000 /absolute/repo`.
+If history fails with `does not support extension: worktreeconfig`, SCC cannot open the checkout. Run the history reports on `git clone --no-local REPO SCRATCH_DIR` and keep file analysis on the original checkout.
 
 Interpretation:
 
-- `analyze` reads the filesystem snapshot, including eligible modified or untracked files; it is not necessarily a HEAD snapshot. History calls cannot rank uncommitted files. Record dirty state and reconcile the inputs.
-- With `by_file`, `limit` applies per language and rows are sorted within each language. Always merge owned production rows client-side into one global numeric ranking. Keep separate rankings for tests, benchmarks, migrations, and owned scripts/tooling. Keep fixtures, generated code, and vendored code separate or excluded.
-- `hotspots` and `coupling` take no exclusion filters; drop generated, vendored, and fixture rows client-side.
+- File analysis reads the filesystem snapshot, including eligible modified or untracked files; it is not necessarily a HEAD snapshot. History reports cannot rank uncommitted files. Record dirty state and reconcile the inputs.
+- By-file rows are grouped and sorted within each language, and the MCP `limit` applies per language. Always merge owned production rows client-side into one global numeric ranking. Keep separate rankings for tests, benchmarks, migrations, and owned scripts/tooling. Keep fixtures, generated code, and vendored code separate or excluded.
+- History reports take no exclusion filters; drop generated, vendored, and fixture rows client-side.
 - Capture SCC candidates before consulting graph architecture. After both lanes complete, architecture may help explain component boundaries, but it is never proof that the file inventory is complete.
 - File complexity is partly a size signal. Source inspection and post-synthesis symbol evidence can refine it, but lack of graph corroboration does not discard an SCC candidate.
-- `hotspots.score` is normalized complexity × commits, not defect probability. Preserve `commits`, `linesChanged`, `codeChurn`, `commentChurn`, `authors`, and the returned date window as context. Code churn distinguishes behavioral accretion from comment-only edits.
-- Repo-wide coupling uses symmetric Jaccard-like degree. File-specific coupling reports directional `couple` and `reverse`; a large gap suggests a hub relationship rather than peer coupling.
+- Hotspot `score` is normalized complexity × commits, not defect probability. Preserve `commits`, `linesChanged`, `codeChurn`, `commentChurn`, `authors`, and the returned date window as context. Code churn distinguishes behavioral accretion from comment-only edits.
+- Repo-wide coupling uses symmetric Jaccard-like degree. Single-file coupling reports directional `couple` and `reverse`; a large gap suggests a hub relationship rather than peer coupling.
+- Before trusting co-change pairs, check how many files commits typically touch (`git show --name-only` over the window). Broad commits such as refactors, renames, and formatting sweeps inflate coupling between unrelated files; discount pairs explained by them.
 - Common source↔test and manifest↔lockfile pairs are expected. Unexpected cross-module policy coupling deserves inspection.
+- SCC's `no_duplicates` option concerns duplicate-file accounting in line counts; it is not a source-clone detector.
 
-SCC's `no_duplicates` option concerns duplicate-file accounting in line counts; it is not a source-clone detector.
+SCC is the history lane: frequency, churn, and co-change. The graph's `FILE_CHANGES_WITH` edges and `File.change_count` come from the same git log, filtered and without rename tracking, so they neither corroborate SCC nor rank candidates. Use the graph to explain history instead: map a diff to symbols with `detect_changes`, and test whether SCC's co-change pairs and hotspots have structural dependencies.
 
 ## Index setup and coverage
 
@@ -122,14 +82,14 @@ get_graph_schema({project: "stable-project-name", diagnostics: "full"})
 ```text
 check_index_coverage({
   project: "stable-project-name",
-  paths: ["src/a.py", "src/b.py"]
+  paths: ["path/to/a.py", "path/to/b.py"]
 })
 ```
 
 Before saying a bounded area has no cycles, duplicates, callers, dead code, or other matches:
 
 ```text
-check_index_coverage({project: "stable-project-name", scopes: ["src/domain/"]})
+check_index_coverage({project: "stable-project-name", scopes: ["<root>/some/area/"]})
 ```
 
 To list every flagged gap file under a scope at once, query the coverage-gap graph, which holds only `Project`, `Folder`, and `File` nodes:
@@ -139,7 +99,7 @@ query_graph({
   project: "stable-project-name",
   graph: "missed",
   format: "json",
-  query: "MATCH (f:File) WHERE f.file_path STARTS WITH 'src/' RETURN f.file_path AS file ORDER BY file ASC"
+  query: "MATCH (f:File) WHERE f.file_path STARTS WITH '<root>/' RETURN f.file_path AS file ORDER BY file ASC"
 })
 ```
 
@@ -150,7 +110,7 @@ Inspect skipped and parse-partial paths directly. `indexed_no_recorded_gap` is s
 ```text
 get_architecture({
   project: "stable-project-name",
-  path: "src/",
+  path: "<root>/",
   aspects: ["overview", "hotspots", "layers", "boundaries", "cycles", "clusters"]
 })
 
@@ -171,9 +131,13 @@ detect_changes({
 
 The walk follows only `CALLS` unless `edge_types` is given, which misses change that spreads through type usage, references, shared state, and inheritance. `edge_types`, `via`, and `fixpoint` require `direction: "inbound"`, and the call rejects edge types the index lacks, so pass only types listed by `get_graph_schema`.
 
+Check edge quality before relying on call or write edges. Edges across a boundary that cannot exist, such as a lower layer calling a higher one, mean that language's calls are resolved by name. Then fan-in, fan-out, cycles, traces, `WRITES` counts, and the hidden-coupling check are unreliable there: shared method or field names link unrelated code. Confirm callers and writers with source search before citing them.
+
 Architecture hotspots rank by fan-in and can include builtins and test utilities. Scope architecture calls to production roots, reconcile returned paths with `index_status`, and filter to owned production symbols before prioritizing. `layers` classifies modules as entry, core, internal, or leaf from fan-in/out; an internal layer whose callers and callees offer the same abstraction is a pass-through candidate. Clusters reveal de-facto seams, not necessarily desired architecture.
 
 ## Query results
+
+Queries below write production scope as `<root>/`. Substitute each production root recorded in Setup, as a repository-relative prefix; for several roots, combine `STARTS WITH` predicates with `OR` inside parentheses or run the query once per root. File paths such as `path/to/a.py` are placeholders too.
 
 Request `format: "json"` for every query that will be ranked or merged; it returns `columns`, row arrays, `total`, `truncated`, and `next_cursor`.
 
@@ -183,6 +147,7 @@ Request `format: "json"` for every query that will be ranked or merged; it retur
 - Treat a warning, timeout, unexpected shape, unexplained empty result, or results skewed to one label as failure.
 - If a gateway summarizes or saves the output, parse the complete saved result; never rank from a preview.
 - The Cypher subset rejects arithmetic, `CASE`, and most functions outside aggregation. Return raw columns and compute derived values client-side.
+- `WHERE` compares properties only against literals; a property-to-property comparison such as `a.file_path <> b.file_path` fails to parse. Return both columns and filter client-side.
 
 ## Symbol complexity and hot-path queries
 
@@ -190,7 +155,7 @@ Check `get_graph_schema` for available properties first. Restrict to production 
 
 ```cypher
 MATCH (f:Function|Method)
-WHERE f.file_path STARTS WITH 'src/'
+WHERE f.file_path STARTS WITH '<root>/'
   AND f.is_test = false
 RETURN f.qualified_name AS symbol,
        f.file_path AS file,
@@ -226,7 +191,7 @@ Estimate how much cyclomatic complexity lies in production functions above compl
 
 ```cypher
 MATCH (f:Function|Method)
-WHERE f.file_path STARTS WITH 'src/'
+WHERE f.file_path STARTS WITH '<root>/'
   AND f.is_test = false
 RETURN sum(f.complexity) AS cyclomatic,
        sum(f.lines) AS lines,
@@ -241,7 +206,7 @@ Compare each file's exported symbols with the complexity they hide. Run both que
 
 ```cypher
 MATCH (f:Function|Method)
-WHERE f.file_path STARTS WITH 'src/' AND f.is_test = false
+WHERE f.file_path STARTS WITH '<root>/' AND f.is_test = false
 RETURN f.file_path AS file, count(f) AS symbols,
        sum(f.complexity) AS cyclomatic, sum(f.lines) AS lines
 ORDER BY cyclomatic DESC, file ASC
@@ -250,14 +215,14 @@ LIMIT 50
 
 ```cypher
 MATCH (f:Function|Method)
-WHERE f.file_path STARTS WITH 'src/' AND f.is_test = false
+WHERE f.file_path STARTS WITH '<root>/' AND f.is_test = false
   AND f.is_exported = true
 RETURN f.file_path AS file, count(f) AS exported
 ORDER BY exported DESC, file ASC
 LIMIT 50
 ```
 
-Many exported symbols over little complexity suggests a shallow module; few exports over substantial complexity suggests a deep one. `is_exported` follows each language's convention and can mark every top-level function of a plain script, so confirm the real interface in source. For a leading candidate, `get_file_outline({project: "stable-project-name", file_path: "src/a.py"})` lists every declaration, including variables and classes, in source order with exact paging; page while `has_more` is true.
+Many exported symbols over little complexity suggests a shallow module; few exports over substantial complexity suggests a deep one. `is_exported` follows each language's convention and can mark every top-level function of a plain script, so confirm the real interface in source. For a leading candidate, `get_file_outline({project: "stable-project-name", file_path: "path/to/a.py"})` lists every declaration, including variables and classes, in source order with exact paging; page while `has_more` is true.
 
 ## Fan-in and fan-out
 
@@ -265,7 +230,7 @@ Run separate queries to avoid accidental Cartesian multiplication:
 
 ```cypher
 MATCH (caller)-[:CALLS]->(f:Function|Method)
-WHERE f.file_path STARTS WITH 'src/'
+WHERE f.file_path STARTS WITH '<root>/'
   AND f.is_test = false AND caller.is_test = false
 RETURN f.qualified_name AS symbol, f.file_path AS file,
        f.start_line AS line, count(DISTINCT caller) AS fan_in
@@ -275,7 +240,7 @@ LIMIT 50
 
 ```cypher
 MATCH (f:Function|Method)-[:CALLS]->(callee)
-WHERE f.file_path STARTS WITH 'src/' AND f.is_test = false
+WHERE f.file_path STARTS WITH '<root>/' AND f.is_test = false
 RETURN f.qualified_name AS symbol, f.file_path AS file,
        f.start_line AS line, count(DISTINCT callee) AS fan_out
 ORDER BY fan_out DESC, symbol ASC
@@ -288,17 +253,19 @@ These count resolved graph edges, not all runtime calls. Builtins, dynamic dispa
 
 ### Transitive dependency cone
 
-Measure when a lightweight entry point, script, or domain module appears coupled to a heavy runtime, I/O, or generated subgraph. Query distinct cross-file production dependency edges (`IMPORTS` target labels vary across languages, so symbol dependency edges provide a uniform file graph):
+Measure when a lightweight entry point, script, or domain module appears coupled to a heavy runtime, I/O, or generated subgraph. Query distinct production dependency edges between files (`IMPORTS` target labels vary across languages, so symbol dependency edges provide a uniform file graph):
 
 ```cypher
 MATCH (src)-[:CALLS|USAGE|CALL_REFERENCE|INHERITS|IMPLEMENTS]->(dst)
 WHERE src.is_test = false AND dst.is_test = false
   AND src.file_path <> '' AND dst.file_path <> ''
-  AND src.file_path <> dst.file_path
+  AND NOT dst.file_path STARTS WITH '<'
 RETURN DISTINCT src.file_path AS src_file, dst.file_path AS dst_file
 ORDER BY src_file ASC, dst_file ASC
 LIMIT 2000
 ```
+
+Drop same-file pairs client-side. Paths in angle brackets, such as `<python-builtins>`, are runtime placeholders, not files.
 
 Compute the reachable file closure `cone(F)` from candidate file `F` client-side, then join with the SCC `by_file` table to sum reachable file count, code lines, and cyclomatic/cognitive complexity. When a small caller has a large dependency cone because it reads static metadata or policy from a runtime module, identify the bridge edge `u -> v` and estimate the counterfactual cone if those facts lived in a pure metadata module.
 
@@ -308,7 +275,7 @@ Find fields and variables written from several files:
 
 ```cypher
 MATCH (w:Function|Method)-[:WRITES]->(v)
-WHERE w.file_path STARTS WITH 'src/' AND w.is_test = false
+WHERE w.file_path STARTS WITH '<root>/' AND w.is_test = false
 RETURN v.qualified_name AS state, v.file_path AS file,
        count(DISTINCT w) AS writers,
        count(DISTINCT w.file_path) AS writer_files
@@ -322,17 +289,16 @@ For immutable policy, protocol, or configuration constants, query cross-file `US
 
 ```cypher
 MATCH (caller)-[:USAGE]->(target:Variable|Class)
-WHERE target.file_path STARTS WITH 'src/'
+WHERE target.file_path STARTS WITH '<root>/'
   AND caller.is_test = false AND target.is_test = false
-  AND caller.file_path <> target.file_path
-RETURN target.qualified_name AS symbol, target.file_path AS owner_file,
-       count(DISTINCT caller.file_path) AS consumer_files,
-       count(DISTINCT caller) AS consumer_symbols
-ORDER BY consumer_files DESC, consumer_symbols DESC, symbol ASC
-LIMIT 50
+RETURN DISTINCT target.qualified_name AS symbol, target.file_path AS owner_file,
+       caller.file_path AS consumer_file
+ORDER BY symbol ASC, consumer_file ASC
 ```
 
-High `consumer_files` on a canonical registry or core domain type is expected. High `consumer_files` on low-level building blocks (individual policy constants, topic names, format codes) across sibling modules that assemble parallel lookup tables or dispatch branches indicates scattered policy ownership.
+Page through the results, drop rows where `consumer_file` equals `owner_file`, and count distinct consumer files per symbol client-side.
+
+Many consumer files on a canonical registry or core domain type is expected. Many consumer files on low-level building blocks (individual policy constants, topic names, format codes) across sibling modules that assemble parallel lookup tables or dispatch branches indicates scattered policy ownership.
 
 ## Duplicate candidates
 
@@ -340,8 +306,8 @@ Query graph-generated token-similarity edges:
 
 ```cypher
 MATCH (a)-[r:SIMILAR_TO]->(b)
-WHERE a.file_path STARTS WITH 'src/'
-  AND b.file_path STARTS WITH 'src/'
+WHERE a.file_path STARTS WITH '<root>/'
+  AND b.file_path STARTS WITH '<root>/'
   AND a.is_test = false AND b.is_test = false
 RETURN a.qualified_name AS symbol_a, a.file_path AS file_a,
        a.start_line AS line_a, b.qualified_name AS symbol_b,
@@ -355,8 +321,8 @@ LIMIT 100
 
 ```cypher
 MATCH (a:Function|Method)-[r:SEMANTICALLY_RELATED]->(b:Function|Method)
-WHERE a.file_path STARTS WITH 'src/'
-  AND b.file_path STARTS WITH 'src/'
+WHERE a.file_path STARTS WITH '<root>/'
+  AND b.file_path STARTS WITH '<root>/'
   AND a.is_test = false AND b.is_test = false
 RETURN a.qualified_name AS symbol_a, a.file_path AS file_a,
        a.start_line AS line_a, b.qualified_name AS symbol_b,
@@ -427,41 +393,13 @@ For blast radius, trace `direction: "inbound"` with the same `edge_types` as `de
 
 Follow `has_more` and `next` cursors. Use `get_code_snippet` for exact symbols, then direct file reads when more context is needed or coverage is partial. Treat trace `risk_labels` only as prioritization hints: they are not finding severity, and transitive risk propagation can label harmless accessors, builtins, or wrappers as `CRITICAL` or recursive.
 
-### Structural dossier
-
-For each leading graph hypothesis, capture enough evidence to explain the design concern rather than merely cite a rank:
-
-- the concept and its likely canonical owner
-- representative inbound callers and what they must pass, coordinate, or know
-- important outbound dependencies and boundary crossings
-- policy or state knowledge repeated across symbols
-- likely change blast radius
-- an existing seam that could contain the knowledge
-- index coverage, unresolved dynamic behavior, and other limits
-
-Use the dossier to test a specific hypothesis such as distributed ownership, boundary leakage, shallow layering, or duplicated coordination. Do not infer all fields from one trace, and do not prescribe a new owner before inspecting its contract and representative callers.
-
-## Dead-code candidates
-
-```text
-search_graph({
-  project: "stable-project-name",
-  label: "Function",
-  max_degree: 0,
-  exclude_entry_points: true,
-  limit: 100
-})
-```
-
-Paginate. Never report dead code from graph isolation alone. Verify exports, framework registration, reflection, plugin hooks, callbacks, FFI, macros, scripts, and direct textual references. `search_code({project: "stable-project-name", pattern: "candidate_name", mode: "files"})` finds textual references in indexed files only; grep the excluded and unindexed paths reported by `index_status` before calling a symbol unreferenced.
-
 ## Hidden change coupling
 
 After both lanes complete, check each leading SCC coupling pair for a static dependency in either direction:
 
 ```cypher
 MATCH (a)-[r]-(b)
-WHERE a.file_path = 'src/a.py' AND b.file_path = 'src/b.py'
+WHERE a.file_path = 'path/to/a.py' AND b.file_path = 'path/to/b.py'
 RETURN type(r) AS edge, count(r) AS n
 ORDER BY n DESC, edge ASC
 ```
@@ -472,7 +410,7 @@ Environment variables, launched programs, and HTTP routes are shared nodes rathe
 
 ```cypher
 MATCH (a)-[:CONFIGURES|SPAWNS|HTTP_CALLS]->(x)<-[:CONFIGURES|SPAWNS|HTTP_CALLS]-(b)
-WHERE a.file_path = 'src/a.py' AND b.file_path = 'src/b.py'
+WHERE a.file_path = 'path/to/a.py' AND b.file_path = 'path/to/b.py'
 RETURN labels(x) AS shared_label, x.name AS shared, count(*) AS n
 ORDER BY n DESC, shared ASC
 ```
@@ -480,14 +418,3 @@ ORDER BY n DESC, shared ASC
 A shared environment variable or route names the coupling; a shared common program such as `git`, or a `<dynamic>` process, does not.
 
 Repeated co-change with no dependency edge is a hidden-coupling candidate: shared knowledge such as a format, protocol, or invariant that neither file states. Inspect a few co-change commits to name it. A link through a third module, dynamic dispatch, configuration, or a coverage gap explains the pair rather than proving the coupling hidden.
-
-## Design-concern evidence matrix
-
-After both independent lanes complete, maintain a small working table before source validation:
-
-| Design concern / change path | Provenance | SCC pressure | Graph structural hypothesis | Representative symbols | Source verification | Coverage | Structural direction |
-|---|---|---|---|---|---|---|---|
-
-`Provenance` is SCC-only, graph-only, both, or discrepancy. Preserve leading lane-unique concerns instead of requiring populated cells from both tools. Treat disagreement as a question to inspect, not a reason to average ranks or discard the concern. Files and symbols support the concern; they are not necessarily its boundary.
-
-The table is an analysis aid. Keep it out of the final report unless the user asks for the full audit trail.
